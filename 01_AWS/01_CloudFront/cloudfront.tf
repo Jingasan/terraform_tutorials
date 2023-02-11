@@ -13,7 +13,9 @@ resource "aws_cloudfront_distribution" "main" {
     origin_access_control_id = aws_cloudfront_origin_access_control.main.id
   }
 
+  # 証明書管理
   viewer_certificate {
+    # CloudFrontのデフォルトの証明書を使用(ACMで発行した証明書に切り替えることも可能)
     cloudfront_default_certificate = true
   }
 
