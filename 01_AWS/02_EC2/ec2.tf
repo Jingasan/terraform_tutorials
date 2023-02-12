@@ -15,18 +15,18 @@ resource "tls_private_key" "handson_private_key" {
 locals {
   public_key_file  = "./${var.key_name}.id_rsa.pub"
   private_key_file = "./${var.key_name}.id_rsa"
-  #public_key_file  = "C:\\terraform_handson\\${var.key_name}.id_rsa.pub"
-  #private_key_file = "C:\\terraform_handson\\${var.key_name}.id_rsa"
+  #public_key_file  = ".\\${var.key_name}.id_rsa.pub"
+  #private_key_file = ".\\${var.key_name}.id_rsa"
 }
 resource "local_file" "handson_private_key_pem" {
-  filename = "${local.private_key_file}"
-  content  = "${tls_private_key.handson_private_key.private_key_pem}"
+  filename = local.private_key_file
+  content  = tls_private_key.handson_private_key.private_key_pem
 }
 
 # 上記で作成した公開鍵をAWSのKey pairにインポート
 resource "aws_key_pair" "handson_keypair" {
-  key_name   = "${var.key_name}"
-  public_key = "${tls_private_key.handson_private_key.public_key_openssh}"
+  key_name   = var.key_name
+  public_key = tls_private_key.handson_private_key.public_key_openssh
 }
 
 # EC2の作成
@@ -34,14 +34,14 @@ data "aws_ssm_parameter" "amzn2_latest_ami" {
   # Amazon Linux 2 の最新版AMIを取得
   name = "/aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-x86_64-gp2"
 }
-resource "aws_instance" "handson_ec2"{
+resource "aws_instance" "handson_ec2" {
   ami                         = data.aws_ssm_parameter.amzn2_latest_ami.value
   instance_type               = "t2.micro"
   availability_zone           = "ap-northeast-1a"
   vpc_security_group_ids      = [aws_security_group.handson_ec2_sg.id]
   subnet_id                   = aws_subnet.handson_public_1a_sn.id
   associate_public_ip_address = "true"
-  key_name                    = "${var.key_name}"
+  key_name                    = var.key_name
 
   # タグ
   tags = {
@@ -51,5 +51,5 @@ resource "aws_instance" "handson_ec2"{
 
 # 作成したEC2のパブリックIPアドレスを出力
 output "ec2_global_ips" {
-  value = "${aws_instance.handson_ec2.*.public_ip}"
+  value = aws_instance.handson_ec2.*.public_ip
 }
