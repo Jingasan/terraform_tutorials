@@ -2,7 +2,7 @@
 
 # バケット名とタグの設定
 resource "aws_s3_bucket" "main" {
-  bucket = "terraform-tutorial-bucket-name"
+  bucket = "terraform-tutorial-public-bucket-name"
 
   # バケットの中にオブジェクトが入っていてもTerraformに削除を許可するかどうか(true:許可)
   force_destroy = true
@@ -17,9 +17,9 @@ resource "aws_s3_bucket" "main" {
 resource "aws_s3_bucket_public_access_block" "main" {
   bucket                  = aws_s3_bucket.main.id
   block_public_acls       = true
-  block_public_policy     = true
+  block_public_policy     = false # バケットポリシーに基づいてアクセスを許可するため、ブロックを無効化
   ignore_public_acls      = true
-  restrict_public_buckets = true
+  restrict_public_buckets = false # バケットポリシーに基づいてアクセスを許可するため、ブロックを無効化
 }
 
 # 他のAWSアカウントによるバケットアクセスコントロールの設定
@@ -34,25 +34,25 @@ resource "aws_s3_bucket_policy" "main" {
   # CloudFront Distributionからのアクセスのみ許可するポリシーを追加
   policy = data.aws_iam_policy_document.s3_main_policy.json
 }
-# CloudFront Distributionからのアクセスのみ許可するポリシー
+# パブリックアクセスを許可するポリシー
 data "aws_iam_policy_document" "s3_main_policy" {
   statement {
-	sid    = ""
+    sid    = ""
     effect = "Allow"
-	# アクセス元の設定
+    # アクセス元の設定
     principals {
-      type        = "Service"
-      identifiers = ["cloudfront.amazonaws.com"]
+      type        = "*"
+      identifiers = ["*"] # 誰でもアクセスを許可
     }
-	# バケットに対して制御するアクションの設定
-    actions   = ["s3:GetObject"]
-	# アクセス先の設定
-    resources = ["${aws_s3_bucket.main.arn}/*"]
-    condition {
-      test     = "StringEquals"
-      variable = "aws:SourceArn"
-      values   = [aws_cloudfront_distribution.main.arn]
-    }
+    # バケットに対して制御するアクションの設定
+    actions = [
+      "s3:GetObject" # オブジェクトの読み取りアクション
+    ]
+    # アクセス先の設定
+    resources = [
+      "${aws_s3_bucket.main.arn}",  # S3バケットへのアクセス。
+      "${aws_s3_bucket.main.arn}/*" # S3バケット配下へのアクセス。
+    ]
   }
 }
 
