@@ -34,7 +34,7 @@ data "aws_iam_policy_document" "s3_main_policy" {
     principals {
       type        = "Service"
       identifiers = ["cloudfront.amazonaws.com"]
-	}
+    }
     actions   = ["s3:GetObject"]
     resources = ["${aws_s3_bucket.main.arn}/*"]
     condition {
@@ -45,7 +45,28 @@ data "aws_iam_policy_document" "s3_main_policy" {
   }
 }
 
+# CORSの設定
+resource "aws_s3_bucket_cors_configuration" "main" {
+  bucket = aws_s3_bucket.main.id
+
+  # CORSルール
+  cors_rule {
+    allowed_headers = ["*"]   # 許可するリクエストヘッダー
+    allowed_methods = ["GET"] # オリジン間リクエストで許可するHTTPメソッド
+    allowed_origins = ["*"]   # オリジン間アクセスを許可するアクセス元
+    expose_headers  = []      # ブラウザからアクセスを許可するレスポンスヘッダー
+  }
+}
+
+# オブジェクトのバージョン管理の設定
+resource "aws_s3_bucket_versioning" "main" {
+  bucket = aws_s3_bucket.main.id
+  versioning_configuration {
+    status = "Enabled"
+  }
+}
+
 # 戻り値
 output "aws_s3_bucket" {
-	value = aws_s3_bucket.main
+  value = aws_s3_bucket.main
 }

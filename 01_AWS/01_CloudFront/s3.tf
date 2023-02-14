@@ -37,22 +37,35 @@ resource "aws_s3_bucket_policy" "main" {
 # CloudFront Distributionからのアクセスのみ許可するポリシー
 data "aws_iam_policy_document" "s3_main_policy" {
   statement {
-	sid    = ""
+    sid    = ""
     effect = "Allow"
-	# アクセス元の設定
+    # アクセス元の設定
     principals {
       type        = "Service"
       identifiers = ["cloudfront.amazonaws.com"]
     }
-	# バケットに対して制御するアクションの設定
-    actions   = ["s3:GetObject"]
-	# アクセス先の設定
+    # バケットに対して制御するアクションの設定
+    actions = ["s3:GetObject"]
+    # アクセス先の設定
     resources = ["${aws_s3_bucket.main.arn}/*"]
     condition {
       test     = "StringEquals"
       variable = "aws:SourceArn"
       values   = [aws_cloudfront_distribution.main.arn]
     }
+  }
+}
+
+# CORSの設定
+resource "aws_s3_bucket_cors_configuration" "main" {
+  bucket = aws_s3_bucket.main.id
+
+  # CORSルール
+  cors_rule {
+    allowed_headers = ["*"]   # 許可するリクエストヘッダー
+    allowed_methods = ["GET"] # オリジン間リクエストで許可するHTTPメソッド
+    allowed_origins = ["*"]   # オリジン間アクセスを許可するアクセス元
+    expose_headers  = []      # ブラウザからアクセスを許可するレスポンスヘッダー
   }
 }
 
@@ -66,7 +79,7 @@ resource "aws_s3_bucket_versioning" "main" {
 
 # 外部コマンドの実行
 locals {
-  src_dir = "./webpage" # アップロード対象のディレクトリ
+  src_dir = "./webpage"                         # アップロード対象のディレクトリ
   dst_dir = "s3://${aws_s3_bucket.main.bucket}" # アップロード先
 }
 resource "null_resource" "fileupload" {

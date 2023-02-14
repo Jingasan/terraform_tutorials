@@ -56,6 +56,19 @@ data "aws_iam_policy_document" "s3_main_policy" {
   }
 }
 
+# CORSの設定
+resource "aws_s3_bucket_cors_configuration" "main" {
+  bucket = aws_s3_bucket.main.id
+
+  # CORSルール
+  cors_rule {
+    allowed_headers = ["*"]   # 許可するリクエストヘッダー
+    allowed_methods = ["GET"] # オリジン間リクエストで許可するHTTPメソッド
+    allowed_origins = ["*"]   # オリジン間アクセスを許可するアクセス元
+    expose_headers  = []      # ブラウザからアクセスを許可するレスポンスヘッダー
+  }
+}
+
 # オブジェクトのバージョン管理の設定
 resource "aws_s3_bucket_versioning" "main" {
   bucket = aws_s3_bucket.main.id
@@ -66,7 +79,7 @@ resource "aws_s3_bucket_versioning" "main" {
 
 # 外部コマンドの実行
 locals {
-  src_dir = "./webpage" # アップロード対象のディレクトリ
+  src_dir = "./webpage"                         # アップロード対象のディレクトリ
   dst_dir = "s3://${aws_s3_bucket.main.bucket}" # アップロード先
 }
 resource "null_resource" "fileupload" {
