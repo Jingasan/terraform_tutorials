@@ -77,7 +77,7 @@ resource "aws_s3_bucket_versioning" "main" {
   }
 }
 
-# 外部コマンドの実行
+# ローカルで実行するコマンドの設定
 locals {
   src_dir = "./webpage"                         # アップロード対象のディレクトリ
   dst_dir = "s3://${aws_s3_bucket.main.bucket}" # アップロード先
