@@ -85,7 +85,9 @@ resource "null_resource" "lambda_build" {
   depends_on = [aws_s3_bucket.lambda_bucket]
   # Lambda関数依存パッケージのインストール
   provisioner "local-exec" {
-    command     = "npm install"
+    # 実行するコマンド
+    command = "npm install"
+    # コマンドを実行するディレクトリ
     working_dir = "node"
   }
   # Lambda関数のビルド
