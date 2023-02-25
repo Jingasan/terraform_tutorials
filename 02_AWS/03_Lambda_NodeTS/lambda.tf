@@ -79,12 +79,16 @@ resource "aws_lambda_function" "lambda" {
   }
 }
 
+# ローカルで実行するコマンドの設定
 resource "null_resource" "lambda_build" {
+  # ビルド済みの関数zipファイルアップロード先のS3バケットが生成されたら実行
   depends_on = [aws_s3_bucket.lambda_bucket]
+  # Lambda関数依存パッケージのインストール
   provisioner "local-exec" {
     command     = "npm install"
     working_dir = "node"
   }
+  # Lambda関数のビルド
   provisioner "local-exec" {
     command     = "npm run build"
     working_dir = "node"
