@@ -1,8 +1,8 @@
 ### VPC
 
 # VPCの設定
-resource "aws_vpc" "handson_vpc"{
-  cidr_block           = "10.0.0.0/16"
+resource "aws_vpc" "handson_vpc" {
+  cidr_block = "10.0.0.0/16"
 
   # DNSホスト名の有効化
   enable_dns_hostnames = true
@@ -16,8 +16,8 @@ resource "aws_vpc" "handson_vpc"{
 # Subnetの設定
 resource "aws_subnet" "handson_public_1a_sn" {
   # VPCの指定
-  vpc_id            = aws_vpc.handson_vpc.id
-  cidr_block        = "10.0.1.0/24"
+  vpc_id     = aws_vpc.handson_vpc.id
+  cidr_block = "10.0.1.0/24"
 
   # アベイラビリティゾーン
   availability_zone = "ap-northeast-1a"
@@ -42,10 +42,10 @@ resource "aws_internet_gateway" "handson_igw" {
 # Route tableの作成
 resource "aws_route_table" "handson_public_rt" {
   # VPCの指定
-  vpc_id            = aws_vpc.handson_vpc.id
+  vpc_id = aws_vpc.handson_vpc.id
   route {
-    cidr_block      = "0.0.0.0/0"
-    gateway_id      = aws_internet_gateway.handson_igw.id
+    cidr_block = "0.0.0.0/0"
+    gateway_id = aws_internet_gateway.handson_igw.id
   }
 
   # タグ
@@ -69,15 +69,16 @@ variable "allowed_cidr" {
   default = null
 }
 locals {
-  myip          = chomp(data.http.ifconfig.body)
-  allowed_cidr  = (var.allowed_cidr == null) ? "${local.myip}/32" : var.allowed_cidr
+  myip         = chomp(data.http.ifconfig.body)
+  allowed_cidr = (var.allowed_cidr == null) ? "${local.myip}/32" : var.allowed_cidr
 }
 resource "aws_security_group" "handson_ec2_sg" {
-  name              = "terraform-handson-ec2-sg"
-  description       = "For EC2 Linux"
-  vpc_id            = aws_vpc.handson_vpc.id
+  name        = "terraform-handson-ec2-sg"
+  description = "For EC2 Linux"
+  vpc_id      = aws_vpc.handson_vpc.id
 
   # インバウンドルール
+  # EC2にアクセスを許可するIPアドレスを自身のIPアドレスに限定する
   ingress {
     from_port   = 22
     to_port     = 22
