@@ -6,6 +6,7 @@ import * as sourceMapSupport from "source-map-support";
 sourceMapSupport.install();
 const app = express();
 const router = express.Router();
+// リクエストボディのパース用設定
 router.use(bodyParser.json());
 router.use(bodyParser.urlencoded({ extended: true }));
 // CORS
