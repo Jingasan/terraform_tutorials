@@ -1,4 +1,6 @@
-### Lambda関数のzipファイルをデプロイするS3バケットの設定
+###################################################################
+##### ビルドしたLambda関数zipファイルをデプロイするS3バケットの設定 #####
+###################################################################
 
 # Lambda関数のzipファイルをデプロイするS3バケットの設定
 resource "aws_s3_bucket" "lambda_bucket" {
@@ -46,7 +48,10 @@ output "lambda_bucket_name" {
 }
 
 
-### Lambda関数の設定
+
+###########################
+##### Lambda関数の定義 #####
+###########################
 
 # Lambda関数の設定
 resource "aws_lambda_function" "lambda" {
@@ -175,7 +180,10 @@ output "function_name" {
 }
 
 
-### API Gatewayの設定
+
+############################
+##### API Gatewayの設定 #####
+############################
 
 # RestAPIの定義
 resource "aws_api_gateway_rest_api" "api" {
