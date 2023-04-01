@@ -12,6 +12,68 @@ resource "aws_ecs_cluster" "example" {
   }
 }
 
+# Task Execution Roleの設定
+# Task Execution RoleとはECS上でコンテナを実行するために必要な操作を行うためのIAMロールである。
+# Task Execution Roleを使用する主体はコンテナ自体ではなく、ECS Agentである。
+# ECRからのコンテナイメージのpull、CloudWatch LogsのLog Streamの作成とログ出力、
+# SSMからの値取得などの操作が対象となる。
+resource "aws_iam_role" "task_execution_role" {
+  # Task Execution Role名の設定
+  name = "task_execution_roleution_role"
+  # ロールポリシーの設定
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect    = "Allow"
+        Principal = { Service = "ecs-tasks.amazonaws.com" }
+        Action    = "sts:AssumeRole"
+      }
+    ]
+  })
+  managed_policy_arns = [
+    "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
+  ]
+}
+
+# Task Roleの設定
+# Task RoleとはECS上で稼働するコンテナからAWSサービスを利用する際に必要となるIAMロールである。
+# 例：コンテナからのS3操作，DynamoDB操作など
+resource "aws_iam_role" "task_role" {
+  # Task Role名の設定
+  name = "ecs_task_role"
+  # ロールポリシーの設定
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect    = "Allow"
+        Principal = { Service = "ecs-tasks.amazonaws.com" }
+        Action    = "sts:AssumeRole"
+      }
+    ]
+  })
+  # コンテナから操作を許可するAWSリソースの記述
+  inline_policy {
+    name = "allow_logs"
+    policy = jsonencode({
+      Version = "2012-10-17"
+      Statement = [
+        { # CloudWatch Logsへのログ出力許可
+          Effect = "Allow"
+          Action = [
+            "logs:CreateLogStream",
+            "logs:DescribeLogGroups",
+            "logs:DescribeLogStreams",
+            "logs:PutLogEvents",
+          ]
+          Resource = "*"
+        }
+      ]
+    })
+  }
+}
+
 # ECSタスクの定義
 resource "aws_ecs_task_definition" "example" {
   # タスク定義名（これにリビジョン番号を付与した名前がタスク定義名となる）
@@ -19,6 +81,10 @@ resource "aws_ecs_task_definition" "example" {
   # CPUとメモリの設定（選択可能なCPUとメモリの組み合わせは決まっている）
   cpu    = "256"  # 0.25vCPU
   memory = "1024" # 1GB
+  # Task Execution Roleの設定
+  execution_role_arn = aws_iam_role.task_execution_role.arn
+  # Task Roleの設定
+  task_role_arn = aws_iam_role.task_role.arn
   # 起動タイプの指定
   requires_compatibilities = ["FARGATE"]
   # ネットワークモード（FARGATEの場合はawsvpcを指定）
@@ -26,15 +92,23 @@ resource "aws_ecs_task_definition" "example" {
   # コンテナの定義
   container_definitions = jsonencode([
     {
-      "name" : "example",       # コンテナ名
-      "image" : "nginx:latest", # コンテナイメージ名
-      "essential" : true,       # タスク実行に必須かどうか
-      "portMappings" : [        # マッピングするコンテナのプロトコルとポート番号
+      name      = "example"      # コンテナ名
+      image     = "nginx:latest" # コンテナイメージ名
+      essential = true           # タスク実行に必須かどうか
+      portMappings = [           # マッピングするコンテナのプロトコルとポート番号
         {
-          "protocol" : "tcp",
-          "containerPort" : 80
+          protocol      = "tcp"
+          containerPort = 80
         }
       ]
+      logConfiguration = { # CloudWatch Logsへのログの転送設定
+        logDriver = "awslogs"
+        options = {
+          awslogs-region        = "ap-northeast-1"
+          awslogs-group         = "${aws_cloudwatch_log_group.service.name}"
+          awslogs-stream-prefix = "ecs"
+        }
+      }
     }
   ])
 }
@@ -99,4 +173,19 @@ module "nginx_sg" {
   # 通信を許可するポート番号/IPの指定
   port        = 80
   cidr_blocks = [aws_vpc.example.cidr_block]
+}
+
+
+#==============================
+# CloudWatch Logs
+#==============================
+
+# コンテナのログ保存先をCloudWatch Logsに作成
+resource "aws_cloudwatch_log_group" "service" {
+  # ロググループ名の設定
+  name = "/ecs/nginx-loggroup"
+  # タグ
+  tags = {
+    "Name" = "Terraform検証用"
+  }
 }
