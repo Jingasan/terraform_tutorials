@@ -10,10 +10,11 @@ resource "aws_lb" "example" {
   load_balancer_type = "application"
   # インターネット向けなのかVPC内部向けなのか
   internal = false # false: インターネット向け
-  # タイムアウト時間(default: 60s)
-  idle_timeout = 60
+  # タイムアウト時間(default: 60s, 最大: 4000s)
+  idle_timeout = 4000
   # 削除保護(true:有効)(本番環境では誤って削除しないようにtrueにする)
   enable_deletion_protection = false
+  # ALBを所属させるサブネット
   subnets = [
     aws_subnet.public_a.id,
     aws_subnet.public_c.id,
@@ -26,7 +27,8 @@ resource "aws_lb" "example" {
   }
   # セキュリティグループの指定
   security_groups = [
-    aws_security_group.http_sg.id
+    module.http_sg.security_group_id,
+    #module.https_sg.security_group_id,
   ]
   # タグ
   tags = {
@@ -114,46 +116,28 @@ output "alb_dns_name" {
 # セキュリティグループ
 #==============================
 
-# セキュリティグループの作成
-resource "aws_security_group" "http_sg" {
-  # セキュリティグループ名
-  name = "http_sg"
-  # セキュリティグループを割り当てるVPCのID
+# セキュリティグループの作成(HTTP 80番ポートの許可)
+module "http_sg" {
+  # 利用するモジュールの指定
+  source = "./security_group"
+  # セキュリティグループ名の指定
+  name = "http-sg"
+  # セキュリティグループを割り当てるVPC IDの指定
   vpc_id = aws_vpc.example.id
-  # 説明
-  description = "Terraform Test"
-  # タグ
-  tags = {
-    Name = "Terraform検証用"
-  }
+  # 通信を許可するポート番号/IPの指定
+  port        = 80
+  cidr_blocks = ["0.0.0.0/0"]
 }
 
-# インバウンドルール(VPC外からインスタンスへのアクセスルール)の追加
-resource "aws_security_group_rule" "http_sg_ingress" {
-  # 関連付けるセキュリティグループID
-  security_group_id = aws_security_group.http_sg.id
-  # typeをingressにすることでインバウンドルールになる
-  type = "ingress"
-  # 追加するルール：HTTP通信の許可
-  from_port   = "80"
-  to_port     = "80"
-  protocol    = "tcp"
-  cidr_blocks = ["0.0.0.0/0"]
-  # 説明
-  description = "Terraform Test"
-}
-
-# アウトバウンドルール(インスタンスからVPC外へのアクセスルール)の追加
-resource "aws_security_group_rule" "http_sg_egress" {
-  # 関連付けるセキュリティグループID
-  security_group_id = aws_security_group.http_sg.id
-  # typeをegressにすることでアウトバウンドルールになる
-  type = "egress"
-  # 追加するルール：すべての通信を許可
-  from_port   = 0
-  to_port     = 0
-  protocol    = "all"
-  cidr_blocks = ["0.0.0.0/0"]
-  # 説明
-  description = "Terraform Test"
-}
+# セキュリティグループの作成(HTTPS 443番ポートの許可)
+# module "https_sg" {
+#   # 利用するモジュールの指定
+#   source = "./security_group"
+#   # セキュリティグループ名の指定
+#   name = "https-sg"
+#   # セキュリティグループを割り当てるVPC IDの指定
+#   vpc_id = aws_vpc.example.id
+#   # 通信を許可するポート番号/IPの指定
+#   port        = 443
+#   cidr_blocks = ["0.0.0.0/0"]
+# }

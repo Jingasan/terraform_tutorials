@@ -61,7 +61,7 @@ resource "aws_ecs_service" "example" {
     # パブリックIPアドレスを割り当てるかどうか
     assign_public_ip = false
     # セキュリティグループの指定
-    security_groups = [aws_security_group.nginx_sg.id]
+    security_groups = [module.nginx_sg.security_group_id]
     # サブネットの指定
     subnets = [
       aws_subnet.private_a.id,
@@ -88,47 +88,15 @@ resource "aws_ecs_service" "example" {
 # セキュリティグループ
 #==============================
 
-# セキュリティグループの作成
-resource "aws_security_group" "nginx_sg" {
-  # セキュリティグループ名
-  name = "nginx_sg"
-  # セキュリティグループを割り当てるVPCのID
+# セキュリティグループの作成(HTTP 80番ポートの許可)
+module "nginx_sg" {
+  # 利用するモジュールの指定
+  source = "./security_group"
+  # セキュリティグループ名の指定
+  name = "nginx-sg"
+  # セキュリティグループを割り当てるVPC IDの指定
   vpc_id = aws_vpc.example.id
-  # 説明
-  description = "Terraform Test"
-  # タグ
-  tags = {
-    Name = "Terraform検証用"
-  }
+  # 通信を許可するポート番号/IPの指定
+  port        = 80
+  cidr_blocks = [aws_vpc.example.cidr_block]
 }
-
-# インバウンドルール(VPC外からインスタンスへのアクセスルール)の追加
-resource "aws_security_group_rule" "nginx_sg_ingress" {
-  # 関連付けるセキュリティグループID
-  security_group_id = aws_security_group.nginx_sg.id
-  # typeをingressにすることでインバウンドルールになる
-  type = "ingress"
-  # 追加するルール：HTTP通信の許可
-  from_port   = "80"
-  to_port     = "80"
-  protocol    = "tcp"
-  cidr_blocks = ["0.0.0.0/0"]
-  # 説明
-  description = "Terraform Test"
-}
-
-# アウトバウンドルール(インスタンスからVPC外へのアクセスルール)の追加
-resource "aws_security_group_rule" "nginx_sg_egress" {
-  # 関連付けるセキュリティグループID
-  security_group_id = aws_security_group.nginx_sg.id
-  # typeをegressにすることでアウトバウンドルールになる
-  type = "egress"
-  # 追加するルール：すべての通信を許可
-  from_port   = 0
-  to_port     = 0
-  protocol    = "all"
-  cidr_blocks = ["0.0.0.0/0"]
-  # 説明
-  description = "Terraform Test"
-}
-
