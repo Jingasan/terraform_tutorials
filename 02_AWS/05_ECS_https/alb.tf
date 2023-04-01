@@ -28,7 +28,7 @@ resource "aws_lb" "example" {
   # セキュリティグループの指定
   security_groups = [
     module.http_sg.security_group_id,
-    #module.https_sg.security_group_id,
+    module.https_sg.security_group_id,
   ]
   # タグ
   tags = {
@@ -36,20 +36,21 @@ resource "aws_lb" "example" {
   }
 }
 
-# リスナーの作成
+# HTTPプロトコル向けのリスナーの作成
 resource "aws_lb_listener" "http" {
   # ALB IDの指定
   load_balancer_arn = aws_lb.example.arn
   # HTTPでのアクセスを受け付ける
   port     = "80"
   protocol = "HTTP"
-  # デフォルトアクション
+  # デフォルトアクションの設定
   default_action {
-    type = "fixed-response"
-    fixed_response {
-      content_type = "text/plain"
-      status_code  = "200"
-      message_body = "This is HTTP."
+    # 80番ポートで受け付けたHTTPプロトコルのリクエストを443番ポートに転送する
+    type = "redirect"
+    redirect {
+      port        = "443"
+      protocol    = "HTTPS"
+      status_code = "HTTP_301"
     }
   }
   # タグ
@@ -57,11 +58,33 @@ resource "aws_lb_listener" "http" {
     "Name" = "Terraform検証用"
   }
 }
+# HTTPSプロトコル向けのリスナーの作成
+resource "aws_lb_listener" "https" {
+  # ALB IDの指定
+  load_balancer_arn = aws_lb.example.arn
+  # HTTPSでのアクセスを受け付ける
+  port     = "443"
+  protocol = "HTTPS"
+  # SSL/TLS証明書の設定
+  certificate_arn = aws_acm_certificate.cert.arn
+  # SSL/TLSのセキュリティポリシーの設定
+  ssl_policy = "ELBSecurityPolicy-2016-08"
+  # デフォルトアクション
+  default_action {
+    # 443番ポートで受け付けたHTTPSプロトコルのリクエストに対し、固定のHTTPレスポンスを返す
+    type = "fixed-response"
+    fixed_response {
+      content_type = "text/plain"
+      status_code  = "200"
+      message_body = "This is HTTP."
+    }
+  }
+}
 
 # リスナールール
 resource "aws_lb_listener_rule" "ecs" {
   # HTTPのリスナーにリスナールールを追加
-  listener_arn = aws_lb_listener.http.arn
+  listener_arn = aws_lb_listener.https.arn
   # リスナールールの実行優先順位
   priority = 100
   # 作成したターゲットグループにアクセスを転送する
@@ -126,5 +149,18 @@ module "http_sg" {
   vpc_id = aws_vpc.example.id
   # 通信を許可するポート番号/IPの指定
   port        = 80
+  cidr_blocks = ["0.0.0.0/0"]
+}
+
+# セキュリティグループの作成(HTTPS 443番ポートの許可)
+module "https_sg" {
+  # 利用するモジュールの指定
+  source = "./security_group"
+  # セキュリティグループ名の指定
+  name = "https-sg"
+  # セキュリティグループを割り当てるVPC IDの指定
+  vpc_id = aws_vpc.example.id
+  # 通信を許可するポート番号/IPの指定
+  port        = 443
   cidr_blocks = ["0.0.0.0/0"]
 }
