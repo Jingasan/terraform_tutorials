@@ -24,6 +24,11 @@ resource "aws_route53_record" "example" {
   }
 }
 
+
+#==============================
+# ACM
+#==============================
+
 # ACMによる証明書の作成
 resource "aws_acm_certificate" "cert" {
   # 証明書発行対象のドメイン名
