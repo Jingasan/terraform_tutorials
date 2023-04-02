@@ -105,7 +105,7 @@ resource "aws_ecs_task_definition" "example" {
         logDriver = "awslogs"
         options = {
           awslogs-region        = "ap-northeast-1"
-          awslogs-group         = "${aws_cloudwatch_log_group.service.name}"
+          awslogs-group         = "${aws_cloudwatch_log_group.example.name}"
           awslogs-stream-prefix = "ecs"
         }
       }
@@ -181,7 +181,7 @@ module "nginx_sg" {
 #==============================
 
 # コンテナのログ保存先をCloudWatch Logsに作成
-resource "aws_cloudwatch_log_group" "service" {
+resource "aws_cloudwatch_log_group" "example" {
   # ロググループ名の設定
   name = "/ecs/nginx-loggroup"
   # タグ

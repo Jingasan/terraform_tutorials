@@ -92,20 +92,25 @@ resource "aws_ecs_task_definition" "example" {
   # コンテナの定義
   container_definitions = jsonencode([
     {
-      name      = "example"      # コンテナ名
-      image     = "nginx:latest" # コンテナイメージ名
-      essential = true           # タスク実行に必須かどうか
-      portMappings = [           # マッピングするコンテナのプロトコルとポート番号
+      # コンテナ名
+      name = "example"
+      # コンテナイメージ名
+      image = "nginx:latest"
+      # タスク実行に必須かどうか
+      essential = true
+      # マッピングするコンテナのプロトコルとポート番号
+      portMappings = [
         {
           protocol      = "tcp"
           containerPort = 80
         }
       ]
-      logConfiguration = { # CloudWatch Logsへのログの転送設定
+      # CloudWatch Logsへのログの転送設定
+      logConfiguration = {
         logDriver = "awslogs"
         options = {
           awslogs-region        = "ap-northeast-1"
-          awslogs-group         = "${aws_cloudwatch_log_group.service.name}"
+          awslogs-group         = "${aws_cloudwatch_log_group.example.name}"
           awslogs-stream-prefix = "ecs"
         }
       }
@@ -181,7 +186,7 @@ module "nginx_sg" {
 #==============================
 
 # コンテナのログ保存先をCloudWatch Logsに作成
-resource "aws_cloudwatch_log_group" "service" {
+resource "aws_cloudwatch_log_group" "example" {
   # ロググループ名の設定
   name = "/ecs/nginx-loggroup"
   # タグ
