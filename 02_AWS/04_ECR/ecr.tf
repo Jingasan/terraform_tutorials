@@ -59,9 +59,9 @@ resource "null_resource" "main" {
     command = "docker build -t ${var.image_name} ${var.dockerfile_dir}"
   }
   provisioner "local-exec" {
-    command = "docker tag ${var.image_name}:latest ${aws_ecr_repository.main.repository_url}"
+    command = "docker tag ${var.image_name}:latest ${aws_ecr_repository.main.repository_url}:latest"
   }
   provisioner "local-exec" {
-    command = "docker push ${aws_ecr_repository.main.repository_url}"
+    command = "docker push ${aws_ecr_repository.main.repository_url}:latest"
   }
 }
