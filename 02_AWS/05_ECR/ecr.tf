@@ -56,7 +56,7 @@ resource "null_resource" "main" {
     command = "aws ecr get-login-password --region ap-northeast-1 | docker login --username AWS --password-stdin ${aws_ecr_repository.main.repository_url}"
   }
   provisioner "local-exec" {
-    command = "docker build -t ${var.image_name} ${var.dockerfile_dir}"
+    command = "docker build -t ${var.image_name}:latest ${var.dockerfile_dir}"
   }
   provisioner "local-exec" {
     command = "docker tag ${var.image_name}:latest ${aws_ecr_repository.main.repository_url}:latest"
