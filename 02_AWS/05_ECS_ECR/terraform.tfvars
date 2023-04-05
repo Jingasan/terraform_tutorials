@@ -7,4 +7,4 @@ profile = "default"
 # コンテナイメージ名
 image_name = "nginx"
 # ビルドするコンテナイメージのDockerfileがあるディレクトリパス
-dockerfile_dir = "./src"
+dockerfile_dir = "./docker"
