@@ -36,14 +36,14 @@ resource "aws_lb" "example" {
   }
 }
 
-# HTTPプロトコル向けのリスナーの作成
+# リスナーの作成
 resource "aws_lb_listener" "http" {
   # ALB IDの指定
   load_balancer_arn = aws_lb.example.arn
   # HTTPでのアクセスを受け付ける
   port     = "80"
   protocol = "HTTP"
-  # デフォルトアクションの設定
+  # デフォルトアクション
   default_action {
     # 80番ポートで受け付けたHTTPプロトコルのリクエストを443番ポートに転送する
     type = "redirect"

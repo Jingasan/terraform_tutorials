@@ -76,7 +76,7 @@ resource "aws_lb_listener" "https" {
     fixed_response {
       content_type = "text/plain"
       status_code  = "200"
-      message_body = "This is HTTP."
+      message_body = "This is HTTPS."
     }
   }
 }
