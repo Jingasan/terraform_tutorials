@@ -5,7 +5,7 @@
 # ALBの作成
 resource "aws_lb" "example" {
   # ALBの名前
-  name = "example"
+  name = "example-terraform-alb"
   # ロードバランサ―の種類（ALB: application, NLB: network）
   load_balancer_type = "application"
   # インターネット向けなのかVPC内部向けなのか
@@ -22,7 +22,7 @@ resource "aws_lb" "example" {
   # アクセスログ保存先のS3バケットの指定
   access_logs {
     bucket  = aws_s3_bucket.alb_log.id
-    prefix  = "example-alb"
+    prefix  = "example-terraform-alb"
     enabled = true
   }
   # セキュリティグループの指定
@@ -80,7 +80,7 @@ resource "aws_lb_listener_rule" "ecs" {
 # ALBターゲットグループの作成
 resource "aws_lb_target_group" "ecs" {
   # ターゲットグループ名
-  name = "example"
+  name = "example-terraform-target-group"
   # ターゲットの種類の指定
   target_type = "ip" # Fargateの場合はipを指定する
   # 関連するVPCのIDの指定

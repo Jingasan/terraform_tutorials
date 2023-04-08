@@ -5,7 +5,7 @@
 # ECSクラスターの定義
 resource "aws_ecs_cluster" "example" {
   # クラスター名
-  name = "example-cluster"
+  name = "example-terraform-cluster"
   # タグ
   tags = {
     Name = "Terraform検証用"
@@ -77,7 +77,7 @@ resource "aws_iam_role" "task_role" {
 # ECSタスクの定義
 resource "aws_ecs_task_definition" "example" {
   # タスク定義名（これにリビジョン番号を付与した名前がタスク定義名となる）
-  family = "example-task"
+  family = "example-terraform-task"
   # CPUとメモリの設定（選択可能なCPUとメモリの組み合わせは決まっている）
   cpu    = "256"  # 0.25vCPU
   memory = "1024" # 1GB
@@ -121,7 +121,7 @@ resource "aws_ecs_task_definition" "example" {
 # ECS サービス
 resource "aws_ecs_service" "example" {
   # ECSサービス名
-  name = "example"
+  name = "example-terraform-service"
   # ECSクラスターの設定
   cluster = aws_ecs_cluster.example.arn
   # ECSタスクの設定
@@ -140,7 +140,7 @@ resource "aws_ecs_service" "example" {
     # パブリックIPアドレスを割り当てるかどうか
     assign_public_ip = false
     # セキュリティグループの指定
-    security_groups = [module.nginx_sg.security_group_id]
+    security_groups = [module.ecs_service_sg.security_group_id]
     # サブネットの指定
     subnets = [
       aws_subnet.private_a.id,
@@ -168,29 +168,14 @@ resource "aws_ecs_service" "example" {
 #==============================
 
 # セキュリティグループの作成(HTTP 80番ポートの許可)
-module "nginx_sg" {
+module "ecs_service_sg" {
   # 利用するモジュールの指定
   source = "./security_group"
   # セキュリティグループ名の指定
-  name = "nginx-sg"
+  name = "ecs_service_sg"
   # セキュリティグループを割り当てるVPC IDの指定
   vpc_id = aws_vpc.example.id
   # 通信を許可するポート番号/IPの指定
   port        = 80
   cidr_blocks = [aws_vpc.example.cidr_block]
-}
-
-
-#==============================
-# CloudWatch Logs
-#==============================
-
-# コンテナのログ保存先をCloudWatch Logsに作成
-resource "aws_cloudwatch_log_group" "example" {
-  # ロググループ名の設定
-  name = "/ecs/nginx-loggroup"
-  # タグ
-  tags = {
-    "Name" = "Terraform検証用"
-  }
 }
