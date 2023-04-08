@@ -5,7 +5,7 @@
 # ホストゾーンの定義
 data "aws_route53_zone" "main" {
   # 作成済みのホストゾーン(取得済みのドメイン)の指定
-  name = "api-server-tutorial.com"
+  name = var.domain_name
   # パブリック証明書のリクエストを指定
   private_zone = false
 }
@@ -32,9 +32,9 @@ resource "aws_route53_record" "example" {
 # ACMによる証明書の作成
 resource "aws_acm_certificate" "cert" {
   # 証明書発行対象のドメイン名
-  domain_name = "api-server-tutorial.com"
+  domain_name = var.domain_name
   # サブドメインに対しても証明書を有効化
-  subject_alternative_names = ["*.api-server-tutorial.com"]
+  subject_alternative_names = ["*.${var.domain_name}"]
   # ドメインの認証方法の指定：DNS認証
   validation_method = "DNS"
   # 既存の証明書があった場合に一旦削除してから作り直す設定

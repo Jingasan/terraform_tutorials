@@ -4,6 +4,10 @@
 variable "region" {}
 # AWSアクセスキーのプロファイル
 variable "profile" {}
+# ドメイン名
+variable "domain_name" {}
+# コンテナ名
+variable "container_name" {}
 # コンテナイメージ名
 variable "image_name" {}
 # ビルドするコンテナイメージのDockerfileがあるディレクトリパス
