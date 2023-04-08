@@ -1,0 +1,26 @@
+{
+  "name": "@socketio_maplibre/types",
+  "version": "0.0.1",
+  "description": "",
+  "main": "dist/index.cjs.js",
+  "module": "./dist/index.esm.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "/dist"
+  ],
+  "scripts": {
+    "build": "run-p build:*",
+    "build:esbuild": "tsx esbuild.config.ts",
+    "build:types": "tsc"
+  },
+  "keywords": [],
+  "author": "author <author@example.com> (https://example.com/)",
+  "license": "UNLICENSED",
+  "devDependencies": {
+    "@types/node": "^18.15.3",
+    "esbuild": "^0.17.11",
+    "npm-run-all": "^4.1.5",
+    "tsx": "^3.12.5",
+    "typescript": "^4.9.5"
+  }
+}
