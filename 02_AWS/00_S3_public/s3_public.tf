@@ -2,7 +2,8 @@
 
 # バケット名とタグの設定
 resource "aws_s3_bucket" "main" {
-  bucket = "terraform-tutorial-public-bucket-name"
+  # バケット名
+  bucket = var.bucket_name
 
   # バケットの中にオブジェクトが入っていてもTerraformに削除を許可するかどうか(true:許可)
   force_destroy = true
@@ -79,7 +80,7 @@ resource "aws_s3_bucket_versioning" "main" {
 
 # ローカルで実行するコマンドの設定
 locals {
-  src_dir = "./webpage"                         # アップロード対象のディレクトリ
+  src_dir = var.src_dir                         # アップロード対象のディレクトリ
   dst_dir = "s3://${aws_s3_bucket.main.bucket}" # アップロード先
 }
 resource "null_resource" "fileupload" {
@@ -92,4 +93,9 @@ resource "null_resource" "fileupload" {
   provisioner "local-exec" {
     command = "aws s3 cp ${local.src_dir} ${local.dst_dir} --recursive"
   }
+}
+
+# WebサイトURLのターミナル出力
+output "url" {
+  value = "https://${aws_s3_bucket.main.bucket_domain_name}/index.html"
 }
