@@ -37,7 +37,7 @@ resource "aws_s3_bucket_policy" "main" {
 # CloudFront Distributionからのアクセスのみ許可するポリシー
 data "aws_iam_policy_document" "s3_main_policy" {
   statement {
-    sid    = ""
+    sid    = "0"
     effect = "Allow"
     # アクセス元の設定
     principals {

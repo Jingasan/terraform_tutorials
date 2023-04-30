@@ -38,7 +38,7 @@ resource "aws_s3_bucket_policy" "main" {
 # パブリックアクセスを許可するポリシー
 data "aws_iam_policy_document" "s3_main_policy" {
   statement {
-    sid    = ""
+    sid    = "0"
     effect = "Allow"
     # アクセス元の設定
     principals {
@@ -99,3 +99,4 @@ resource "null_resource" "fileupload" {
 output "url" {
   value = "https://${aws_s3_bucket.main.bucket_domain_name}/index.html"
 }
+
