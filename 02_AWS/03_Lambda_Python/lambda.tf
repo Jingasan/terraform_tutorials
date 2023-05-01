@@ -12,12 +12,6 @@ resource "aws_s3_bucket" "lambda_bucket" {
   }
 }
 
-# Lambda関数のzipファイルをデプロイするS3バケットのACL設定
-resource "aws_s3_bucket_acl" "bucket_acl" {
-  bucket = aws_s3_bucket.lambda_bucket.id
-  acl    = "private"
-}
-
 # Lambda関数のzip化の設定
 data "archive_file" "lambda" {
   type = "zip"
