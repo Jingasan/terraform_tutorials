@@ -14,10 +14,31 @@ resource "aws_s3_bucket" "alb_log" {
   }
 }
 
+# パブリックアクセスのブロック設定
+resource "aws_s3_bucket_public_access_block" "alb_log" {
+  bucket                  = aws_s3_bucket.alb_log.id
+  block_public_acls       = false
+  block_public_policy     = false # バケットポリシーに基づいてアクセスを許可するため、ブロックを無効化
+  ignore_public_acls      = false
+  restrict_public_buckets = false # バケットポリシーに基づいてアクセスを許可するため、ブロックを無効化
+}
+
+# 他のAWSアカウントによるバケットアクセスコントロールの設定
+resource "aws_s3_account_public_access_block" "alb_log" {
+  block_public_acls   = false
+  block_public_policy = false
+}
+
 # バケットポリシー
 resource "aws_s3_bucket_policy" "alb_log" {
+  # バケット
   bucket = aws_s3_bucket.alb_log.id
+  # バケットポリシー
   policy = data.aws_iam_policy_document.alb_log.json
+  # ブロックパブリックアクセスの設定がされてからバケットポリシーの設定を行う
+  depends_on = [
+    aws_s3_bucket_public_access_block.alb_log,
+  ]
 }
 data "aws_iam_policy_document" "alb_log" {
   statement {

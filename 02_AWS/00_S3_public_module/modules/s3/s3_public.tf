@@ -33,6 +33,10 @@ resource "aws_s3_bucket_policy" "main" {
   bucket = aws_s3_bucket.main.id
   # CloudFront Distributionからのアクセスのみ許可するポリシーを追加
   policy = data.aws_iam_policy_document.s3_main_policy.json
+  # ブロックパブリックアクセスの設定がされてからバケットポリシーの設定を行う
+  depends_on = [
+    aws_s3_bucket_public_access_block.main,
+  ]
 }
 # パブリックアクセスを許可するポリシー
 data "aws_iam_policy_document" "s3_main_policy" {
