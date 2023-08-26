@@ -1,9 +1,14 @@
-### CloudFront
+#============================================================
+# CloudFront
+#============================================================
 
 # ディストリビューションの設定
 resource "aws_cloudfront_distribution" "main" {
   # ディストリビューションの有効化
   enabled = true
+
+  # デフォルトルートオブジェクトの設定
+  default_root_object = "index.html"
 
   # オリジンの設定
   origin {
@@ -34,6 +39,7 @@ resource "aws_cloudfront_distribution" "main" {
   restrictions {
     geo_restriction {
       restriction_type = "none"
+      locations        = []
     }
   }
 
@@ -72,7 +78,8 @@ resource "aws_cloudfront_origin_access_control" "main" {
   signing_protocol                  = "sigv4"
 }
 
-# Cloudfront distributionのDNSネーム出力
-output "cloudfront_distribution_dns_name" {
-  value = aws_cloudfront_distribution.main.domain_name
+# Cloudfront distributionのURL出力
+output "cloudfront_distribution_url" {
+  description = "CloudFront distribution URL"
+  value       = "https://${aws_cloudfront_distribution.main.domain_name}"
 }
