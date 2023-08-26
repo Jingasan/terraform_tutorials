@@ -38,11 +38,11 @@ resource "aws_cloudfront_distribution" "main" {
   }
 
   # 説明
-  comment = "Terraform検証用"
+  comment = var.tag_name
 
   # タグ
   tags = {
-    Name = "Terraform検証用"
+    Name = var.tag_name
   }
 }
 
@@ -70,4 +70,9 @@ resource "aws_cloudfront_origin_access_control" "main" {
   origin_access_control_origin_type = "s3"
   signing_behavior                  = "always"
   signing_protocol                  = "sigv4"
+}
+
+# Cloudfront distributionのDNSネーム出力
+output "cloudfront_distribution_dns_name" {
+  value = aws_cloudfront_distribution.main.domain_name
 }

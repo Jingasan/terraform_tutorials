@@ -2,14 +2,14 @@
 
 # バケット名とタグの設定
 resource "aws_s3_bucket" "main" {
-  bucket = "terraform-tutorial-bucket-name"
+  bucket = var.bucket_name
 
   # バケットの中にオブジェクトが入っていてもTerraformに削除を許可するかどうか(true:許可)
   force_destroy = true
 
   # タグ
   tags = {
-    Name = "Terraform検証用"
+    Name = var.tag_name
   }
 }
 
