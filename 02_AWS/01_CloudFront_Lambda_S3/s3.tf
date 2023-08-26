@@ -76,18 +76,28 @@ resource "aws_s3_bucket_versioning" "main" {
   }
 }
 
-# 外部コマンドの実行
+# ローカルコマンドの実行
 locals {
-  src_dir = "./webpage"                         # アップロード対象のディレクトリ
+  src_dir = "./frontend"                        # アップロード対象のディレクトリ
   dst_dir = "s3://${aws_s3_bucket.main.bucket}" # アップロード先
 }
 resource "null_resource" "fileupload" {
-  # S3バケット作成完了後に実行
+  # S3バケットのUpdatedタグ更新後に実行
   triggers = {
     trigger = "${aws_s3_bucket.main.id}"
   }
-  # ローカルディレクトリにあるWebページをS3バケットにアップロード
+  # React Webアプリの依存パッケージインストール
   provisioner "local-exec" {
-    command = "aws s3 cp ${local.src_dir} ${local.dst_dir} --recursive"
+    command     = "npm install"
+    working_dir = local.src_dir
+  }
+  # React Webアプリのビルド
+  provisioner "local-exec" {
+    command     = "npm run build"
+    working_dir = local.src_dir
+  }
+  # React WebアプリをS3バケットにアップロード
+  provisioner "local-exec" {
+    command = "aws s3 cp ${local.src_dir}/dist ${local.dst_dir} --recursive"
   }
 }

@@ -21,9 +21,9 @@ data "archive_file" "lambda" {
   # 生成するアーカイブの種類
   type = "zip"
   # zip化対象のディレクトリ
-  source_dir = "${path.module}/node/dist"
+  source_dir = "${path.module}/backend/dist"
   # zipファイルの出力先
-  output_path = "${path.module}/node/.lambda/lambda.zip"
+  output_path = "${path.module}/backend/.lambda/lambda.zip"
 }
 
 # Lambda関数のアップロード設定
@@ -49,7 +49,7 @@ resource "aws_lambda_function" "lambda" {
   # 関数名
   function_name = var.lambda_name
   # 実行環境の指定(ex: nodejs, python, go, etc.)
-  runtime = "nodejs16.x"
+  runtime = "nodejs18.x"
   # ハンドラの指定
   handler = "index.handler"
   # 作成するLambda関数に対して許可するIAMロールの指定
@@ -84,12 +84,12 @@ resource "null_resource" "lambda_build" {
     # 実行するコマンド
     command = "npm install"
     # コマンドを実行するディレクトリ
-    working_dir = "node"
+    working_dir = "backend"
   }
   # Lambda関数のビルド
   provisioner "local-exec" {
     command     = "npm run build"
-    working_dir = "node"
+    working_dir = "backend"
   }
 }
 
