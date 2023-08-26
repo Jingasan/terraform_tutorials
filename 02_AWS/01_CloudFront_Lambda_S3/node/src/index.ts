@@ -17,7 +17,7 @@ const corsOptions = {
 };
 // GET
 app.get(
-  "/users/:id",
+  "/api/sample/:id",
   cors(corsOptions),
   (req: Request, res: Response, _next: NextFunction) => {
     return res.status(200).json({ Query: req.query });
@@ -25,7 +25,7 @@ app.get(
 );
 // POST
 app.post(
-  "/users/:id",
+  "/api/sample/:id",
   cors(corsOptions),
   (req: Request, res: Response, _next: NextFunction) => {
     const body = JSON.parse(req.body);
@@ -34,7 +34,7 @@ app.post(
 );
 // PUT
 app.put(
-  "/users/:id",
+  "/api/sample/:id",
   cors(corsOptions),
   (req: Request, res: Response, _next: NextFunction) => {
     return res.status(200).json({ RequestHeader: req.headers });
@@ -42,7 +42,7 @@ app.put(
 );
 // DELETE
 app.delete(
-  "/users/:id",
+  "/api/sample/:id",
   cors(corsOptions),
   (req: Request, res: Response, _next: NextFunction) => {
     return res.status(200).json({ URLParams: req.params.id });

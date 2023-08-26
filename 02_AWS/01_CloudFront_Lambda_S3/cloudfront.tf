@@ -3,15 +3,36 @@
 #============================================================
 
 # ディストリビューションの設定
-resource "aws_cloudfront_distribution" "api" {
+resource "aws_cloudfront_distribution" "main" {
   # ディストリビューションの有効化
   enabled = true
   # デフォルトルートオブジェクトの設定
   default_root_object = "index.html"
-  # オリジンの設定
+  # オリジングループの作成
+  origin_group {
+    origin_id = "group"
+    failover_criteria {
+      status_codes = [403, 404, 500, 502]
+    }
+    # S3とLambdaへのアクセス振り分け用のオリジンIDを作成
+    member {
+      origin_id = "S3"
+    }
+    member {
+      origin_id = "Lambda"
+    }
+  }
+  # オリジンの設定(S3)
+  origin {
+    origin_id   = "S3"
+    domain_name = aws_s3_bucket.main.bucket_regional_domain_name
+    # OAC を設定
+    origin_access_control_id = aws_cloudfront_origin_access_control.main.id
+  }
+  # オリジンの設定(Lambda)
   origin {
     domain_name = "${aws_lambda_function_url.lambda.url_id}.lambda-url.${var.region}.on.aws"
-    origin_id   = "lambda"
+    origin_id   = "Lambda"
     custom_origin_config {
       http_port              = 80
       https_port             = 443
@@ -24,9 +45,21 @@ resource "aws_cloudfront_distribution" "api" {
     # CloudFrontのデフォルトの証明書を使用(ACMで発行した証明書に切り替えることも可能)
     cloudfront_default_certificate = true
   }
+
   # デフォルトキャッシュビヘイビアの設定
   default_cache_behavior {
-    target_origin_id       = "lambda"
+    target_origin_id           = "S3"
+    viewer_protocol_policy     = "redirect-to-https"
+    allowed_methods            = ["GET", "HEAD"]
+    cached_methods             = ["GET", "HEAD"]
+    cache_policy_id            = data.aws_cloudfront_cache_policy.CachingOptimized.id
+    origin_request_policy_id   = data.aws_cloudfront_origin_request_policy.CORS-S3Origin.id
+    response_headers_policy_id = data.aws_cloudfront_response_headers_policy.SimpleCORS.id
+  }
+  # デフォルトキャッシュビヘイビアの設定
+  ordered_cache_behavior {
+    target_origin_id       = "Lambda"
+    path_pattern           = "/api/*"
     viewer_protocol_policy = "redirect-to-https"
     allowed_methods        = ["GET", "HEAD"]
     cached_methods         = ["GET", "HEAD"]
@@ -47,6 +80,15 @@ resource "aws_cloudfront_distribution" "api" {
   }
 }
 
+# キャッシュポリシー
+data "aws_cloudfront_cache_policy" "CachingOptimized" {
+  # AWSのマネージドポリシーを指定
+  name = "Managed-CachingOptimized"
+}
+data "aws_cloudfront_cache_policy" "CachingDisabled" {
+  # AWSのマネージドポリシーを指定
+  name = "Managed-CachingDisabled"
+}
 # カスタムキャッシュポリシー
 resource "aws_cloudfront_cache_policy" "CachingDisabledCookieQueryEnabled" {
   name    = "CachingDisabledCookieQueryEnabled"
@@ -82,8 +124,28 @@ resource "aws_cloudfront_cache_policy" "CachingDisabledCookieQueryEnabled" {
   }
 }
 
+# オリジンリクエストポリシー
+data "aws_cloudfront_origin_request_policy" "CORS-S3Origin" {
+  # AWSのマネージドポリシーを指定
+  name = "Managed-CORS-S3Origin"
+}
+
+# レスポンスヘッダーポリシー
+data "aws_cloudfront_response_headers_policy" "SimpleCORS" {
+  # AWSのマネージドポリシーを指定
+  name = "Managed-SimpleCORS"
+}
+
+# OACの作成
+resource "aws_cloudfront_origin_access_control" "main" {
+  name                              = "cloudfront-origin-access-control"
+  origin_access_control_origin_type = "s3"
+  signing_behavior                  = "always"
+  signing_protocol                  = "sigv4"
+}
+
 # Cloudfront distributionのURL出力
 output "cloudfront_distribution_url" {
   description = "CloudFront distribution URL"
-  value       = "https://${aws_cloudfront_distribution.api.domain_name}/"
+  value       = "https://${aws_cloudfront_distribution.main.domain_name}/"
 }
