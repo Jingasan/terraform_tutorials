@@ -16,6 +16,8 @@ resource "aws_s3_bucket" "lambda_bucket" {
 
 # Lambda関数のzip化の設定
 data "archive_file" "lambda" {
+  # Lambda関数のビルド後に実行
+  depends_on = [null_resource.lambda_build]
   # 生成するアーカイブの種類
   type = "zip"
   # zip化対象のディレクトリ
@@ -76,6 +78,24 @@ resource "aws_lambda_function" "lambda" {
   # タグ
   tags = {
     Name = var.tag_name
+  }
+}
+
+# Lambda関数のローカルビルドコマンドの設定
+resource "null_resource" "lambda_build" {
+  # ビルド済みの関数zipファイルアップロード先のS3バケットが生成されたら実行
+  depends_on = [aws_s3_bucket.lambda_bucket]
+  # Lambda関数依存パッケージのインストール
+  provisioner "local-exec" {
+    # 実行するコマンド
+    command = "npm install"
+    # コマンドを実行するディレクトリ
+    working_dir = "node"
+  }
+  # Lambda関数のビルド
+  provisioner "local-exec" {
+    command     = "npm run build"
+    working_dir = "node"
   }
 }
 
