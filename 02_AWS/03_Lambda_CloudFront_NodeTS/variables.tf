@@ -12,9 +12,5 @@ variable "lambda_name" {}
 variable "iam_role_name" {}
 # IAMポリシー名
 variable "iam_policy_name" {}
-# API Gateway名
-variable "api_gateway_name" {}
-# API URLステージ名
-variable "stage_name" {}
 # タグ名
 variable "tag_name" {}
