@@ -1,0 +1,22 @@
+version: "3.9"
+services:
+  minio-server:
+    container_name: minio-server
+    image: minio/minio:latest
+    ports:
+      - "9000:9000" # APIポート番号
+      - "9090:9090" # 管理コンソール画面ポート番号
+    volumes:
+      - ./data:/data
+    command: minio server --console-address ":9090" /data
+    environment:
+      MINIO_ROOT_USER: minioadmin # ROOTユーザー名
+      MINIO_ROOT_PASSWORD: minioadmin # ROOTパスワード
+    deploy:
+      mode: replicated
+      replicas: 1 # 起動コンテナ数
+      placement:
+        max_replicas_per_node: 1
+    restart: always # 再起動条件：常に
+    tty: true
+
