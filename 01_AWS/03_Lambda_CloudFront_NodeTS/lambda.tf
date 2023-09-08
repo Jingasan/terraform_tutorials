@@ -170,7 +170,7 @@ resource "aws_iam_policy" "lambda_policy" {
   }
 }
 
-# Lambda関数のURLリソースの設定
+# CloudFront向けにLambda関数のURLを定義
 resource "aws_lambda_function_url" "lambda" {
   function_name      = aws_lambda_function.lambda.function_name
   authorization_type = "NONE"
