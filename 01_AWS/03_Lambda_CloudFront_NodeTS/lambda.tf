@@ -55,7 +55,7 @@ resource "aws_lambda_function" "lambda" {
   # 関数名
   function_name = var.lambda_name
   # 実行環境の指定(ex: nodejs, python, go, etc.)
-  runtime = "nodejs16.x"
+  runtime = "nodejs18.x"
   # ハンドラの指定
   handler = "index.handler"
   # 作成するLambda関数に対して許可するIAMロールの指定
@@ -133,6 +133,8 @@ resource "aws_iam_role" "lambda_role" {
       },
     ]
   })
+  # 説明
+  description = var.tag_name
   # タグ
   tags = {
     Name = var.tag_name
