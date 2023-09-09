@@ -28,6 +28,8 @@ data "archive_file" "lambda" {
 
 # Lambda関数のアップロード設定
 resource "aws_s3_object" "lambda_zip_uploader" {
+  # Lambda関数のビルド後に実行
+  depends_on = [null_resource.lambda_build]
   # アップロード先バケット
   bucket = aws_s3_bucket.lambda_bucket.id
   # アップロード先のパス
@@ -55,18 +57,18 @@ resource "aws_lambda_function" "lambda" {
   # 関数名
   function_name = var.lambda_name
   # 実行環境の指定(ex: nodejs, python, go, etc.)
-  runtime = "nodejs16.x"
+  runtime = var.lambda_runtime
   # ハンドラの指定
   handler = "index.handler"
   # 作成するLambda関数に対して許可するIAMロールの指定
   role = aws_iam_role.lambda_role.arn
   # Lambda関数のコード取得元S3バケットとパス
-  s3_bucket = aws_s3_bucket.lambda_bucket.id
+  s3_bucket = aws_s3_bucket.lambda_bucket.bucket
   s3_key    = aws_s3_object.lambda_zip_uploader.key
   # ソースコードが変更されていたら再デプロイする設定
   source_code_hash = data.archive_file.lambda.output_base64sha256
   # Lambda関数のタイムアウト時間
-  timeout = 30
+  timeout = var.lambda_timeout
   # 作成するLambdaの説明文
   description = var.tag_name
   # 環境変数の指定
@@ -85,6 +87,17 @@ resource "aws_lambda_function" "lambda" {
 resource "null_resource" "lambda_build" {
   # ビルド済みの関数zipファイルアップロード先のS3バケットが生成されたら実行
   depends_on = [aws_s3_bucket.lambda_bucket]
+  # ソースコードに差分があった場合に実行
+  triggers = {
+    code_diff = join("", [
+      for file in fileset("node/src", "{*.ts, package*.json}")
+      : filebase64("node/src/${file}")
+    ])
+    package_diff = join("", [
+      for file in fileset("node", "{package*.json}")
+      : filebase64("node/${file}")
+    ])
+  }
   # Lambda関数依存パッケージのインストール
   provisioner "local-exec" {
     # 実行するコマンド
@@ -104,7 +117,7 @@ resource "aws_cloudwatch_log_group" "lambda" {
   # CloudWatchロググループ名
   name = "/aws/lambda/${aws_lambda_function.lambda.function_name}"
   # ログを残す期間(日)の指定
-  retention_in_days = 30
+  retention_in_days = var.lambda_cloudwatch_log_retention_in_days
   # タグ
   tags = {
     Name = var.tag_name
@@ -114,7 +127,7 @@ resource "aws_cloudwatch_log_group" "lambda" {
 # IAMロールの設定
 resource "aws_iam_role" "lambda_role" {
   # IAMロール名
-  name = var.iam_role_name
+  name = var.lambda_iam_role_name
   # IAMロールにポリシーを紐付け
   managed_policy_arns = [
     aws_iam_policy.lambda_policy.arn
@@ -142,7 +155,7 @@ resource "aws_iam_role" "lambda_role" {
 # IAMロールに紐付けるポリシーの設定
 resource "aws_iam_policy" "lambda_policy" {
   # ポリシー名
-  name = var.iam_policy_name
+  name = var.lambda_iam_policy_name
   # ポリシーの説明文
   description = var.tag_name
   # ポリシー(どのAWSリソースにどのような操作を許可するか)の定義
@@ -246,7 +259,7 @@ resource "aws_api_gateway_deployment" "api_gateway" {
   # Rest APIの設定IDの指定
   rest_api_id = aws_api_gateway_rest_api.api.id
   # ステージ名の設定
-  stage_name = var.stage_name
+  stage_name = var.api_gateway_stage_name
   # 以下のリソースが生成されてから実行 
   depends_on = [
     aws_api_gateway_integration.lambda,

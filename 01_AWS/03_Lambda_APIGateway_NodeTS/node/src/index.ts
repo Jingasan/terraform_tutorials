@@ -17,6 +17,14 @@ const corsOptions = {
 };
 // GET
 app.get(
+  "/",
+  cors(corsOptions),
+  (_req: Request, res: Response, _next: NextFunction) => {
+    return res.status(200).json("OK");
+  }
+);
+// GET
+app.get(
   "/users/:id",
   cors(corsOptions),
   (req: Request, res: Response, _next: NextFunction) => {
@@ -57,4 +65,5 @@ app.use(
     });
   }
 );
+// 関数のエンドポイント
 export const handler = serverlessExpress({ app });

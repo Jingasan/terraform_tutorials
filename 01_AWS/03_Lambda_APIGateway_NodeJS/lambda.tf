@@ -58,7 +58,7 @@ resource "aws_lambda_function" "lambda" {
   # 作成するLambda関数に対して許可するIAMロールの指定
   role = aws_iam_role.lambda_role.arn
   # Lambda関数のコード取得元S3バケットとパス
-  s3_bucket = aws_s3_bucket.lambda_bucket.id
+  s3_bucket = aws_s3_bucket.lambda_bucket.bucket
   s3_key    = aws_s3_object.lambda_zip_uploader.key
   # ソースコードが変更されていたら再デプロイする設定
   source_code_hash = data.archive_file.lambda.output_base64sha256

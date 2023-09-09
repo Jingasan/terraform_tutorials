@@ -1,4 +1,6 @@
-### Lambda関数のzipファイルをデプロイするS3バケットの設定
+#============================================================
+# S3：ビルドしたLambda関数zipファイルをデプロイするバケットの設定
+#============================================================
 
 # Lambda関数のzipファイルをデプロイするS3バケットの設定
 resource "aws_s3_bucket" "lambda_bucket" {
@@ -40,7 +42,10 @@ output "lambda_bucket_name" {
 }
 
 
-### Lambda関数の設定
+
+#============================================================
+# Lambda
+#============================================================
 
 # Lambda関数の設定
 resource "aws_lambda_function" "lambda" {
@@ -53,7 +58,7 @@ resource "aws_lambda_function" "lambda" {
   # 作成するLambda関数に対して許可するIAMロールの指定
   role = aws_iam_role.lambda_role.arn
   # Lambda関数のコード取得元S3バケットとパス
-  s3_bucket = aws_s3_bucket.lambda_bucket.id
+  s3_bucket = aws_s3_bucket.lambda_bucket.bucket
   s3_key    = aws_s3_object.lambda_zip_uploader.key
   # ソースコードが変更されていたら再デプロイする設定
   source_code_hash = data.archive_file.lambda.output_base64sha256
@@ -151,7 +156,10 @@ output "function_name" {
 }
 
 
-### API Gatewayの設定
+
+#============================================================
+# API Gateway
+#============================================================
 
 # RestAPIの定義
 resource "aws_api_gateway_rest_api" "api" {

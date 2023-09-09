@@ -28,6 +28,8 @@ data "archive_file" "lambda" {
 
 # Lambda関数のアップロード設定
 resource "aws_s3_object" "lambda_zip_uploader" {
+  # Lambda関数のビルド後に実行
+  depends_on = [null_resource.lambda_build]
   # アップロード先バケット
   bucket = aws_s3_bucket.lambda_bucket.id
   # アップロード先のパス
@@ -55,7 +57,7 @@ resource "aws_lambda_function" "lambda" {
   # 作成するLambda関数に対して許可するIAMロールの指定
   role = aws_iam_role.lambda_role.arn
   # Lambda関数のコード取得元S3バケットとパス
-  s3_bucket = aws_s3_bucket.lambda_bucket.id
+  s3_bucket = aws_s3_bucket.lambda_bucket.bucket
   s3_key    = aws_s3_object.lambda_zip_uploader.key
   # ソースコードが変更されていたら再デプロイする設定
   source_code_hash = data.archive_file.lambda.output_base64sha256
@@ -90,6 +92,17 @@ resource "aws_lambda_function" "lambda" {
 resource "null_resource" "lambda_build" {
   # ビルド済みの関数zipファイルアップロード先のS3バケットが生成されたら実行
   depends_on = [aws_s3_bucket.lambda_bucket]
+  # ソースコードに差分があった場合に実行
+  triggers = {
+    code_diff = join("", [
+      for file in fileset("node/src", "{*.ts, package*.json}")
+      : filebase64("node/src/${file}")
+    ])
+    package_diff = join("", [
+      for file in fileset("node", "{package*.json}")
+      : filebase64("node/${file}")
+    ])
+  }
   # Lambda関数依存パッケージのインストール
   provisioner "local-exec" {
     # 実行するコマンド
