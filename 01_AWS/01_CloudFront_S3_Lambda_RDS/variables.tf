@@ -20,6 +20,24 @@ variable "public_subnet_cidrs" {}
 # プライベートサブネット CIDRS
 variable "private_subnet_cidrs" {}
 #============================================================
+# CloudFront
+#============================================================
+# S3オリジンID
+variable "cloudfront_origin_id_s3" {}
+# LambdaオリジンID
+variable "cloudfront_origin_id_lambda" {}
+# リバースプロキシ先のLambda関数URL
+variable "cloudfront_path_pattern_lambda" {}
+#============================================================
+# Lambda
+#============================================================
+# 実行ランタイム（ex: nodejs, python, go, etc.）
+variable "lambda_runtime" {}
+# Lambda関数のタイムアウト時間
+variable "lambda_timeout" {}
+# CloudWatchにログを残す期間（日）
+variable "lambda_cloudwatch_log_retention_in_days" {}
+#============================================================
 # RDS
 #============================================================
 # DBのタイプ
@@ -62,21 +80,3 @@ variable "rds_proxy_connection_borrow_timeout" {}
 #============================================================
 # 削除後のシークレット保存期間（日）
 variable "secret_manager_recovery_window_in_days" {}
-#============================================================
-# Lambda
-#============================================================
-# 実行ランタイム（ex: nodejs, python, go, etc.）
-variable "lambda_runtime" {}
-# Lambda関数のタイムアウト時間
-variable "lambda_timeout" {}
-# CloudWatchにログを残す期間（日）
-variable "lambda_cloudwatch_log_retention_in_days" {}
-#============================================================
-# CloudFront
-#============================================================
-# S3オリジンID
-variable "cloudfront_origin_id_s3" {}
-# LambdaオリジンID
-variable "cloudfront_origin_id_lambda" {}
-# リバースプロキシ先のLambda関数URL
-variable "cloudfront_path_pattern_lambda" {}

@@ -26,6 +26,24 @@ private_subnet_cidrs = {
   "c" = "10.0.3.0/24"
 }
 #============================================================
+# CloudFront
+#============================================================
+# S3オリジンID
+cloudfront_origin_id_s3 = "S3"
+# LambdaオリジンID
+cloudfront_origin_id_lambda = "Lambda"
+# リバースプロキシ先のLambda関数URL
+cloudfront_path_pattern_lambda = "/api/*"
+#============================================================
+# Lambda
+#============================================================
+# 実行ランタイム（ex: nodejs, python, go, etc.）
+lambda_runtime = "nodejs18.x"
+# Lambda関数のタイムアウト時間
+lambda_timeout = 30
+# CloudWatchにログを残す期間（日）
+lambda_cloudwatch_log_retention_in_days = 30
+#============================================================
 # RDS
 #============================================================
 # DBのタイプ
@@ -68,21 +86,3 @@ rds_proxy_connection_borrow_timeout = 120
 #============================================================
 # 削除後のシークレット保存期間（日）
 secret_manager_recovery_window_in_days = 0 # 保存しない
-#============================================================
-# Lambda
-#============================================================
-# 実行ランタイム（ex: nodejs, python, go, etc.）
-lambda_runtime = "nodejs18.x"
-# Lambda関数のタイムアウト時間
-lambda_timeout = 30
-# CloudWatchにログを残す期間（日）
-lambda_cloudwatch_log_retention_in_days = 30
-#============================================================
-# CloudFront
-#============================================================
-# S3オリジンID
-cloudfront_origin_id_s3 = "S3"
-# LambdaオリジンID
-cloudfront_origin_id_lambda = "Lambda"
-# リバースプロキシ先のLambda関数URL
-cloudfront_path_pattern_lambda = "/api/*"
