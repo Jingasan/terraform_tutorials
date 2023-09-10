@@ -53,22 +53,35 @@ resource "aws_cloudfront_distribution" "main" {
 
   # デフォルトキャッシュビヘイビアの設定
   default_cache_behavior {
-    target_origin_id           = "S3"                # オリジンID
-    viewer_protocol_policy     = "redirect-to-https" # HTTPはHTTPSにリダイレクトする
-    allowed_methods            = ["GET", "HEAD"]     # 許可するHTTPメソッド
-    cached_methods             = ["GET", "HEAD"]     # キャッシュするHTTPメソッド
-    cache_policy_id            = data.aws_cloudfront_cache_policy.CachingOptimized.id
-    origin_request_policy_id   = data.aws_cloudfront_origin_request_policy.CORS-S3Origin.id
+    # オリジンID
+    target_origin_id = "S3"
+    # HTTPはHTTPSにリダイレクトする
+    viewer_protocol_policy = "redirect-to-https"
+    # 許可するHTTPメソッド
+    allowed_methods = ["GET", "HEAD", "OPTIONS", "PUT", "POST", "PATCH", "DELETE"]
+    # キャッシュするHTTPメソッド
+    cached_methods = ["GET", "HEAD", "OPTIONS", "PUT", "POST", "PATCH", "DELETE"]
+    # キャッシュポリシー
+    cache_policy_id = data.aws_cloudfront_cache_policy.CachingOptimized.id
+    # オリジンリクエストポリシー
+    origin_request_policy_id = data.aws_cloudfront_origin_request_policy.CORS-S3Origin.id
+    # レスポンスヘッダーポリシー
     response_headers_policy_id = data.aws_cloudfront_response_headers_policy.SimpleCORS.id
   }
   # デフォルトキャッシュビヘイビアの設定
   ordered_cache_behavior {
-    target_origin_id       = "Lambda"            # オリジンID
-    path_pattern           = "/api/*"            # リバースプロキシ先のURL
-    viewer_protocol_policy = "redirect-to-https" # HTTPはHTTPSにリダイレクトする
-    allowed_methods        = ["GET", "HEAD"]     # 許可するHTTPメソッド
-    cached_methods         = ["GET", "HEAD"]     # キャッシュするHTTPメソッド
-    cache_policy_id        = aws_cloudfront_cache_policy.CachingDisabledCookieQueryEnabled.id
+    # オリジンID
+    target_origin_id = "Lambda"
+    # リバースプロキシ先のURL
+    path_pattern = "/api/*"
+    # HTTPはHTTPSにリダイレクトする
+    viewer_protocol_policy = "redirect-to-https"
+    # 許可するHTTPメソッド
+    allowed_methods = ["GET", "HEAD", "OPTIONS", "PUT", "POST", "PATCH", "DELETE"]
+    # キャッシュするHTTPメソッド
+    cached_methods = ["GET", "HEAD", "OPTIONS", "PUT", "POST", "PATCH", "DELETE"]
+    # キャッシュポリシー
+    cache_policy_id = aws_cloudfront_cache_policy.CachingDisabledCookieQueryEnabled.id
   }
   # アクセス制限
   restrictions {
