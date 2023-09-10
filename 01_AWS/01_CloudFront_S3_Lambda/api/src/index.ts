@@ -57,4 +57,5 @@ app.use(
     });
   }
 );
+// 関数エンドポイント
 export const handler = serverlessExpress({ app });

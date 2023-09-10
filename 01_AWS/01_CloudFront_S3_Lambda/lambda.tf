@@ -21,9 +21,9 @@ data "archive_file" "lambda" {
   # 生成するアーカイブの種類
   type = "zip"
   # zip化対象のディレクトリ
-  source_dir = "${path.module}/backend/dist"
+  source_dir = "${path.module}/api/dist"
   # zipファイルの出力先
-  output_path = "${path.module}/backend/.lambda/lambda.zip"
+  output_path = "${path.module}/api/.lambda/lambda.zip"
 }
 
 # Lambda関数のアップロード設定
@@ -84,12 +84,12 @@ resource "null_resource" "lambda_build" {
     # 実行するコマンド
     command = "npm install"
     # コマンドを実行するディレクトリ
-    working_dir = "backend"
+    working_dir = "api"
   }
   # Lambda関数のビルド
   provisioner "local-exec" {
     command     = "npm run build"
-    working_dir = "backend"
+    working_dir = "api"
   }
 }
 
