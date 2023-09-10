@@ -17,7 +17,15 @@ const corsOptions = {
 };
 // GET
 app.get(
-  "/users/:id",
+  "/",
+  cors(corsOptions),
+  (_req: Request, res: Response, _next: NextFunction) => {
+    return res.status(200).json("OK");
+  }
+);
+// GET
+app.get(
+  "/api/:id",
   cors(corsOptions),
   (req: Request, res: Response, _next: NextFunction) => {
     return res.status(200).json({ Query: req.query });
@@ -25,7 +33,7 @@ app.get(
 );
 // POST
 app.post(
-  "/users/:id",
+  "/api/:id",
   cors(corsOptions),
   (req: Request, res: Response, _next: NextFunction) => {
     const body = JSON.parse(req.body);
@@ -34,7 +42,7 @@ app.post(
 );
 // PUT
 app.put(
-  "/users/:id",
+  "/api/:id",
   cors(corsOptions),
   (req: Request, res: Response, _next: NextFunction) => {
     return res.status(200).json({ RequestHeader: req.headers });
@@ -42,7 +50,7 @@ app.put(
 );
 // DELETE
 app.delete(
-  "/users/:id",
+  "/api/:id",
   cors(corsOptions),
   (req: Request, res: Response, _next: NextFunction) => {
     return res.status(200).json({ URLParams: req.params.id });
@@ -57,4 +65,5 @@ app.use(
     });
   }
 );
+// 関数のエンドポイント
 export const handler = serverlessExpress({ app });

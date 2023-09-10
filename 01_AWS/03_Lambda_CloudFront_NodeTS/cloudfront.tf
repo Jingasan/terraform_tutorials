@@ -6,8 +6,6 @@
 resource "aws_cloudfront_distribution" "api" {
   # ディストリビューションの有効化
   enabled = true
-  # デフォルトルートオブジェクトの設定
-  default_root_object = "index.html"
   # オリジンの設定
   origin {
     domain_name = "${aws_lambda_function_url.lambda.url_id}.lambda-url.${var.region}.on.aws"
