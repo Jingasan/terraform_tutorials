@@ -85,7 +85,7 @@ locals {
 }
 resource "null_resource" "fileupload" {
   # S3バケットの作成後に実行
-  depends_on = [aws_s3_bucket.frontend.id]
+  depends_on = [aws_s3_bucket.frontend]
   # React Webアプリの依存パッケージインストール
   provisioner "local-exec" {
     command     = "npm install"
