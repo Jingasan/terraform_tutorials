@@ -60,7 +60,7 @@ resource "aws_cloudfront_distribution" "main" {
     # 許可するHTTPメソッド
     allowed_methods = ["GET", "HEAD", "OPTIONS", "PUT", "POST", "PATCH", "DELETE"]
     # キャッシュするHTTPメソッド
-    cached_methods = ["GET", "HEAD", "OPTIONS", "PUT", "POST", "PATCH", "DELETE"]
+    cached_methods = ["GET", "HEAD"]
     # キャッシュポリシー
     cache_policy_id = data.aws_cloudfront_cache_policy.CachingOptimized.id
     # オリジンリクエストポリシー
@@ -79,7 +79,7 @@ resource "aws_cloudfront_distribution" "main" {
     # 許可するHTTPメソッド
     allowed_methods = ["GET", "HEAD", "OPTIONS", "PUT", "POST", "PATCH", "DELETE"]
     # キャッシュするHTTPメソッド
-    cached_methods = ["GET", "HEAD", "OPTIONS", "PUT", "POST", "PATCH", "DELETE"]
+    cached_methods = ["GET", "HEAD"]
     # キャッシュポリシー
     cache_policy_id = aws_cloudfront_cache_policy.CachingDisabledCookieQueryEnabled.id
   }
