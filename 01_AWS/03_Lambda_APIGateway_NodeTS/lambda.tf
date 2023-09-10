@@ -22,7 +22,7 @@ resource "aws_s3_bucket" "lambda_bucket" {
 
 # Lambda関数の設定
 resource "aws_lambda_function" "lambda" {
-  # 
+  # 関数のZIPファイルをS3にアップロードした後に実行
   depends_on = [null_resource.lambda_build_upload]
   # 関数名
   function_name = var.lambda_name
@@ -90,7 +90,7 @@ resource "null_resource" "lambda_build_upload" {
   }
 }
 
-# Lambda関数の更新コマンド
+# Lambda関数の更新
 resource "null_resource" "lambda_update" {
   # Lambda関数作成後に実行
   depends_on = [null_resource.lambda_build_upload, aws_lambda_function.lambda]

@@ -14,32 +14,6 @@ resource "aws_s3_bucket" "lambda_bucket" {
   }
 }
 
-# Lambda関数のzip化の設定
-data "archive_file" "lambda" {
-  # Lambda関数のビルド後に実行
-  depends_on = [null_resource.lambda_build]
-  # 生成するアーカイブの種類
-  type = "zip"
-  # zip化対象のディレクトリ
-  source_dir = "${path.module}/node/dist"
-  # zipファイルの出力先
-  output_path = "${path.module}/node/.lambda/lambda.zip"
-}
-
-# Lambda関数のアップロード設定
-resource "aws_s3_object" "lambda_zip_uploader" {
-  # Lambda関数のビルド後に実行
-  depends_on = [null_resource.lambda_build]
-  # アップロード先バケット
-  bucket = aws_s3_bucket.lambda_bucket.id
-  # アップロード先のパス
-  key = "lambda.zip"
-  # アップロード対象の指定
-  source = data.archive_file.lambda.output_path
-  # アップロード対象に変更があった場合にのみアップロードする設定
-  etag = filemd5(data.archive_file.lambda.output_path)
-}
-
 
 
 #============================================================
@@ -48,6 +22,8 @@ resource "aws_s3_object" "lambda_zip_uploader" {
 
 # Lambda関数の設定
 resource "aws_lambda_function" "lambda" {
+  # 関数のZIPファイルをS3にアップロードした後に実行
+  depends_on = [null_resource.lambda_build_upload]
   # 関数名
   function_name = "${var.project_name}-func"
   # 実行ランタイム（ex: nodejs, python, go, etc.）
@@ -58,9 +34,7 @@ resource "aws_lambda_function" "lambda" {
   role = aws_iam_role.lambda_role.arn
   # Lambda関数のコード取得元S3バケットとパス
   s3_bucket = aws_s3_bucket.lambda_bucket.bucket
-  s3_key    = aws_s3_object.lambda_zip_uploader.key
-  # ソースコードが変更されていたら再デプロイする設定
-  source_code_hash = data.archive_file.lambda.output_base64sha256
+  s3_key    = "lambda.zip"
   # Lambda関数のタイムアウト時間
   timeout = var.lambda_timeout
   # 作成するLambdaの説明文
@@ -89,7 +63,7 @@ resource "aws_lambda_function" "lambda" {
 }
 
 # Lambda関数のローカルビルドコマンドの設定
-resource "null_resource" "lambda_build" {
+resource "null_resource" "lambda_build_upload" {
   # ビルド済みの関数zipファイルアップロード先のS3バケットが生成されたら実行
   depends_on = [aws_s3_bucket.lambda_bucket]
   # ソースコードに差分があった場合に実行
@@ -113,6 +87,38 @@ resource "null_resource" "lambda_build" {
   # Lambda関数のビルド
   provisioner "local-exec" {
     command     = "npm run build"
+    working_dir = "node"
+  }
+  # Lambda関数のZIP圧縮
+  provisioner "local-exec" {
+    command     = "zip lambda.zip index.js"
+    working_dir = "node/dist"
+  }
+  # S3アップロード
+  provisioner "local-exec" {
+    command     = "aws s3 cp ./dist/lambda.zip s3://${aws_s3_bucket.lambda_bucket.bucket}/lambda.zip"
+    working_dir = "node"
+  }
+}
+
+# Lambda関数の更新
+resource "null_resource" "lambda_update" {
+  # Lambda関数作成後に実行
+  depends_on = [null_resource.lambda_build_upload, aws_lambda_function.lambda]
+  # ソースコードに差分があった場合にのみ実行
+  triggers = {
+    code_diff = join("", [
+      for file in fileset("node/src", "{*.ts}")
+      : filebase64("node/src/${file}")
+    ])
+    package_diff = join("", [
+      for file in fileset("node", "{package*.json}")
+      : filebase64("node/${file}")
+    ])
+  }
+  # Lambda関数を更新
+  provisioner "local-exec" {
+    command     = "aws lambda update-function-code --function-name ${aws_lambda_function.lambda.function_name} --s3-bucket ${aws_s3_bucket.lambda_bucket.bucket} --s3-key lambda.zip --publish --no-cli-pager"
     working_dir = "node"
   }
 }
