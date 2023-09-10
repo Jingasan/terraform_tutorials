@@ -72,6 +72,7 @@ resource "aws_s3_bucket_cors_configuration" "frontend" {
 # オブジェクトのバージョン管理の設定
 resource "aws_s3_bucket_versioning" "frontend" {
   bucket = aws_s3_bucket.frontend.id
+  # バケットのバージョン管理の設定（Enabled/Disabled）
   versioning_configuration {
     status = "Enabled"
   }
@@ -83,10 +84,8 @@ locals {
   dst_dir = "s3://${aws_s3_bucket.frontend.bucket}" # アップロード先
 }
 resource "null_resource" "fileupload" {
-  # S3バケットのUpdatedタグ更新後に実行
-  triggers = {
-    trigger = "${aws_s3_bucket.frontend.id}"
-  }
+  # S3バケットの作成後に実行
+  depends_on = [aws_s3_bucket.frontend.id]
   # React Webアプリの依存パッケージインストール
   provisioner "local-exec" {
     command     = "npm install"
