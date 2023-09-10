@@ -24,15 +24,20 @@ resource "aws_cloudfront_distribution" "main" {
   }
   # オリジンの設定(S3)
   origin {
-    origin_id   = "S3"
+    # オリジンID
+    origin_id = "S3"
+    # S3サービスのドメイン名
     domain_name = aws_s3_bucket.main.bucket_regional_domain_name
     # OAC を設定
     origin_access_control_id = aws_cloudfront_origin_access_control.main.id
   }
   # オリジンの設定(Lambda)
   origin {
+    # オリジンID
+    origin_id = "Lambda"
+    # Lambdaサービスのドメイン名
     domain_name = "${aws_lambda_function_url.lambda.url_id}.lambda-url.${var.region}.on.aws"
-    origin_id   = "Lambda"
+    # 許可するプロトコル
     custom_origin_config {
       http_port              = 80
       https_port             = 443
@@ -48,25 +53,26 @@ resource "aws_cloudfront_distribution" "main" {
 
   # デフォルトキャッシュビヘイビアの設定
   default_cache_behavior {
-    target_origin_id           = "S3"
-    viewer_protocol_policy     = "redirect-to-https"
-    allowed_methods            = ["GET", "HEAD"]
-    cached_methods             = ["GET", "HEAD"]
+    target_origin_id           = "S3"                # オリジンID
+    viewer_protocol_policy     = "redirect-to-https" # HTTPはHTTPSにリダイレクトする
+    allowed_methods            = ["GET", "HEAD"]     # 許可するHTTPメソッド
+    cached_methods             = ["GET", "HEAD"]     # キャッシュするHTTPメソッド
     cache_policy_id            = data.aws_cloudfront_cache_policy.CachingOptimized.id
     origin_request_policy_id   = data.aws_cloudfront_origin_request_policy.CORS-S3Origin.id
     response_headers_policy_id = data.aws_cloudfront_response_headers_policy.SimpleCORS.id
   }
   # デフォルトキャッシュビヘイビアの設定
   ordered_cache_behavior {
-    target_origin_id       = "Lambda"
-    path_pattern           = "/api/*"
-    viewer_protocol_policy = "redirect-to-https"
-    allowed_methods        = ["GET", "HEAD"]
-    cached_methods         = ["GET", "HEAD"]
+    target_origin_id       = "Lambda"            # オリジンID
+    path_pattern           = "/api/*"            # リバースプロキシ先のURL
+    viewer_protocol_policy = "redirect-to-https" # HTTPはHTTPSにリダイレクトする
+    allowed_methods        = ["GET", "HEAD"]     # 許可するHTTPメソッド
+    cached_methods         = ["GET", "HEAD"]     # キャッシュするHTTPメソッド
     cache_policy_id        = aws_cloudfront_cache_policy.CachingDisabledCookieQueryEnabled.id
   }
   # アクセス制限
   restrictions {
+    # 国・地域によるアクセス制限
     geo_restriction {
       restriction_type = "none"
       locations        = []

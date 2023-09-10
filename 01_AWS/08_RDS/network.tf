@@ -181,12 +181,14 @@ resource "aws_vpc_endpoint" "s3_endpoint" {
   # VPCからのS3接続時に許可するアクセスポリシーの指定
   policy = <<POLICY
     {
+        "Version": "2012-10-17",
         "Statement": [
             {
                 "Action": "*",
                 "Effect": "Allow",
                 "Resource": "*",
-                "Principal": "*"
+                "Principal": "*",
+                "Sid":""
             }
         ]
     }
