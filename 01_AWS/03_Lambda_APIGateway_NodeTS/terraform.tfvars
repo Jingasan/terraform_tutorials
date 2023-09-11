@@ -28,7 +28,7 @@ lambda_iam_policy_name = "terraform_lambda_policy"
 # API Gateway
 #============================================================
 # API Gateway名
-api_gateway_name = "terraform_api_gateway"
+apigateway_name = "terraform_api_gateway"
 # API URLステージ名
-api_gateway_stage_name = "dev"
+apigateway_stage_name = "dev"
 

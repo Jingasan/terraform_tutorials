@@ -198,7 +198,7 @@ output "function_name" {
 # RestAPIの定義
 resource "aws_api_gateway_rest_api" "api" {
   # API Gateway名
-  name = var.api_gateway_name
+  name = var.apigateway_name
   # 説明文
   description = var.tag_name
   # タグ
@@ -256,17 +256,17 @@ resource "aws_api_gateway_integration" "lambda_root" {
 
 # API Gatewayのデプロイ設定
 resource "aws_api_gateway_deployment" "api_gateway" {
-  # Rest APIの設定IDの指定
+  # Rest APIの設定ID
   rest_api_id = aws_api_gateway_rest_api.api.id
-  # ステージ名の設定
-  stage_name = var.api_gateway_stage_name
+  # ステージ名
+  stage_name = var.apigateway_stage_name
   # 以下のリソースが生成されてから実行 
   depends_on = [
     aws_api_gateway_integration.lambda,
     aws_api_gateway_integration.lambda_root,
   ]
-  # 毎回再デプロイさせるための設定
-  stage_description = "Updated at ${timestamp()}"
+  # ステージ名の説明
+  stage_description = var.tag_name
   # 既存のAPI Gatewayリソースがあった場合に一旦削除してから作り直す設定
   lifecycle {
     create_before_destroy = true

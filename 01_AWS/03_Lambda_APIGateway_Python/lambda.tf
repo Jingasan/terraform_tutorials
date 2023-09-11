@@ -222,17 +222,17 @@ resource "aws_api_gateway_integration" "lambda_root" {
 
 # API Gatewayのデプロイ設定
 resource "aws_api_gateway_deployment" "api_gateway" {
-  # Rest APIの設定IDの指定
+  # Rest APIの設定ID
   rest_api_id = aws_api_gateway_rest_api.api.id
-  # ステージ名の設定
+  # ステージ名
   stage_name = "dev"
   # 以下のリソースが生成されてから実行 
   depends_on = [
     aws_api_gateway_integration.lambda,
     aws_api_gateway_integration.lambda_root,
   ]
-  # 毎回再デプロイさせるための設定
-  stage_description = "Updated at ${timestamp()}"
+  # ステージ名の説明
+  stage_description = "Terraform検証用"
   # 既存のAPI Gatewayリソースがあった場合に一旦削除してから作り直す設定
   lifecycle {
     create_before_destroy = true

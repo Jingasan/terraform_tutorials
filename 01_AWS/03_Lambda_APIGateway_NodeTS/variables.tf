@@ -28,6 +28,6 @@ variable "lambda_iam_policy_name" {}
 # API Gateway
 #============================================================
 # API Gateway名
-variable "api_gateway_name" {}
+variable "apigateway_name" {}
 # API URLステージ名
-variable "api_gateway_stage_name" {}
+variable "apigateway_stage_name" {}
