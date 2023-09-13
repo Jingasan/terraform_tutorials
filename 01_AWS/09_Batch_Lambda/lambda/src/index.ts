@@ -13,7 +13,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 // CORS
 app.use(cors());
 
-// RDS関連の情報
+// AWS Batch関連の情報
 const jobQueue = String(process.env.JOB_QUEUE); // ジョブキュー
 const jobDefinition = String(process.env.JOB_DEFINITION); // ジョブ定義
 
