@@ -5,7 +5,7 @@
 # ECRのリポジトリの設定
 resource "aws_ecr_repository" "batch" {
   # リポジトリ名
-  name = var.docker_image_name
+  name = var.ecr_docker_image_name
   # イメージタグの上書き防止設定(MUTABLE:上書き可/IMMUTABLE:上書き不可)
   image_tag_mutability = "MUTABLE"
   # レジストリにpushしたコンテナイメージのセキュリティスキャン設定
@@ -58,10 +58,10 @@ resource "null_resource" "batch" {
     command = "aws ecr get-login-password --region ${var.region} | docker login --username AWS --password-stdin ${aws_ecr_repository.batch.repository_url}"
   }
   provisioner "local-exec" {
-    command = "docker build -t ${var.docker_image_name}:latest batch"
+    command = "docker build -t ${var.ecr_docker_image_name}:latest batch"
   }
   provisioner "local-exec" {
-    command = "docker tag ${var.docker_image_name}:latest ${aws_ecr_repository.batch.repository_url}:latest"
+    command = "docker tag ${var.ecr_docker_image_name}:latest ${aws_ecr_repository.batch.repository_url}:latest"
   }
   provisioner "local-exec" {
     command = "docker push ${aws_ecr_repository.batch.repository_url}:latest"
