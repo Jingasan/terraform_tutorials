@@ -19,7 +19,9 @@ resource "aws_ecs_cluster" "example" {
 # SSMからの値取得などの操作が対象となる。
 resource "aws_iam_role" "task_execution_role" {
   # Task Execution Role名の設定
-  name = "task_execution_roleution_role"
+  name = "task_execution_role"
+  # 説明
+  description = "task execution role"
   # ロールポリシーの設定
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
