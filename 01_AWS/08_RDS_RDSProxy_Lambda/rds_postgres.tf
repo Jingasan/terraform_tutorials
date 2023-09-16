@@ -95,7 +95,7 @@ resource "aws_db_subnet_group" "rds" {
 # Security Group
 #============================================================
 
-# セキュリティグループ
+# RDS用のセキュリティグループ
 resource "aws_security_group" "rds" {
   # セキュリティグループ名
   name = "${var.project_name}-${var.rds_engine}-sg"
@@ -108,8 +108,7 @@ resource "aws_security_group" "rds" {
     Name = "${var.project_name}-${var.rds_engine}"
   }
 }
-
-# セキュリティグループ
+# LambdaなどのRDS（RDS Proxy）に接続するアプリ用のセキュリティグループ
 resource "aws_security_group" "rds_app" {
   # セキュリティグループ名
   name = "${var.project_name}-${var.rds_engine}-app-sg"
@@ -123,7 +122,7 @@ resource "aws_security_group" "rds_app" {
   }
 }
 
-# インバウンドルールの追加
+# RDSのセキュリティグループに割り当てるRDS Proxy用のインバウンドルール
 resource "aws_security_group_rule" "rds_ingress_rdsproxy" {
   # 割り当て先のセキュリティグループID
   security_group_id = aws_security_group.rds.id
@@ -137,6 +136,7 @@ resource "aws_security_group_rule" "rds_ingress_rdsproxy" {
   # 説明
   description = "${var.project_name} ${var.rds_engine} sgr for RDS Proxy"
 }
+# RDSのセキュリティグループに割り当てるLambdaなどのアプリ用のインバウンドルール
 resource "aws_security_group_rule" "rds_ingress_app" {
   # 割り当て先のセキュリティグループID
   security_group_id = aws_security_group.rds.id
@@ -150,8 +150,7 @@ resource "aws_security_group_rule" "rds_ingress_app" {
   # 説明
   description = "${var.project_name} ${var.rds_engine} sgr for App"
 }
-
-# アウトバウンドルールの追加
+# RDSのセキュリティグループに割り当てるアウトバウンドルール
 resource "aws_security_group_rule" "rds_egress_all" {
   # 割り当て先のセキュリティグループID
   security_group_id = aws_security_group.rds.id
