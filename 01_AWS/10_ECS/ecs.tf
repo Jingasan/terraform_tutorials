@@ -287,7 +287,7 @@ resource "aws_security_group_rule" "egress" {
 # ECS ExecによるECSコンテナログインスクリプトの作成
 resource "local_file" "login_ecs_container_script" {
   # 出力先パス
-  filename = "./script/login_ecs_container.sh"
+  filename = "./bastion_script/login_ecs_container.sh"
   # 出力ファイルのパーミッション
   file_permission = "0755"
   # 出力ファイルの内容
@@ -315,7 +315,7 @@ DOC
 # ECSコンテナを開始させるスクリプトの作成
 resource "local_file" "start_ecs_container_script" {
   # 出力先パス
-  filename = "./script/start_ecs_container.sh"
+  filename = "./bastion_script/start_ecs_container.sh"
   # 出力ファイルのパーミッション
   file_permission = "0755"
   # 出力ファイルの内容
@@ -328,14 +328,15 @@ aws ecs update-service \
   --region ${var.region} \
   --cluster ${aws_ecs_cluster.ecs_cluster.name} \
   --service ${aws_ecs_service.ecs_service.name} \
-  --desired-count 1
+  --desired-count 1 \
+  --no-cli-pager
 DOC
 }
 
 # ECSコンテナを停止させるスクリプトの作成
 resource "local_file" "stop_ecs_container_script" {
   # 出力先パス
-  filename = "./script/stop_ecs_container.sh"
+  filename = "./bastion_script/stop_ecs_container.sh"
   # 出力ファイルのパーミッション
   file_permission = "0755"
   # 出力ファイルの内容
@@ -348,6 +349,7 @@ aws ecs update-service \
   --region ${var.region} \
   --cluster ${aws_ecs_cluster.ecs_cluster.name} \
   --service ${aws_ecs_service.ecs_service.name} \
-  --desired-count 0
+  --desired-count 0 \
+  --no-cli-pager
 DOC
 }
