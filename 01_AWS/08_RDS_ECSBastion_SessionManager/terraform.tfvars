@@ -56,7 +56,7 @@ rds_backup_retention_period = 1
 # ECSで起動するコンテナ名
 ecs_container_name = "BastionContainer"
 # ECSで起動するイメージ名
-ecs_container_image = "ubuntu:22.04" #"nginx:latest"
+ecs_container_image = "ubuntu:22.04"
 # ECSで起動するコンテナのvCPU数
 ecs_container_vcpu = "256" # 0.25vCPU
 # ECSで起動するコンテナのメモリサイズ
