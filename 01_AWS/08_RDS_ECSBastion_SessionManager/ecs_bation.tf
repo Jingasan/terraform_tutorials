@@ -5,7 +5,7 @@
 # ECSクラスターの作成
 resource "aws_ecs_cluster" "ecs_cluster" {
   # クラスター名
-  name = var.project_name
+  name = "${var.project_name}-cluster"
   # ContainerInsightsの有効化
   setting {
     name  = "containerInsights"
@@ -38,8 +38,8 @@ resource "aws_ecs_cluster_capacity_providers" "ecs_cluster_capacity_providers" {
 
 # ECSタスク定義
 resource "aws_ecs_task_definition" "ecs_task_definition" {
-  # ECSタスク定義名
-  family = var.project_name
+  # ECSタスク定義名（これにリビジョン番号を付与した名前がタスク定義名となる）
+  family = "${var.project_name}-ecs-task-definition"
   # CPUとメモリの設定（選択可能なCPUとメモリの組み合わせは決まっている）
   cpu    = var.ecs_container_vcpu   # 0.25vCPU
   memory = var.ecs_container_memory # 512MB
@@ -169,7 +169,7 @@ resource "aws_iam_role" "ecs_task_role" {
 # ECSサービスの作成
 resource "aws_ecs_service" "ecs_service" {
   # ECSサービス名
-  name = var.project_name
+  name = "${var.project_name}-ecs-service"
   # ECSサービスを割り当てるECSクラスター名
   cluster = aws_ecs_cluster.ecs_cluster.arn
   # 割り当てるタスク定義
