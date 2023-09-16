@@ -3,7 +3,7 @@
 #============================================================
 
 # ECSクラスターの作成
-resource "aws_ecs_cluster" "example" {
+resource "aws_ecs_cluster" "ecs_cluster" {
   # クラスター名
   name = "${var.project_name}-cluster"
   # ContainerInsightsの有効化
@@ -17,6 +17,19 @@ resource "aws_ecs_cluster" "example" {
   }
 }
 
+# ECSキャパシティープロバイダーの設定
+# https://docs.aws.amazon.com/ja_jp/AmazonECS/latest/developerguide/cluster-capacity-providers.html
+resource "aws_ecs_cluster_capacity_providers" "ecs_cluster_capacity_providers" {
+  # 設定対象のECSクラスター名
+  cluster_name = aws_ecs_cluster.ecs_cluster.name
+  # キャパシティープロバイダーの選択（FARGATE or EC2）
+  capacity_providers = ["FARGATE"]
+  # デフォルトのキャパシティープロバイダー戦略
+  default_capacity_provider_strategy {
+    capacity_provider = "FARGATE"
+  }
+}
+
 
 
 #============================================================
@@ -24,7 +37,7 @@ resource "aws_ecs_cluster" "example" {
 #============================================================
 
 # ECSタスクの定義
-resource "aws_ecs_task_definition" "example" {
+resource "aws_ecs_task_definition" "ecs_task" {
   # タスク定義名（これにリビジョン番号を付与した名前がタスク定義名となる）
   family = "${var.project_name}-ecs-task-definition"
   # CPUとメモリの設定（選択可能なCPUとメモリの組み合わせは決まっている）
@@ -59,12 +72,16 @@ resource "aws_ecs_task_definition" "example" {
         logDriver = "awslogs"
         options = {
           awslogs-region        = "ap-northeast-1"
-          awslogs-group         = "${aws_cloudwatch_log_group.example.name}"
+          awslogs-group         = "${aws_cloudwatch_log_group.ecs_task.name}"
           awslogs-stream-prefix = "ecs"
         }
       }
     }
   ])
+  # タグ
+  tags = {
+    Name = var.project_name
+  }
 }
 
 # Task Execution Roleの設定
@@ -90,6 +107,12 @@ resource "aws_iam_role" "task_execution_role" {
   managed_policy_arns = [
     "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
   ]
+  # 説明
+  description = "${var.project_name} ECS Task Execution Role"
+  # タグ
+  tags = {
+    Name = var.project_name
+  }
 }
 
 # Task Roleの設定
@@ -134,6 +157,12 @@ resource "aws_iam_role" "task_role" {
       ]
     })
   }
+  # 説明
+  description = "${var.project_name} ECS Task Role"
+  # タグ
+  tags = {
+    Name = var.project_name
+  }
 }
 
 
@@ -143,7 +172,7 @@ resource "aws_iam_role" "task_role" {
 #============================================================
 
 # コンテナのログ保存先をCloudWatch Logsに作成
-resource "aws_cloudwatch_log_group" "example" {
+resource "aws_cloudwatch_log_group" "ecs_task" {
   # ロググループ名の設定
   name = "/ecs/nginx-loggroup"
   # タグ
@@ -159,13 +188,13 @@ resource "aws_cloudwatch_log_group" "example" {
 #============================================================
 
 # ECS サービス
-resource "aws_ecs_service" "example" {
+resource "aws_ecs_service" "ecs_service" {
   # ECSサービス名
   name = "${var.project_name}-ecs-service"
   # ECSクラスターの設定
-  cluster = aws_ecs_cluster.example.arn
+  cluster = aws_ecs_cluster.ecs_cluster.arn
   # ECSタスクの設定
-  task_definition = aws_ecs_task_definition.example.arn
+  task_definition = aws_ecs_task_definition.ecs_task.arn
   # ECSサービスが維持するタスク数
   desired_count = 1
   # 起動タイプ
@@ -192,6 +221,10 @@ resource "aws_ecs_service" "example" {
     # FARGATEではデプロイの度にタスク定義が更新されるため、
     # タスク定義の変更の度にECSサービスが再デプロイされることを防ぐ
     ignore_changes = [task_definition]
+  }
+  # タグ
+  tags = {
+    Name = var.project_name
   }
 }
 
@@ -243,4 +276,78 @@ resource "aws_security_group_rule" "egress" {
   cidr_blocks = ["0.0.0.0/0"]
   # 説明
   description = var.project_name
+}
+
+
+
+#============================================================
+# SCRIPT作成
+#============================================================
+
+# ECS ExecによるECSコンテナログインスクリプトの作成
+resource "local_file" "login_ecs_container_script" {
+  # 出力先パス
+  filename = "./script/login_ecs_container.sh"
+  # 出力ファイルのパーミッション
+  file_permission = "0755"
+  # 出力ファイルの内容
+  content = <<DOC
+#!/bin/bash
+
+# ECSタスクのIDの取得
+TASK_ID=`aws ecs list-tasks \
+  --profile ${var.profile} \
+  --region ${var.region} \
+  --cluster ${aws_ecs_cluster.ecs_cluster.name} \
+  | jq '.taskArns[0]' | sed 's/"//g' | cut -f 3 -d '/'`
+
+# ECS ExecによるECSコンテナログイン
+aws ecs execute-command \
+  --profile ${var.profile} \
+  --region ${var.region} \
+  --cluster ${aws_ecs_cluster.ecs_cluster.name} \
+  --task $TASK_ID \
+  --container ${var.ecs_container_name} \
+  --interactive --command "/bin/sh"
+DOC
+}
+
+# ECSコンテナを開始させるスクリプトの作成
+resource "local_file" "start_ecs_container_script" {
+  # 出力先パス
+  filename = "./script/start_ecs_container.sh"
+  # 出力ファイルのパーミッション
+  file_permission = "0755"
+  # 出力ファイルの内容
+  content = <<DOC
+#!/bin/bash
+
+# ECSコンテナの開始
+aws ecs update-service \
+  --profile ${var.profile} \
+  --region ${var.region} \
+  --cluster ${aws_ecs_cluster.ecs_cluster.name} \
+  --service ${aws_ecs_service.ecs_service.name} \
+  --desired-count 1
+DOC
+}
+
+# ECSコンテナを停止させるスクリプトの作成
+resource "local_file" "stop_ecs_container_script" {
+  # 出力先パス
+  filename = "./script/stop_ecs_container.sh"
+  # 出力ファイルのパーミッション
+  file_permission = "0755"
+  # 出力ファイルの内容
+  content = <<DOC
+#!/bin/bash
+
+# ECSコンテナの停止
+aws ecs update-service \
+  --profile ${var.profile} \
+  --region ${var.region} \
+  --cluster ${aws_ecs_cluster.ecs_cluster.name} \
+  --service ${aws_ecs_service.ecs_service.name} \
+  --desired-count 0
+DOC
 }
