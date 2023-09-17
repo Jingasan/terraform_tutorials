@@ -295,7 +295,7 @@ function start_rds_connection () {
       break
     fi
   done
-  echo "Container Task ID: $TASK_ID"
+  echo "ECS Container Task ID: $TASK_ID"
 
   # ECSタスクのラインタイムIDの取得
   while :
