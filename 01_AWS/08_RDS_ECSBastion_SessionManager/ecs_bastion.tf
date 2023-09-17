@@ -175,7 +175,7 @@ resource "aws_ecs_service" "ecs_service" {
   # 割り当てるタスク定義
   task_definition = aws_ecs_task_definition.ecs_task_definition.arn
   # ECSサービスが維持するタスク数
-  desired_count = 1
+  desired_count = 0
   # 起動タイプ
   launch_type = "FARGATE"
   # FARGATEプラットフォームのバージョン
@@ -247,105 +247,116 @@ resource "aws_cloudwatch_log_group" "service" {
 #============================================================
 
 # SessionManagerによるRDS接続開始スクリプト出力
-resource "local_file" "connect_rds" {
+resource "local_file" "rds_connection_script" {
   # 出力先
-  filename = "./bastion_script/connect_rds.sh"
+  filename = "./bastion_script/establish_rds_connection.sh"
   # 出力ファイルのパーミッション
   file_permission = "0755"
   # 出力ファイルの内容
   content = <<DOC
 #!/bin/bash
+# ローカルPCからのRDS接続確立用のスクリプト
 
-# ECSタスクのIDの取得
-TASK_ID=`aws ecs list-tasks \
-  --profile ${var.profile} \
-  --region ${var.region} \
-  --cluster ${aws_ecs_cluster.ecs_cluster.name} \
-  | jq '.taskArns[0]' | sed 's/"//g' | cut -f 3 -d '/'`
+#============================================================
+# 踏み台用のECSコンテナの開始関数
+#============================================================
+function start_container () {
+  echo "---------------------------------------------"
+  echo "1. Start bastion container"
+  echo "---------------------------------------------"
+  # 踏み台用のECSコンテナの開始
+  aws ecs update-service \
+    --profile ${var.profile} \
+    --region ${var.region} \
+    --cluster ${aws_ecs_cluster.ecs_cluster.name} \
+    --service ${aws_ecs_service.ecs_service.name} \
+    --desired-count 1 \
+    --no-cli-pager > /dev/null 2>&1
+}
 
-# ECSタスクのラインタイムIDの取得
-RUNTIME_ID=`aws ecs describe-tasks \
-  --profile ${var.profile} \
-  --region ${var.region} \
-  --cluster ${aws_ecs_cluster.ecs_cluster.name} \
-  --task $TASK_ID | jq '.tasks[0].containers[0].runtimeId' | sed 's/"//g'`
+#============================================================
+# Session ManagerによるRDS接続の開始関数
+#============================================================
+function start_rds_connection () {
+  echo "---------------------------------------------"
+  echo "2. Start RDS connection with Session Manager"
+  echo "---------------------------------------------"
+
+  # ECSタスクのIDの取得
+  while :
+  do
+    sleep 3
+    TASK_ID=`aws ecs list-tasks \
+      --profile ${var.profile} \
+      --region ${var.region} \
+      --cluster ${aws_ecs_cluster.ecs_cluster.name} \
+      | jq '.taskArns[0]' | sed 's/"//g' | cut -f 3 -d '/'`
+    if [ x"$TASK_ID" != x"null" ]; then
+      break
+    fi
+  done
+  echo "Container Task ID: $TASK_ID"
+
+  # ECSタスクのラインタイムIDの取得
+  while :
+  do
+    sleep 3
+    RUNTIME_ID=`aws ecs describe-tasks \
+      --profile ${var.profile} \
+      --region ${var.region} \
+      --cluster ${aws_ecs_cluster.ecs_cluster.name} \
+      --task $TASK_ID | jq '.tasks[0].containers[0].runtimeId' | sed 's/"//g'`
+    if [ x"$RUNTIME_ID" != x"null" ]; then
+      break
+    fi
+  done
+  echo "ECS Runtime ID: $RUNTIME_ID"
+
+  # すぐに繋ぐとエラーとなるため、待機
+  sleep 5
+
+  # Session ManagerによるRDS接続の開始
+  aws ssm start-session \
+    --profile ${var.profile} \
+    --region ${var.region} \
+    --target "ecs:${aws_ecs_cluster.ecs_cluster.name}_"$TASK_ID"_"$RUNTIME_ID \
+    --document-name AWS-StartPortForwardingSessionToRemoteHost \
+    --parameters '{"host":["${aws_db_instance.rds.address}"],"portNumber":["${aws_db_instance.rds.port}"], "localPortNumber":["${aws_db_instance.rds.port}"]}'
+}
+
+#============================================================
+# 踏み台用のECSコンテナの終了関数
+#============================================================
+function stop_container () {
+  echo "---------------------------------------------"
+  echo "3. Stop bastion container"
+  echo "---------------------------------------------"
+  # 踏み台用のECSコンテナの停止
+  aws ecs update-service \
+    --profile ${var.profile} \
+    --region ${var.region} \
+    --cluster ${aws_ecs_cluster.ecs_cluster.name} \
+    --service ${aws_ecs_service.ecs_service.name} \
+    --desired-count 0 \
+    --no-cli-pager > /dev/null 2>&1
+  exit 1
+}
+
+#============================================================
+# メイン処理
+#============================================================
+
+# Ctrl+Cなどで終了したらECSコンテナを終了する処理をトリガー
+trap 'stop_container' {1,2,9,20}
+
+# 踏み台用のECSコンテナの開始
+start_container
 
 # Session ManagerによるRDS接続の開始
-aws ssm start-session \
-  --profile ${var.profile} \
-  --region ${var.region} \
-  --target "ecs:${aws_ecs_cluster.ecs_cluster.name}_"$TASK_ID"_"$RUNTIME_ID \
-  --document-name AWS-StartPortForwardingSessionToRemoteHost \
-  --parameters '{"host":["${aws_db_instance.rds.address}"],"portNumber":["${aws_db_instance.rds.port}"], "localPortNumber":["${aws_db_instance.rds.port}"]}'
-DOC
-}
+start_rds_connection
 
-# ECS ExecによるECSコンテナログインスクリプトの作成
-resource "local_file" "login_ecs_container_script" {
-  # 出力先パス
-  filename = "./bastion_script/login_ecs_container.sh"
-  # 出力ファイルのパーミッション
-  file_permission = "0755"
-  # 出力ファイルの内容
-  content = <<DOC
-#!/bin/bash
+# 踏み台用のECSコンテナの終了
+stop_container
 
-# ECSタスクのIDの取得
-TASK_ID=`aws ecs list-tasks \
-  --profile ${var.profile} \
-  --region ${var.region} \
-  --cluster ${aws_ecs_cluster.ecs_cluster.name} \
-  | jq '.taskArns[0]' | sed 's/"//g' | cut -f 3 -d '/'`
-
-# ECS ExecによるECSコンテナログイン
-aws ecs execute-command \
-  --profile ${var.profile} \
-  --region ${var.region} \
-  --cluster ${aws_ecs_cluster.ecs_cluster.name} \
-  --task $TASK_ID \
-  --container ${var.ecs_container_name} \
-  --interactive --command "/bin/sh"
-DOC
-}
-
-# ECSコンテナを開始させるスクリプトの作成
-resource "local_file" "start_ecs_container_script" {
-  # 出力先パス
-  filename = "./bastion_script/start_ecs_container.sh"
-  # 出力ファイルのパーミッション
-  file_permission = "0755"
-  # 出力ファイルの内容
-  content = <<DOC
-#!/bin/bash
-
-# ECSコンテナの開始
-aws ecs update-service \
-  --profile ${var.profile} \
-  --region ${var.region} \
-  --cluster ${aws_ecs_cluster.ecs_cluster.name} \
-  --service ${aws_ecs_service.ecs_service.name} \
-  --desired-count 1 \
-  --no-cli-pager
-DOC
-}
-
-# ECSコンテナを停止させるスクリプトの作成
-resource "local_file" "stop_ecs_container_script" {
-  # 出力先パス
-  filename = "./bastion_script/stop_ecs_container.sh"
-  # 出力ファイルのパーミッション
-  file_permission = "0755"
-  # 出力ファイルの内容
-  content = <<DOC
-#!/bin/bash
-
-# ECSコンテナの停止
-aws ecs update-service \
-  --profile ${var.profile} \
-  --region ${var.region} \
-  --cluster ${aws_ecs_cluster.ecs_cluster.name} \
-  --service ${aws_ecs_service.ecs_service.name} \
-  --desired-count 0 \
-  --no-cli-pager
 DOC
 }
