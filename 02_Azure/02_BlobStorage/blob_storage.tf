@@ -2,12 +2,21 @@
 # Blob Storage
 #============================================================
 
+# ランダムな小文字16進数値の生成
+resource "random_id" "blob" {
+  byte_length = 2 # 値の範囲
+}
+locals {
+  lower_random_hex = random_id.blob.dec
+}
+
 # ストレージアカウントの作成
 resource "azurerm_storage_account" "blob" {
+  depends_on = [random_id.blob]
   # 所属させるリソースグループ
   resource_group_name = azurerm_resource_group.rg.name
   # ストレージアカウント名
-  name = "${var.project_name}account"
+  name = "${var.project_name}${local.lower_random_hex}"
   # 作成先のリージョン
   location = azurerm_resource_group.rg.location
   # アカウントの種類
@@ -70,7 +79,7 @@ resource "azurerm_storage_account" "blob" {
 # ストレージコンテナの作成
 resource "azurerm_storage_container" "blob" {
   # コンテナ名
-  name = "${var.project_name}container"
+  name = var.project_name
   # 所属させるストレージアカウント名
   storage_account_name = azurerm_storage_account.blob.name
   # 匿名アクセスレベル (private(Default)/blob/container)
