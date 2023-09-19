@@ -3,10 +3,6 @@
 #============================================================
 
 # コンピューティング環境の作成
-locals {
-  public_subnet_ids  = [for value in aws_subnet.public : value.id]
-  private_subnet_ids = [for value in aws_subnet.private : value.id]
-}
 resource "aws_batch_compute_environment" "aws-batch-computing-environment" {
   # AWS Batchの実行ロールが生成されてからコンピューティング環境を作成
   depends_on = [
@@ -27,10 +23,7 @@ resource "aws_batch_compute_environment" "aws-batch-computing-environment" {
     # 最大vCPU数（ジョブの同時実行数=最大vCPU数/ジョブ1つのvCPU数）
     max_vcpus = var.batch_max_vcpus
     # VPCサブネット
-    subnets = concat(
-      local.public_subnet_ids,
-      local.private_subnet_ids
-    )
+    subnets = [for value in aws_subnet.private : value.id]
     # VPCセキュリティグループ
     security_group_ids = [
       aws_security_group.batch.id

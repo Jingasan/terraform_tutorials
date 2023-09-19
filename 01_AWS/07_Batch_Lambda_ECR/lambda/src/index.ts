@@ -49,16 +49,17 @@ const cancelJobCommand = async (jobId: string): Promise<boolean> => {
   }
 };
 
-// ジョブ登録
+// 連続ジョブの登録
 app.post("/job", async (_req: Request, res: Response, _next: NextFunction) => {
   console.log("JobQueue: " + jobQueue);
   console.log("JobDefinition: " + jobDefinition);
-  const input: Batch.SubmitJobCommandInput = {
-    jobName: "test-job",
+  // ジョブ１の送信
+  const input1: Batch.SubmitJobCommandInput = {
+    jobName: "test-job-1",
     jobDefinition: jobDefinition,
     jobQueue: jobQueue,
     containerOverrides: {
-      command: ["echo", "hello world"],
+      command: ["sleep", "10"],
       environment: [{ name: "NAME", value: "VALUE" }],
       resourceRequirements: [
         { type: "MEMORY", value: "512" },
@@ -66,17 +67,61 @@ app.post("/job", async (_req: Request, res: Response, _next: NextFunction) => {
       ],
     },
   };
-  // キューへのジョブの送信
-  const response = await submitJobCommand(input);
-  if (!response || !response.jobId) {
+  const response1 = await submitJobCommand(input1);
+  if (!response1 || !response1.jobId) {
     return res.status(503).json("Internal Server Error");
   }
-  return res.status(200).json({ jobId: response.jobId });
+  // ジョブ２の送信
+  const input2: Batch.SubmitJobCommandInput = {
+    jobName: "test-job-2",
+    jobDefinition: jobDefinition,
+    jobQueue: jobQueue,
+    containerOverrides: {
+      command: ["sleep", "10"],
+      environment: [{ name: "NAME", value: "VALUE" }],
+      resourceRequirements: [
+        { type: "MEMORY", value: "512" },
+        { type: "VCPU", value: "0.25" },
+      ],
+    },
+    dependsOn: [{ jobId: response1.jobId, type: "N_TO_N" }],
+  };
+  const response2 = await submitJobCommand(input2);
+  if (!response2 || !response2.jobId) {
+    return res.status(503).json("Internal Server Error");
+  }
+  // ジョブ３の送信
+  const input3: Batch.SubmitJobCommandInput = {
+    jobName: "test-job-3",
+    jobDefinition: jobDefinition,
+    jobQueue: jobQueue,
+    containerOverrides: {
+      command: ["sleep", "10"],
+      environment: [{ name: "NAME", value: "VALUE" }],
+      resourceRequirements: [
+        { type: "MEMORY", value: "512" },
+        { type: "VCPU", value: "0.25" },
+      ],
+    },
+    dependsOn: [{ jobId: response2.jobId, type: "N_TO_N" }],
+  };
+  const response3 = await submitJobCommand(input3);
+  if (!response3 || !response3.jobId) {
+    return res.status(503).json("Internal Server Error");
+  }
+  // レスポンス
+  return res
+    .status(200)
+    .json([
+      { job1Id: response1.jobId },
+      { job2Id: response2.jobId },
+      { job3Id: response3.jobId },
+    ]);
 });
 
 // ジョブキャンセル
 app.delete("/job", async (req: Request, res: Response, _next: NextFunction) => {
-  const jobId = String(req.query?.jobId);
+  const jobId = String(req.query?.jobId); // キャンセルするジョブID
   if (!jobId) {
     return res.status(503).json("Internal Server Error");
   }
