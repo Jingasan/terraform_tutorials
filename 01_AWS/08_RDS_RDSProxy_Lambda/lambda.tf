@@ -52,7 +52,7 @@ resource "aws_lambda_function" "lambda" {
   # Lambda関数をVPCに所属させる設定
   vpc_config {
     # サブネット
-    subnet_ids = local.private_subnet_ids
+    subnet_ids = [for value in aws_subnet.private : value.id]
     # セキュリティグループ
     security_group_ids = [aws_security_group.rds.id, aws_security_group.rds_app.id]
   }

@@ -89,10 +89,7 @@ resource "aws_db_proxy" "rdsproxy" {
   # TLS接続の有効化
   require_tls = true
   # VPCサブネットの指定
-  vpc_subnet_ids = concat(
-    local.public_subnet_ids,
-    local.private_subnet_ids
-  )
+  vpc_subnet_ids = [for value in aws_subnet.private : value.id]
   # VPCセキュリティグループの指定
   vpc_security_group_ids = [aws_security_group.rds.id]
 }
