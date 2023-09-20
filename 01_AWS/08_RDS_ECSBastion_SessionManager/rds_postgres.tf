@@ -69,20 +69,13 @@ resource "aws_db_instance" "rds" {
 #============================================================
 
 # サブネットグループの作成
-locals {
-  public_subnet_ids  = [for value in aws_subnet.public : value.id]
-  private_subnet_ids = [for value in aws_subnet.private : value.id]
-}
 resource "aws_db_subnet_group" "rds" {
   # サブネットグループ名
   name = "${var.project_name}-${var.rds_engine}"
   # サブネットグループの説明
   description = "RDS Subnet Group for ${var.rds_engine}"
   # サブネットID
-  subnet_ids = concat(
-    local.public_subnet_ids,
-    local.private_subnet_ids
-  )
+  subnet_ids = [for value in aws_subnet.private : value.id]
   # タグ
   tags = {
     Name = "${var.project_name}-${var.rds_engine}"

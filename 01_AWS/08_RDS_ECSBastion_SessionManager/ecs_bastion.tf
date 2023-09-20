@@ -190,7 +190,7 @@ resource "aws_ecs_service" "ecs_service" {
     # セキュリティグループの指定
     security_groups = [aws_security_group.ecs_security_group.id]
     # サブネットの指定
-    subnets = [for value in aws_subnet.public : value.id]
+    subnets = [for value in aws_subnet.private : value.id]
   }
   # ECSサービスのライフサイクル設定
   lifecycle {
