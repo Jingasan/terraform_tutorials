@@ -77,8 +77,8 @@ output "azure_functions_hostname" {
 resource "azurerm_application_insights" "function" {
   # 所属させるリソースグループ
   resource_group_name = azurerm_resource_group.rg.name
-  # ストレージアカウント名
-  name = "${var.project_name}${local.lower_random_hex}"
+  # Application Insights名
+  name = azurerm_linux_function_app.functions.name
   # 作成先のリージョン
   location = azurerm_resource_group.rg.location
   # アプリケーションのタイプ
