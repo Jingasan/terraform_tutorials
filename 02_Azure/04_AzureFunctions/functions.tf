@@ -54,7 +54,6 @@ resource "azurerm_linux_function_app" "functions" {
     }
     # Application Insights の接続文字列
     application_insights_connection_string = azurerm_application_insights.function.connection_string
-    #application_insights_key               = azurerm_application_insights.function.instrumentation_key
   }
   # タグ
   tags = {
