@@ -45,22 +45,25 @@ resource "aws_ecr_lifecycle_policy" "main" {
   })
 }
 
-# ローカルで実行するコマンドの設定
+# コンテナイメージのビルドとECRリポジトリへのプッシュ
 resource "null_resource" "main" {
   # ECRリポジトリ作成後に実行
   triggers = {
-    trigger = "${aws_ecr_repository.main.id}"
+    trigger = aws_ecr_repository.main.id
   }
-  # 実行コマンド：コンテナイメージのビルドとプッシュを行う
+  # ECRログイン
   provisioner "local-exec" {
     command = "aws ecr get-login-password --region ap-northeast-1 | docker login --username AWS --password-stdin ${aws_ecr_repository.main.repository_url}"
   }
+  # コンテナのビルド
   provisioner "local-exec" {
     command = "docker build -t ${var.image_name}:latest ${var.dockerfile_dir}"
   }
+  # コンテナ名の変更
   provisioner "local-exec" {
     command = "docker tag ${var.image_name}:latest ${aws_ecr_repository.main.repository_url}:latest"
   }
+  # ACRリポジトリへのコンテナのプッシュ
   provisioner "local-exec" {
     command = "docker push ${aws_ecr_repository.main.repository_url}:latest"
   }

@@ -3,11 +3,11 @@
 #============================================================
 
 # ランダムな小文字16進数値の生成
-resource "random_id" "blob" {
+resource "random_id" "azure_functions" {
   byte_length = 2 # 値の範囲
 }
 locals {
-  lower_random_hex = random_id.blob.dec
+  azure_functions_lower_random_hex = random_id.azure_functions.dec
 }
 
 # App Serviceの作成
@@ -15,7 +15,7 @@ resource "azurerm_service_plan" "functions" {
   # 所属させるリソースグループ
   resource_group_name = azurerm_resource_group.rg.name
   # App Service名
-  name = "${var.project_name}${local.lower_random_hex}"
+  name = "${var.project_name}${local.azure_functions_lower_random_hex}"
   # 作成先のリージョン
   location = azurerm_resource_group.rg.location
   # OSの種類
@@ -34,7 +34,7 @@ resource "azurerm_linux_function_app" "functions" {
   # 所属させるリソースグループ
   resource_group_name = azurerm_resource_group.rg.name
   # ストレージアカウント名
-  name = "${var.project_name}${local.lower_random_hex}"
+  name = "${var.project_name}${local.azure_functions_lower_random_hex}"
   # 作成先のリージョン
   location = azurerm_resource_group.rg.location
   # ストレージアカウント名
@@ -61,24 +61,18 @@ resource "azurerm_linux_function_app" "functions" {
   }
 }
 
-# Azure Functions API Hostname
-output "azure_functions_hostname" {
-  description = "Azure Functions Hostname"
-  value       = azurerm_linux_function_app.functions.default_hostname
-}
-
 
 
 #============================================================
 # Application Insights (Azure Functionsのログモニタリング用)
 #============================================================
 
-#　Application Insightsの作成
+# Application Insightsの作成
 resource "azurerm_application_insights" "function" {
   # 所属させるリソースグループ
   resource_group_name = azurerm_resource_group.rg.name
   # Application Insights名
-  name = "${var.project_name}${local.lower_random_hex}"
+  name = "${var.project_name}${local.azure_functions_lower_random_hex}"
   # 作成先のリージョン
   location = azurerm_resource_group.rg.location
   # アプリケーションのタイプ
@@ -101,7 +95,7 @@ resource "azurerm_storage_account" "functions" {
   # 所属させるリソースグループ
   resource_group_name = azurerm_resource_group.rg.name
   # ストレージアカウント名
-  name = "${var.project_name}${local.lower_random_hex}"
+  name = "${var.project_name}${local.azure_functions_lower_random_hex}"
   # 作成先のリージョン
   location = azurerm_resource_group.rg.location
   # アカウントの種類
