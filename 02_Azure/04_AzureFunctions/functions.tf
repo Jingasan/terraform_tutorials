@@ -52,7 +52,7 @@ resource "azurerm_linux_function_app" "functions" {
     application_stack {
       node_version = var.functions_node_version
     }
-    # Application Insights の接続文字列
+    # Azure FunctionsのログをApplication Insightsに書き出すための接続文字列の指定
     application_insights_connection_string = azurerm_application_insights.function.connection_string
   }
   # タグ
