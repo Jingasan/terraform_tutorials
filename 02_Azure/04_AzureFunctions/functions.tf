@@ -98,7 +98,7 @@ resource "null_resource" "functions_build_upload" {
   }
   # 関数のアップロード
   provisioner "local-exec" {
-    command     = "func azure functionapp publish ${azurerm_linux_function_app.functions.name}"
+    command     = "npx func azure functionapp publish ${azurerm_linux_function_app.functions.name}"
     working_dir = local.func_dir
   }
 }
