@@ -61,6 +61,48 @@ resource "azurerm_linux_function_app" "functions" {
   }
 }
 
+# Azure Functionsの関数のビルドとアップロード
+locals {
+  func_dir = "./api"
+}
+resource "null_resource" "functions_build_upload" {
+  triggers = {
+    # Azure FunctionsとBlob Storageが生成されたら実行
+    azure_functions_id       = azurerm_linux_function_app.functions.id
+    azure_storage_account_id = azurerm_storage_account.functions.id
+    # ソースコードに差分があった場合に実行
+    code_diff = join("", [
+      for file in fileset("${local.func_dir}/src", "{*.ts, function.json}")
+      : filebase64("${local.func_dir}/src/${file}")
+    ])
+    package_diff = join("", [
+      for file in fileset("${local.func_dir}", "{package*.json, host.json}")
+      : filebase64("${local.func_dir}/${file}")
+    ])
+  }
+  # 関数の依存パッケージのインストール
+  provisioner "local-exec" {
+    # 実行するコマンド
+    command = "npm install"
+    # コマンドを実行するディレクトリ
+    working_dir = local.func_dir
+  }
+  # 関数のビルド
+  provisioner "local-exec" {
+    command     = "npm run build"
+    working_dir = local.func_dir
+  }
+  # sleep
+  provisioner "local-exec" {
+    command = "sleep 30"
+  }
+  # 関数のアップロード
+  provisioner "local-exec" {
+    command     = "func azure functionapp publish ${azurerm_linux_function_app.functions.name}"
+    working_dir = local.func_dir
+  }
+}
+
 
 
 #============================================================
