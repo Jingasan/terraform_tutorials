@@ -105,7 +105,7 @@ locals {
 resource "null_resource" "fileupload" {
   # ストレージコンテナ作成完了後に実行
   triggers = {
-    trigger = "${azurerm_storage_container.blob.id}"
+    trigger = azurerm_storage_container.blob.id
   }
   # ローカルディレクトリにあるWebページをS3バケットにアップロード
   provisioner "local-exec" {

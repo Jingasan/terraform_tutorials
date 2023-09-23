@@ -96,7 +96,7 @@ resource "null_resource" "functions_build_upload" {
     command     = "npm run build"
     working_dir = local.func_dir
   }
-  # sleep
+  # 関数アプリにアップロードできるようになるまで暫く待機
   provisioner "local-exec" {
     command = "sleep 30"
   }
