@@ -3,3 +3,15 @@
 #============================================================
 # プロジェクト名（英数字のみ）
 project_name = "terraformtutorial"
+#============================================================
+# Resource Group
+#============================================================
+# ロケーション
+location = "japaneast"
+#============================================================
+# Blob Storage
+#============================================================
+# パフォーマンス (Standard/Premium)
+account_storage_account_tier = "Standard"
+# 冗長性 (LRS/GRS/RAGRS/ZRS/GZRS/RAGZRS)
+account_storage_account_replication_type = "LRS"

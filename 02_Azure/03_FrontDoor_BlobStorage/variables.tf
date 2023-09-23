@@ -3,3 +3,15 @@
 #============================================================
 # プロジェクト名
 variable "project_name" {}
+#============================================================
+# Resource Group
+#============================================================
+# ロケーション
+variable "location" {}
+#============================================================
+# Blob Storage
+#============================================================
+# パフォーマンス (Standard/Premium)
+variable "account_storage_account_tier" {}
+# 冗長性 (LRS/GRS/RAGRS/ZRS/GZRS/RAGZRS)
+variable "account_storage_account_replication_type" {}
