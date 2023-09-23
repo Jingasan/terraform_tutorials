@@ -47,6 +47,10 @@ resource "azurerm_linux_function_app" "functions" {
   enabled = true
   # HTTPSに限定するか（HTTPを許容するか）
   https_only = true
+  # 環境変数の設定
+  app_settings = {
+    "ENV_NAME" = "ENV_VALUE"
+  }
   site_config {
     # Azure Functionsのランタイムとバージョンの設定
     application_stack {

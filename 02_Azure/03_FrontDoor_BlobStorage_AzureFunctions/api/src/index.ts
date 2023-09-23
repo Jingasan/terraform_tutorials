@@ -15,7 +15,7 @@ app.use(cors());
 
 // GET
 app.get("/api/test", async (_req: Request, res: Response): Promise<void> => {
-  res.status(200).json("Azure Functions is called.");
+  res.status(200).json("ENV_NAME: " + process.env.ENV_NAME);
 });
 
 // GET
