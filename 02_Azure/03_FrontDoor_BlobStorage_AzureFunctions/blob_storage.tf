@@ -113,16 +113,13 @@ resource "null_resource" "fileupload" {
   }
 }
 
-# サブスクリプションIDの取得
-data "azurerm_subscription" "subscription" {}
-
 # ストレージアカウントにAzure Functionsからの操作ロールを割り当て
 resource "azurerm_role_assignment" "example" {
   # ロールの割り当て先：上記のストレージアカウントを指定
   scope = azurerm_storage_account.blob.id
-  # ロール：ストレージ BLOB データ共同作成者
+  # 割り当てるロール：ストレージ BLOB データ共同作成者
   # https://learn.microsoft.com/en-us/azure/role-based-access-control/built-in-roles
-  role_definition_id = "${data.azurerm_subscription.subscription.id}/providers/Microsoft.Authorization/roleDefinitions/ba92f5b4-2d11-453d-a403-e96b0029c9fe"
-  # Azure FunctionsからのマネージドIDによるアクセスを許可
+  role_definition_name = "Storage Blob Data Contributor"
+  # プリンシパルID：Azure FunctionsからマネージドIDによるアクセスを許可
   principal_id = azurerm_linux_function_app.functions.identity[0].principal_id
 }
