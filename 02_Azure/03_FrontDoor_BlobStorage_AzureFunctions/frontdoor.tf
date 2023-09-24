@@ -253,5 +253,5 @@ output "webpage_url" {
 # API URLの表示
 output "api_url" {
   description = "API URL"
-  value       = "https://${azurerm_cdn_frontdoor_endpoint.endpoint.host_name}/api/~"
+  value       = "https://${azurerm_cdn_frontdoor_endpoint.endpoint.host_name}/api/blob"
 }
