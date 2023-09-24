@@ -49,7 +49,12 @@ resource "azurerm_linux_function_app" "functions" {
   https_only = true
   # 環境変数の設定
   app_settings = {
-    "ENV_NAME" = "ENV_VALUE"
+    "STORAGE_ACCOUNT_NAME"   = azurerm_storage_account.blob.name
+    "STORAGE_CONTAINER_NAME" = azurerm_storage_container.blob.name
+  }
+  # システム割り当てマネージドID：ON
+  identity {
+    type = "SystemAssigned"
   }
   site_config {
     # Azure Functionsのランタイムとバージョンの設定

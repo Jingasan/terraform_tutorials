@@ -112,3 +112,17 @@ resource "null_resource" "fileupload" {
     command = "az storage copy -s ${local.src_path} -d ${local.dst_path} --account-key ${azurerm_storage_account.blob.primary_access_key} -r"
   }
 }
+
+# サブスクリプションIDの取得
+data "azurerm_subscription" "subscription" {}
+
+# ストレージアカウントへのロール割り当て
+resource "azurerm_role_assignment" "example" {
+  # ロールの割り当て先：上記のストレージアカウントを指定
+  scope = azurerm_storage_account.blob.id
+  # ロール：ストレージ BLOB データ共同作成者
+  # https://learn.microsoft.com/en-us/azure/role-based-access-control/built-in-roles
+  role_definition_id = "${data.azurerm_subscription.subscription.id}/providers/Microsoft.Authorization/roleDefinitions/ba92f5b4-2d11-453d-a403-e96b0029c9fe"
+  # Azure FunctionsからのマネージドIDによるアクセスを許可
+  principal_id = azurerm_linux_function_app.functions.identity[0].principal_id
+}
