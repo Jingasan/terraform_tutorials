@@ -43,7 +43,7 @@ resource "azurerm_cdn_frontdoor_route" "blob_route" {
   # 一致するパターン
   patterns_to_match = ["/*"]
   # 転送プロトコル
-  forwarding_protocol = "MatchRequest"
+  forwarding_protocol = "HttpsOnly"
   # HTTPSリダイレクト設定
   https_redirect_enabled = true
   # 配信元グループID
