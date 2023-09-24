@@ -16,8 +16,6 @@
     "@types/node": "^20.6.3",
     "@types/source-map-support": "^0.5.7",
     "azure-functions-core-tools": "^4.0.5348",
-    "esbuild": "^0.19.3",
-    "tsx": "^3.12.10",
     "typescript": "^5.2.2"
   },
   "dependencies": {
