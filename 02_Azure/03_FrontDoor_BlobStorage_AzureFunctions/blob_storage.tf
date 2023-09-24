@@ -99,7 +99,7 @@ resource "azurerm_storage_container" "blob" {
 locals {
   account   = azurerm_storage_container.blob.storage_account_name                 # ストレージアカウント名
   container = azurerm_storage_container.blob.name                                 # ストレージコンテナ名
-  src_path  = "./webpage/*"                                                       # アップロード対象のファイル群
+  src_path  = "./frontend/*"                                                      # アップロード対象のファイル群
   dst_path  = "https://${local.account}.blob.core.windows.net/${local.container}" # アップロード先のURL
 }
 resource "null_resource" "fileupload" {
@@ -116,7 +116,7 @@ resource "null_resource" "fileupload" {
 # サブスクリプションIDの取得
 data "azurerm_subscription" "subscription" {}
 
-# ストレージアカウントへのロール割り当て
+# ストレージアカウントにAzure Functionsからの操作ロールを割り当て
 resource "azurerm_role_assignment" "example" {
   # ロールの割り当て先：上記のストレージアカウントを指定
   scope = azurerm_storage_account.blob.id
