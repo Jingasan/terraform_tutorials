@@ -18,8 +18,8 @@ resource "azurerm_container_registry" "acr" {
   name = "${var.project_name}${local.acr_lower_random_hex}"
   # 作成先のリージョン
   location = azurerm_resource_group.rg.location
-  # 機能プラン (Basic/Standard/Premium)
-  sku = "Basic"
+  # 価格プラン (Basic/Standard/Premium)
+  sku = var.acr_sku
   # 管理者ユーザーからのアクセス可否
   admin_enabled = true
   # パブリックアクセスの可否
