@@ -18,7 +18,7 @@ variable "acr_image_name" {}
 # ビルドするコンテナイメージのDockerfileがあるディレクトリパス
 variable "acr_dockerfile_dir" {}
 #============================================================
-# Storage Account
+# Storage Account (Azure Batch用)
 #============================================================
 # 価格プラン (Standard/Premium)
 variable "storage_account_tier" {}
