@@ -18,7 +18,7 @@ acr_image_name = "ubuntu-echo"
 # ビルドするコンテナイメージのDockerfileがあるディレクトリパス
 acr_dockerfile_dir = "./batch/ubuntu-echo"
 #============================================================
-# Storage Account
+# Storage Account (Azure Batch用)
 #============================================================
 # 価格プラン (Standard/Premium)
 storage_account_tier = "Standard"
