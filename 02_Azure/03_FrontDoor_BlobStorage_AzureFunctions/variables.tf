@@ -11,10 +11,10 @@ variable "location" {}
 #============================================================
 # Blob Storage
 #============================================================
-# パフォーマンス (Standard/Premium)
-variable "account_storage_account_tier" {}
+# 価格プラン (Standard/Premium)
+variable "storage_account_tier" {}
 # 冗長性 (LRS/GRS/RAGRS/ZRS/GZRS/RAGZRS)
-variable "account_storage_account_replication_type" {}
+variable "storage_account_replication_type" {}
 #============================================================
 # Azure Functions
 #============================================================

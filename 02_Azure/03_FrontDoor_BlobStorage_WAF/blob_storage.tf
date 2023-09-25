@@ -22,9 +22,9 @@ resource "azurerm_storage_account" "blob" {
   # アカウントの種類
   account_kind = "StorageV2"
   # パフォーマンス (Standard/Premium)
-  account_tier = var.account_storage_account_tier
+  account_tier = var.storage_account_tier
   # 冗長性 (LRS/GRS/RAGRS/ZRS/GZRS/RAGZRS)
-  account_replication_type = var.account_storage_account_replication_type
+  account_replication_type = var.storage_account_replication_type
   # REST API操作の安全な転送を有効化
   enable_https_traffic_only = true
   # 個々のコンテナでの匿名アクセスの有効化（内部のデータをWeb公開するかどうか）

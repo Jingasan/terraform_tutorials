@@ -17,6 +17,6 @@ waf_allow_ips = ["218.45.247.210/32"]
 # Blob Storage
 #============================================================
 # パフォーマンス (Standard/Premium)
-account_storage_account_tier = "Standard"
+storage_account_tier = "Standard"
 # 冗長性 (LRS/GRS/RAGRS/ZRS/GZRS/RAGZRS)
-account_storage_account_replication_type = "LRS"
+storage_account_replication_type = "LRS"

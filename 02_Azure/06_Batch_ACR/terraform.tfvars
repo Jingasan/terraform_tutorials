@@ -9,9 +9,18 @@ project_name = "terraformtutorial"
 # ロケーション
 location = "japaneast"
 #============================================================
-# Blob Storage
+# ACR
 #============================================================
-# パフォーマンス (Standard/Premium)
+# 価格プラン
+acr_sku = "Basic"
+# コンテナイメージ名
+acr_image_name = "ubuntu-echo"
+# ビルドするコンテナイメージのDockerfileがあるディレクトリパス
+acr_dockerfile_dir = "./batch/ubuntu-echo"
+#============================================================
+# Storage Account
+#============================================================
+# 価格プラン (Standard/Premium)
 storage_account_tier = "Standard"
 # 冗長性 (LRS/GRS/RAGRS/ZRS/GZRS/RAGZRS)
 storage_account_replication_type = "LRS"

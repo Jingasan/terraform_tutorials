@@ -11,10 +11,10 @@ location = "japaneast"
 #============================================================
 # Blob Storage
 #============================================================
-# パフォーマンス (Standard/Premium)
-account_storage_account_tier = "Standard"
+# 価格プラン (Standard/Premium)
+storage_account_tier = "Standard"
 # 冗長性 (LRS/GRS/RAGRS/ZRS/GZRS/RAGZRS)
-account_storage_account_replication_type = "LRS"
+storage_account_replication_type = "LRS"
 #============================================================
 # Azure Functions
 #============================================================
