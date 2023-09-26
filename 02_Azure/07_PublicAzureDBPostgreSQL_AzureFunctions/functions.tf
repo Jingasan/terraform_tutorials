@@ -51,7 +51,7 @@ resource "azurerm_linux_function_app" "functions" {
   app_settings = {
     "DB_HOSTNAME" = azurerm_postgresql_flexible_server.postgres.fqdn                   # DBホスト名
     "DB_PORT"     = 5432                                                               # DBポート番号
-    "DB_DATABASE" = "postgres"                                                         # DBパスワード
+    "DB_DATABASE" = "postgres"                                                         # DB名
     "DB_USERNAME" = azurerm_postgresql_flexible_server.postgres.administrator_login    # DB管理者ユーザー名
     "DB_PASSWORD" = azurerm_postgresql_flexible_server.postgres.administrator_password # DB管理者パスワード
   }
