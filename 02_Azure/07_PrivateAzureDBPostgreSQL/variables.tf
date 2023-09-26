@@ -23,5 +23,3 @@ variable "db_backup_retention_days" {}
 variable "db_administrator_login" {}
 # パスワード
 variable "db_administrator_password" {}
-# PostgreSQLサーバーへの接続を許可するIPのリスト
-variable "db_firewall_allow_ip_list" {}
