@@ -3,11 +3,11 @@
 #============================================================
 
 # ランダムな小文字16進数値の生成
-resource "random_id" "blob" {
+resource "random_id" "postgres" {
   byte_length = 2 # 値の範囲
 }
 locals {
-  lower_random_hex = random_id.blob.dec
+  lower_random_hex = random_id.postgres.dec
 }
 
 # 仮想ネットワークの作成
