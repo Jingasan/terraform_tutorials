@@ -33,7 +33,7 @@ rds_engine = "postgres"
 # DBのバージョン
 rds_engine_version = "15.3"
 # 初期DB名
-rds_dbname = ""
+rds_dbname = "postgres"
 # DBポート番号
 rds_port = 5432
 # DBマスターユーザー名
