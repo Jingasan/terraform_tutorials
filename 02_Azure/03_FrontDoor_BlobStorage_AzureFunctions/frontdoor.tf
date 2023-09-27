@@ -154,32 +154,6 @@ resource "azurerm_cdn_frontdoor_route" "api_route" {
   cdn_frontdoor_origin_group_id = azurerm_cdn_frontdoor_origin_group.api_origin_group.id
   # 配信元ID
   cdn_frontdoor_origin_ids = [azurerm_cdn_frontdoor_origin.api_origin.id]
-  # キャッシュ
-  cache {
-    # クエリ文字列のキャッシュ動作
-    # IgnoreQueryString(Default)/IgnoreSpecifiedQueryStrings/IncludeSpecifiedQueryStrings/UseQueryString
-    query_string_caching_behavior = "UseQueryString" # クエリ文字列を使用する
-    # 配信コンテンツを圧縮するか (true/false)
-    compression_enabled = true
-    # 圧縮対象のMIMEタイプ
-    content_types_to_compress = [
-      "application/javascript",
-      "application/json",
-      "application/xml",
-      "application/xml+rss",
-      "application/x-javascript",
-      "image/svg+xml",
-      "text/css",
-      "text/csv",
-      "text/html",
-      "text/javascript",
-      "text/js",
-      "text/plain",
-      "text/xml",
-      "text/x-script",
-      "text/x-component"
-    ]
-  }
 }
 
 # APIの配信元グループの作成
