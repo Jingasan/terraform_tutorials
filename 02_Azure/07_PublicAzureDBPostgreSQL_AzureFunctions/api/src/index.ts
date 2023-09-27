@@ -5,6 +5,7 @@ import express, { Application, Request, Response, NextFunction } from "express";
 import cors from "cors";
 import bodyParser from "body-parser";
 import * as sourceMapSupport from "source-map-support";
+import intercept from "azure-function-log-intercept";
 import * as PG from "pg";
 sourceMapSupport.install();
 const app: Application = express();
@@ -22,7 +23,7 @@ const dbUsername = String(process.env.DB_USERNAME); // ユーザー名
 const dbPassword = String(process.env.DB_PASSWORD); // パスワード
 
 // DBとの接続初期化
-const initRDSProxyConnection = async (): Promise<PG.Client | false> => {
+const initRDSConnection = async (): Promise<PG.Client | false> => {
   try {
     console.log("> DB 接続");
     const pg = new PG.Client({
@@ -36,23 +37,26 @@ const initRDSProxyConnection = async (): Promise<PG.Client | false> => {
     // DBとの接続
     await pg.connect();
     return pg;
-  } catch (err) {
-    console.log(err);
+  } catch (e) {
+    console.error(e);
     return false;
   }
 };
 
 // GET
 app.get("/api/rds", async (_req: Request, res: Response) => {
-  const console = getCurrentInvoke().event;
+  intercept(getCurrentInvoke().event);
   console.log("DB_HOSTNAME: " + dbHostname);
   console.log("DB_PORT: " + dbPort);
   console.log("DB_NAME: " + db);
   console.log("DB_USERNAME: " + dbUsername);
   console.log("DB_PASSWORD: " + dbPassword);
   // DBとの接続初期化
-  const pg = await initRDSProxyConnection();
-  if (!pg) return res.status(503).json("Internal Server Error");
+  const pg = await initRDSConnection();
+  if (!pg) {
+    console.error("Failed to init RDS connection");
+    return res.status(503).json("Internal Server Error");
+  }
   // SQLの実行
   const sql = `show all`;
   console.log("> SQL 実行：" + sql);

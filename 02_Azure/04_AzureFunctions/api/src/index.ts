@@ -5,6 +5,7 @@ import express, { Application, Request, Response, NextFunction } from "express";
 import cors from "cors";
 import bodyParser from "body-parser";
 import * as sourceMapSupport from "source-map-support";
+import intercept from "azure-function-log-intercept";
 sourceMapSupport.install();
 const app: Application = express();
 // リクエストボディのパース用設定
@@ -22,7 +23,7 @@ app.get("/api/test", async (_req: Request, res: Response): Promise<void> => {
 app.get(
   "/api/test/:workspace/:project",
   async (req: Request, res: Response): Promise<void> => {
-    const console = getCurrentInvoke().event;
+    intercept(getCurrentInvoke().event);
     console.log("workspace: " + req.params.workspace);
     console.log("project: " + req.params.project);
     res.status(200).json({

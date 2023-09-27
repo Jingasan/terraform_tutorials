@@ -5,6 +5,7 @@ import express, { Application, Request, Response, NextFunction } from "express";
 import cors from "cors";
 import bodyParser from "body-parser";
 import * as sourceMapSupport from "source-map-support";
+import intercept from "azure-function-log-intercept";
 import { ManagedIdentityCredential } from "@azure/identity";
 import { BlobServiceClient, ContainerClient } from "@azure/storage-blob";
 sourceMapSupport.install();
@@ -19,7 +20,7 @@ app.use(cors());
 app.get("/api/blob", async (_req: Request, res: Response): Promise<void> => {
   const storageAccountName = String(process.env.STORAGE_ACCOUNT_NAME); // ストレージアカウント名
   const storageContainerName = String(process.env.STORAGE_CONTAINER_NAME); // ストレージコンテナ名
-  const console = getCurrentInvoke().event;
+  intercept(getCurrentInvoke().event);
   console.log("StorageAccountName: " + storageAccountName);
   console.log("StorageContainerName: " + storageContainerName);
   // BlobServiceClientオブジェクトの取得
@@ -30,7 +31,7 @@ app.get("/api/blob", async (_req: Request, res: Response): Promise<void> => {
       new ManagedIdentityCredential()
     );
   } catch (e) {
-    console.log(e);
+    console.error(e);
     res.status(503).json(e);
   }
   // ContainerClientオブジェクトの取得
@@ -39,7 +40,7 @@ app.get("/api/blob", async (_req: Request, res: Response): Promise<void> => {
     containerClient =
       blobServiceClient.getContainerClient(storageContainerName);
   } catch (e) {
-    console.log(e);
+    console.error(e);
     res.status(503).json(e);
   }
   // コンテナが存在しない場合
@@ -56,7 +57,7 @@ app.get("/api/blob", async (_req: Request, res: Response): Promise<void> => {
       fileList.push(blob.name);
     }
   } catch (e) {
-    console.log(e);
+    console.error(e);
     res.status(503).json(e);
   }
   console.log(fileList);
