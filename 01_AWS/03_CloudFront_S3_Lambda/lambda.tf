@@ -146,6 +146,8 @@ resource "aws_iam_role" "lambda_role" {
       },
     ]
   })
+  # 説明
+  description = var.project_name
   # タグ
   tags = {
     Name = var.project_name

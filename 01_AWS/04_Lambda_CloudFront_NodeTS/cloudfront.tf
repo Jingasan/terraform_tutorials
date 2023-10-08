@@ -38,10 +38,10 @@ resource "aws_cloudfront_distribution" "api" {
     }
   }
   # 説明
-  comment = var.tag_name
+  comment = var.project_name
   # タグ
   tags = {
-    Name = var.tag_name
+    Name = var.project_name
   }
 }
 
