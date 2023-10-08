@@ -5,7 +5,7 @@
 # バケット名とタグの設定
 resource "aws_s3_bucket" "frontend" {
   # バケット名
-  bucket = "${var.project_name}-frontend"
+  bucket = "${var.project_name}-${local.lower_random_hex}"
   # バケットにオブジェクトが入っていて削除を許可するかどうか(true:許可)
   force_destroy = true
   # タグ
@@ -16,7 +16,9 @@ resource "aws_s3_bucket" "frontend" {
 
 # パブリックアクセスのブロック設定
 resource "aws_s3_bucket_public_access_block" "frontend" {
-  bucket                  = aws_s3_bucket.frontend.id
+  # パブリックアクセスブロックを設定するバケット名
+  bucket = aws_s3_bucket.frontend.id
+  # パブリックアクセスのブロック
   block_public_acls       = true
   block_public_policy     = true
   ignore_public_acls      = true
@@ -31,6 +33,7 @@ resource "aws_s3_account_public_access_block" "frontend" {
 
 # バケットポリシー
 resource "aws_s3_bucket_policy" "frontend" {
+  # バケットポリシーを設定するバケットのID
   bucket = aws_s3_bucket.frontend.id
   # CloudFront Distributionからのアクセスのみ許可するポリシーを追加
   policy = data.aws_iam_policy_document.s3_frontend_policy.json
@@ -59,6 +62,7 @@ data "aws_iam_policy_document" "s3_frontend_policy" {
 
 # CORSの設定
 resource "aws_s3_bucket_cors_configuration" "frontend" {
+  # CORを設定するバケットのID
   bucket = aws_s3_bucket.frontend.id
   # CORSルール
   cors_rule {
@@ -71,6 +75,7 @@ resource "aws_s3_bucket_cors_configuration" "frontend" {
 
 # オブジェクトのバージョン管理の設定
 resource "aws_s3_bucket_versioning" "frontend" {
+  # バージョン管理を設定するバケットのID
   bucket = aws_s3_bucket.frontend.id
   # バケットのバージョン管理の設定（Enabled/Disabled）
   versioning_configuration {

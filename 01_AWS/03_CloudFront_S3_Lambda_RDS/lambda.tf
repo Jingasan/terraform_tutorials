@@ -4,8 +4,8 @@
 
 # Lambda関数のzipファイルをデプロイするS3バケットの設定
 resource "aws_s3_bucket" "lambda_bucket" {
-  # S3バケット名
-  bucket = "${var.project_name}-lambdazip-bucket"
+  # バケット名
+  bucket = "${var.project_name}-lambda-${local.lower_random_hex}"
   # バケットの中にオブジェクトが入っていてもTerraformに削除を許可するかどうか(true:許可)
   force_destroy = true
   # タグ
