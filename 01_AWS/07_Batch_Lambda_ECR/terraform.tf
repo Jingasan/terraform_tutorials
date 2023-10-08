@@ -1,6 +1,8 @@
 #============================================================
-# Terraform 基本設定
+# TerraformとProviderの設定
 #============================================================
+
+# Terraformの設定
 terraform {
   # Terraformのバージョン指定
   required_version = ">= 1.3.8"
@@ -19,12 +21,16 @@ terraform {
   # }
 }
 
-
-
-#============================================================
-# クラウドプロバイダの設定
-#============================================================
+# プロバイダ設定
 provider "aws" {
   region  = var.region  # AWSのリージョン
   profile = var.profile # AWSアクセスキーのプロファイル
+}
+
+# ランダムな小文字16進数値の生成
+resource "random_id" "main" {
+  byte_length = 2 # 値の範囲
+}
+locals {
+  lower_random_hex = random_id.main.dec
 }

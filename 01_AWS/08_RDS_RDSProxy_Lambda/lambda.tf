@@ -4,8 +4,8 @@
 
 # Lambda関数のzipファイルをデプロイするS3バケットの設定
 resource "aws_s3_bucket" "lambda_bucket" {
-  # S3バケット名
-  bucket = "${var.project_name}-lambdazip-bucket"
+  # バケット名
+  bucket = "${var.project_name}-lambda-${local.lower_random_hex}"
   # バケットの中にオブジェクトが入っていてもTerraformに削除を許可するかどうか(true:許可)
   force_destroy = true
   # タグ
@@ -37,8 +37,6 @@ resource "aws_lambda_function" "lambda" {
   s3_key    = "lambda.zip"
   # Lambda関数のタイムアウト時間
   timeout = var.lambda_timeout
-  # 作成するLambdaの説明文
-  description = "${var.project_name} lambda function"
   # 環境変数の指定
   environment {
     variables = {
@@ -56,6 +54,8 @@ resource "aws_lambda_function" "lambda" {
     # セキュリティグループ
     security_group_ids = [aws_security_group.rds.id, aws_security_group.rds_app.id]
   }
+  # 作成するLambdaの説明文
+  description = "${var.project_name} lambda function"
   # タグ
   tags = {
     Name = var.project_name
@@ -177,8 +177,6 @@ locals {
 resource "aws_iam_policy" "lambda_policy" {
   # ポリシー名
   name = "${var.project_name}-lambda-iam-policy"
-  # ポリシーの説明文
-  description = "Lambda IAM Policy for ${var.project_name}"
   # ポリシー(どのAWSリソースにどのような操作を許可するか)の定義
   policy = jsonencode({
     Version = "2012-10-17"
@@ -212,6 +210,8 @@ resource "aws_iam_policy" "lambda_policy" {
       }
     ]
   })
+  # ポリシーの説明文
+  description = "Lambda IAM Policy for ${var.project_name}"
   # タグ
   tags = {
     Name = var.project_name
