@@ -1,24 +1,26 @@
 #============================================================
-# グローバル変数の定義（terraform.tfvarsの変数値を受け取る）
+# 環境変数の定義（terraform.tfvarsの変数値を受け取る）
 #============================================================
-
+# プロジェクト名
+variable "project_name" {}
+#============================================================
+# AWS Account
+#============================================================
 # AWSのリージョン
 variable "region" {}
 # AWSアクセスキーのプロファイル
 variable "profile" {}
-# バケット名
-variable "bucket_name" {}
-# ビルドしたLambda関数zipファイルのデプロイ先S3バケット名
-variable "lambda_bucket_name" {}
-# Lambda関数名
-variable "lambda_name" {}
-# IAMロール名
-variable "iam_role_name" {}
-# IAMポリシー名
-variable "iam_policy_name" {}
-# API Gateway名
-variable "api_gateway_name" {}
+#============================================================
+# Lambda
+#============================================================
+# 実行ランタイム（ex: nodejs, python, go, etc.）
+variable "lambda_runtime" {}
+# Lambda関数のタイムアウト時間
+variable "lambda_timeout" {}
+# CloudWatchにログを残す期間（日）
+variable "lambda_cloudwatch_log_retention_in_days" {}
+#============================================================
+# API Gateway
+#============================================================
 # API URLステージ名
-variable "stage_name" {}
-# タグ名
-variable "tag_name" {}
+variable "apigateway_stage_name" {}

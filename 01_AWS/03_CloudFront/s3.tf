@@ -16,7 +16,9 @@ resource "aws_s3_bucket" "frontend" {
 
 # パブリックアクセスのブロック設定
 resource "aws_s3_bucket_public_access_block" "frontend" {
-  bucket                  = aws_s3_bucket.frontend.id
+  # パブリックアクセスブロックを設定するバケット名
+  bucket = aws_s3_bucket.frontend.id
+  # パブリックアクセスのブロック
   block_public_acls       = true
   block_public_policy     = true
   ignore_public_acls      = true
@@ -31,6 +33,7 @@ resource "aws_s3_account_public_access_block" "frontend" {
 
 # バケットポリシー
 resource "aws_s3_bucket_policy" "main" {
+  # バケットポリシーを設定するバケットのID
   bucket = aws_s3_bucket.frontend.id
   # CloudFront Distributionからのアクセスのみ許可するポリシーを追加
   policy = data.aws_iam_policy_document.s3_main_policy.json
@@ -86,10 +89,8 @@ locals {
   dst_dir = "s3://${aws_s3_bucket.frontend.bucket}" # アップロード先
 }
 resource "null_resource" "fileupload" {
-  # S3バケット作成完了後に実行
-  triggers = {
-    trigger = "${aws_s3_bucket.frontend.id}"
-  }
+  # S3バケットの作成後に実行
+  depends_on = [aws_s3_bucket.frontend]
   # ローカルディレクトリにあるWebページをS3バケットにアップロード
   provisioner "local-exec" {
     command = "aws s3 cp ${local.src_dir} ${local.dst_dir} --recursive"

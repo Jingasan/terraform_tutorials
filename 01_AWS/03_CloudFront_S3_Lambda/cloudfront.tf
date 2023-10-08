@@ -27,7 +27,7 @@ resource "aws_cloudfront_distribution" "main" {
     # オリジンID
     origin_id = "S3"
     # S3サービスのドメイン名
-    domain_name = aws_s3_bucket.main.bucket_regional_domain_name
+    domain_name = aws_s3_bucket.frontend.bucket_regional_domain_name
     # OAC を設定
     origin_access_control_id = aws_cloudfront_origin_access_control.main.id
   }
@@ -92,10 +92,10 @@ resource "aws_cloudfront_distribution" "main" {
     }
   }
   # 説明
-  comment = var.tag_name
+  comment = var.project_name
   # タグ
   tags = {
-    Name = var.tag_name
+    Name = var.project_name
   }
 }
 
