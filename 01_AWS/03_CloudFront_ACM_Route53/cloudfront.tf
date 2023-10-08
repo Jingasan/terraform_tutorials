@@ -22,7 +22,7 @@ resource "aws_cloudfront_distribution" "main" {
   }
   # 証明書管理
   viewer_certificate {
-    # CloudFrontのデフォルトの証明書を使用(ACMで発行した証明書に切り替えることも可能)
+    # CloudFrontのデフォルトの証明書を使用するか (true:使用する/false:使用しない)
     cloudfront_default_certificate = false
     # ACM証明書のARN
     acm_certificate_arn = aws_acm_certificate_validation.cert.certificate_arn
