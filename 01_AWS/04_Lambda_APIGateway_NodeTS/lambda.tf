@@ -5,12 +5,12 @@
 # Lambda関数のzipファイルをデプロイするS3バケットの設定
 resource "aws_s3_bucket" "lambda_bucket" {
   # S3バケット名
-  bucket = var.lambda_bucket_name
+  bucket = "${var.project_name}-lambda-${local.lower_random_hex}"
   # バケットの中にオブジェクトが入っていてもTerraformに削除を許可するかどうか(true:許可)
   force_destroy = true
   # タグ
   tags = {
-    Name = var.tag_name
+    Name = var.project_name
   }
 }
 
@@ -25,7 +25,7 @@ resource "aws_lambda_function" "lambda" {
   # 関数のZIPファイルをS3にアップロードした後に実行
   depends_on = [null_resource.lambda_build_upload]
   # 関数名
-  function_name = var.lambda_name
+  function_name = var.project_name
   # 実行環境の指定(ex: nodejs, python, go, etc.)
   runtime = var.lambda_runtime
   # ハンドラの指定
@@ -37,17 +37,17 @@ resource "aws_lambda_function" "lambda" {
   s3_key    = "lambda.zip"
   # Lambda関数のタイムアウト時間
   timeout = var.lambda_timeout
-  # 作成するLambdaの説明文
-  description = var.tag_name
   # 環境変数の指定
   environment {
     variables = {
       ENV_VAL = "Terraform tutorial"
     }
   }
+  # 作成するLambdaの説明文
+  description = var.project_name
   # タグ
   tags = {
-    Name = var.tag_name
+    Name = var.project_name
   }
 }
 
@@ -107,7 +107,7 @@ resource "null_resource" "lambda_update" {
   }
   # Lambda関数を更新
   provisioner "local-exec" {
-    command     = "aws lambda update-function-code --function-name ${var.lambda_name} --s3-bucket ${aws_s3_bucket.lambda_bucket.bucket} --s3-key lambda.zip --publish --no-cli-pager"
+    command     = "aws lambda update-function-code --function-name ${aws_lambda_function.lambda.function_name} --s3-bucket ${aws_s3_bucket.lambda_bucket.bucket} --s3-key lambda.zip --publish --no-cli-pager"
     working_dir = "node"
   }
 }
@@ -120,14 +120,14 @@ resource "aws_cloudwatch_log_group" "lambda" {
   retention_in_days = var.lambda_cloudwatch_log_retention_in_days
   # タグ
   tags = {
-    Name = var.tag_name
+    Name = var.project_name
   }
 }
 
 # IAMロールの設定
 resource "aws_iam_role" "lambda_role" {
   # IAMロール名
-  name = var.lambda_iam_role_name
+  name = "${var.project_name}-lambda-iam-role"
   # IAMロールにポリシーを紐付け
   managed_policy_arns = [
     aws_iam_policy.lambda_policy.arn
@@ -148,16 +148,14 @@ resource "aws_iam_role" "lambda_role" {
   })
   # タグ
   tags = {
-    Name = var.tag_name
+    Name = var.project_name
   }
 }
 
 # IAMロールに紐付けるポリシーの設定
 resource "aws_iam_policy" "lambda_policy" {
   # ポリシー名
-  name = var.lambda_iam_policy_name
-  # ポリシーの説明文
-  description = var.tag_name
+  name = "${var.project_name}-lambda-iam-policy"
   # ポリシー(どのAWSリソースにどのような操作を許可するか)の定義
   policy = jsonencode({
     Version = "2012-10-17"
@@ -177,9 +175,11 @@ resource "aws_iam_policy" "lambda_policy" {
       }
     ]
   })
+  # ポリシーの説明文
+  description = var.project_name
   # タグ
   tags = {
-    Name = var.tag_name
+    Name = var.project_name
   }
 }
 
@@ -198,12 +198,12 @@ output "function_name" {
 # RestAPIの定義
 resource "aws_api_gateway_rest_api" "api" {
   # API Gateway名
-  name = var.apigateway_name
+  name = var.project_name
   # 説明文
-  description = var.tag_name
+  description = var.project_name
   # タグ
   tags = {
-    Name = var.tag_name
+    Name = var.project_name
   }
 }
 
@@ -266,7 +266,7 @@ resource "aws_api_gateway_deployment" "api_gateway" {
     aws_api_gateway_integration.lambda_root,
   ]
   # ステージ名の説明
-  stage_description = var.tag_name
+  stage_description = var.project_name
   # 既存のAPI Gatewayリソースがあった場合に一旦削除してから作り直す設定
   lifecycle {
     create_before_destroy = true

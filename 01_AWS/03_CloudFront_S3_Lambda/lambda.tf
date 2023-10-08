@@ -156,8 +156,6 @@ resource "aws_iam_role" "lambda_role" {
 resource "aws_iam_policy" "lambda_policy" {
   # ポリシー名
   name = "${var.project_name}-lambda-iam-policy"
-  # ポリシーの説明文
-  description = var.project_name
   # ポリシー(どのAWSリソースにどのような操作を許可するか)の定義
   policy = jsonencode({
     Version = "2012-10-17"
@@ -177,6 +175,8 @@ resource "aws_iam_policy" "lambda_policy" {
       }
     ]
   })
+  # ポリシーの説明文
+  description = var.project_name
   # タグ
   tags = {
     Name = var.project_name

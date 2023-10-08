@@ -61,7 +61,7 @@ app.use(
   cors(corsOptions),
   (_req: Request, res: Response, _next: NextFunction) => {
     return res.status(404).json({
-      error: "Not Found",
+      error: "Lambda function is called.",
     });
   }
 );
