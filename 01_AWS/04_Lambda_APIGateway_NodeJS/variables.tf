@@ -11,7 +11,16 @@ variable "region" {}
 # AWSアクセスキーのプロファイル
 variable "profile" {}
 #============================================================
-# WAF
+# Lambda
 #============================================================
-# アクセスを許可するIPのリスト
-variable "waf_allow_ips" {}
+# 実行ランタイム（ex: nodejs, python, go, etc.）
+variable "lambda_runtime" {}
+# Lambda関数のタイムアウト時間
+variable "lambda_timeout" {}
+# CloudWatchにログを残す期間（日）
+variable "lambda_cloudwatch_log_retention_in_days" {}
+#============================================================
+# API Gateway
+#============================================================
+# API URLステージ名
+variable "apigateway_stage_name" {}

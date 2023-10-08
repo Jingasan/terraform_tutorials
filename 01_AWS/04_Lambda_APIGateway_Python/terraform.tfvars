@@ -11,7 +11,16 @@ region = "ap-northeast-1"
 # AWSアクセスキーのプロファイル
 profile = "default"
 #============================================================
-# WAF
+# Lambda
 #============================================================
-# アクセスを許可するIPのリスト
-waf_allow_ips = ["133.201.4.126/32"]
+# 実行ランタイム（ex: nodejs, python, go, etc.）
+lambda_runtime = "python3.8"
+# Lambda関数のタイムアウト時間
+lambda_timeout = 30
+# CloudWatchにログを残す期間（日）
+lambda_cloudwatch_log_retention_in_days = 30
+#============================================================
+# API Gateway
+#============================================================
+# API URLステージ名
+apigateway_stage_name = "dev"

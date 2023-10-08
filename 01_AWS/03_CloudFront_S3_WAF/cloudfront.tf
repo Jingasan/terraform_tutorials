@@ -10,8 +10,8 @@ resource "aws_cloudfront_distribution" "main" {
   default_root_object = "index.html"
   # オリジンの設定
   origin {
-    origin_id   = aws_s3_bucket.main.id
-    domain_name = aws_s3_bucket.main.bucket_regional_domain_name
+    origin_id   = aws_s3_bucket.frontend.id
+    domain_name = aws_s3_bucket.frontend.bucket_regional_domain_name
     # OAC を設定
     origin_access_control_id = aws_cloudfront_origin_access_control.main.id
   }
@@ -22,7 +22,7 @@ resource "aws_cloudfront_distribution" "main" {
   }
   # デフォルトキャッシュビヘイビアの設定
   default_cache_behavior {
-    target_origin_id           = aws_s3_bucket.main.id
+    target_origin_id           = aws_s3_bucket.frontend.id
     viewer_protocol_policy     = "redirect-to-https"
     cached_methods             = ["GET", "HEAD"]
     allowed_methods            = ["GET", "HEAD"]

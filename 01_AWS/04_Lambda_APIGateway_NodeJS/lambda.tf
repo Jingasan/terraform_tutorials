@@ -5,12 +5,12 @@
 # Lambda関数のzipファイルをデプロイするS3バケットの設定
 resource "aws_s3_bucket" "lambda_bucket" {
   # S3バケット名
-  bucket = "terraform-tutorial-lambda-bucket"
+  bucket = "${var.project_name}-lambda-${local.lower_random_hex}"
   # バケットの中にオブジェクトが入っていてもTerraformに削除を許可するかどうか(true:許可)
   force_destroy = true
   # タグ
   tags = {
-    Name = "Terraform検証用"
+    Name = var.project_name
   }
 }
 
@@ -50,9 +50,9 @@ output "lambda_bucket_name" {
 # Lambda関数の設定
 resource "aws_lambda_function" "lambda" {
   # 関数名
-  function_name = "terraform_lambda"
+  function_name = var.project_name
   # 実行環境の指定(ex: nodejs, python, go, etc.)
-  runtime = "nodejs16.x"
+  runtime = var.lambda_runtime
   # ハンドラの指定
   handler = "index.handler"
   # 作成するLambda関数に対して許可するIAMロールの指定
@@ -63,18 +63,18 @@ resource "aws_lambda_function" "lambda" {
   # ソースコードが変更されていたら再デプロイする設定
   source_code_hash = data.archive_file.lambda.output_base64sha256
   # Lambda関数のタイムアウト時間
-  timeout = 30
-  # 作成するLambdaの説明文
-  description = "Terraform検証用のLambda関数"
+  timeout = var.lambda_timeout
   # 環境変数の指定
   environment {
     variables = {
       ENV_VAL = "Terraform tutorial"
     }
   }
+  # 作成するLambdaの説明文
+  description = var.project_name
   # タグ
   tags = {
-    Name = "Terraform検証用"
+    Name = var.project_name
   }
 }
 
@@ -83,17 +83,17 @@ resource "aws_cloudwatch_log_group" "lambda" {
   # CloudWatchロググループ名
   name = "/aws/lambda/${aws_lambda_function.lambda.function_name}"
   # ログを残す期間(日)の指定
-  retention_in_days = 30
+  retention_in_days = var.lambda_cloudwatch_log_retention_in_days
   # タグ
   tags = {
-    Name = "Terraform検証用"
+    Name = var.project_name
   }
 }
 
 # IAMロールの設定
 resource "aws_iam_role" "lambda_role" {
   # IAMロール名
-  name = "terraform_lambda_role"
+  name = "${var.project_name}-lambda-iam-role"
   # IAMロールにポリシーを紐付け
   managed_policy_arns = [
     aws_iam_policy.lambda_policy.arn
@@ -114,16 +114,14 @@ resource "aws_iam_role" "lambda_role" {
   })
   # タグ
   tags = {
-    Name = "Terraform検証用"
+    Name = var.project_name
   }
 }
 
 # IAMロールに紐付けるポリシーの設定
 resource "aws_iam_policy" "lambda_policy" {
   # ポリシー名
-  name = "terraform_lambda_policy"
-  # ポリシーの説明文
-  description = "Terraform検証用"
+  name = "${var.project_name}-lambda-iam-policy"
   # ポリシー(どのAWSリソースにどのような操作を許可するか)の定義
   policy = jsonencode({
     Version = "2012-10-17"
@@ -143,9 +141,11 @@ resource "aws_iam_policy" "lambda_policy" {
       }
     ]
   })
+  # ポリシーの説明文
+  description = var.project_name
   # タグ
   tags = {
-    Name = "Terraform検証用"
+    Name = var.project_name
   }
 }
 
@@ -164,12 +164,12 @@ output "function_name" {
 # RestAPIの定義
 resource "aws_api_gateway_rest_api" "api" {
   # API Gateway名
-  name = "terraform_api_gateway"
+  name = var.project_name
   # 説明文
-  description = "Terraform検証用"
+  description = var.project_name
   # タグ
   tags = {
-    Name = "Terraform検証用"
+    Name = var.project_name
   }
 }
 
@@ -225,14 +225,14 @@ resource "aws_api_gateway_deployment" "api_gateway" {
   # Rest APIの設定ID
   rest_api_id = aws_api_gateway_rest_api.api.id
   # ステージ名
-  stage_name = "dev"
+  stage_name = var.apigateway_stage_name
   # 以下のリソースが生成されてから実行 
   depends_on = [
     aws_api_gateway_integration.lambda,
     aws_api_gateway_integration.lambda_root,
   ]
   # ステージ名の説明
-  stage_description = "Terraform検証用"
+  stage_description = var.project_name
   # 既存のAPI Gatewayリソースがあった場合に一旦削除してから作り直す設定
   lifecycle {
     create_before_destroy = true
