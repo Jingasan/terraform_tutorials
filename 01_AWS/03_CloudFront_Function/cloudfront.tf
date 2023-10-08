@@ -8,6 +8,9 @@ resource "aws_cloudfront_distribution" "main" {
   enabled = true
   # デフォルトルートオブジェクトの設定
   default_root_object = "index.html"
+  # 価格クラス (PriceClass_All/PriceClass_200/PriceClass_100)
+  # https://docs.aws.amazon.com/ja_jp/AmazonCloudFront/latest/DeveloperGuide/PriceClass.html
+  price_class = var.cloudfront_price_class
   # オリジンの設定
   origin {
     origin_id   = aws_s3_bucket.main.id

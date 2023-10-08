@@ -6,6 +6,9 @@
 resource "aws_cloudfront_distribution" "api" {
   # ディストリビューションの有効化
   enabled = true
+  # 価格クラス (PriceClass_All/PriceClass_200/PriceClass_100)
+  # https://docs.aws.amazon.com/ja_jp/AmazonCloudFront/latest/DeveloperGuide/PriceClass.html
+  price_class = var.cloudfront_price_class
   # オリジンの設定
   origin {
     domain_name = "${aws_lambda_function_url.lambda.url_id}.lambda-url.${var.region}.on.aws"

@@ -18,5 +18,5 @@ cloudfront_price_class = "PriceClass_200"
 #============================================================
 # Route53
 #============================================================
-# Route53で取得済みのドメイン名
-route53_domain = "test-3d-bucket.com"
+# Route53で事前に取得済みのドメイン名
+route53_domain = "route53-test-domain.com"

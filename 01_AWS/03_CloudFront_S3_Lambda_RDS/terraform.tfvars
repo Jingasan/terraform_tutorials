@@ -28,6 +28,9 @@ private_subnet_cidrs = {
 #============================================================
 # CloudFront
 #============================================================
+# 価格クラス (PriceClass_All/PriceClass_200/PriceClass_100)
+# https://docs.aws.amazon.com/ja_jp/AmazonCloudFront/latest/DeveloperGuide/PriceClass.html
+cloudfront_price_class = "PriceClass_200"
 # S3オリジンID
 cloudfront_origin_id_s3 = "S3"
 # LambdaオリジンID
