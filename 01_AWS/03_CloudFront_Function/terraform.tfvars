@@ -10,8 +10,3 @@ project_name = "terraform-tutorials"
 region = "ap-northeast-1"
 # AWSアクセスキーのプロファイル
 profile = "default"
-#============================================================
-# S3
-#============================================================
-# バケット名
-s3_bucket_name = "terraform-tutorial-bucket-name"

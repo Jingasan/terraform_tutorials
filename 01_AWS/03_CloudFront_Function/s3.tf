@@ -5,7 +5,7 @@
 # バケット名とタグの設定
 resource "aws_s3_bucket" "main" {
   # バケット名
-  bucket = var.s3_bucket_name
+  bucket = "${var.project_name}-${local.lower_random_hex}"
   # バケットの中にオブジェクトが入っていてもTerraformに削除を許可するかどうか(true:許可)
   force_destroy = true
   # タグ
