@@ -1,45 +1,49 @@
-### S3
+#============================================================
+# S3 - 公開バケット
+#============================================================
 
 # バケット名とタグの設定
-resource "aws_s3_bucket" "main" {
+resource "aws_s3_bucket" "frontend" {
   # バケット名
-  bucket = var.bucket_name
-
+  bucket = "${var.project_name}-${local.lower_random_hex}"
   # バケットの中にオブジェクトが入っていてもTerraformに削除を許可するかどうか(true:許可)
   force_destroy = true
-
   # タグ
   tags = {
-    Name = "Terraform検証用"
+    Name = var.project_name
   }
 }
 
 # パブリックアクセスのブロック設定
-resource "aws_s3_bucket_public_access_block" "main" {
-  bucket                  = aws_s3_bucket.main.id
+resource "aws_s3_bucket_public_access_block" "frontend" {
+  # パブリックアクセスブロックを設定するバケット
+  bucket = aws_s3_bucket.frontend.id
+  # バケットポリシーに基づいてアクセスを許可するため、ブロックを無効化
   block_public_acls       = true
-  block_public_policy     = false # バケットポリシーに基づいてアクセスを許可するため、ブロックを無効化
+  block_public_policy     = false
   ignore_public_acls      = true
-  restrict_public_buckets = false # バケットポリシーに基づいてアクセスを許可するため、ブロックを無効化
+  restrict_public_buckets = false
 }
 
 # 他のAWSアカウントによるバケットアクセスコントロールの設定
-resource "aws_s3_account_public_access_block" "main" {
+resource "aws_s3_account_public_access_block" "frontend" {
+  # 拒否
   block_public_acls   = false
   block_public_policy = false
 }
 
 # バケットポリシー
-resource "aws_s3_bucket_policy" "main" {
-  bucket = aws_s3_bucket.main.id
-  # CloudFront Distributionからのアクセスのみ許可するポリシーを追加
+resource "aws_s3_bucket_policy" "frontend" {
+  # バケットポリシーを設定するバケットのID
+  bucket = aws_s3_bucket.frontend.id
+  # 不特定多数からのアクセスを許可するバケットポリシーを追加
   policy = data.aws_iam_policy_document.s3_main_policy.json
   # ブロックパブリックアクセスの設定がされてからバケットポリシーの設定を行う
   depends_on = [
-    aws_s3_bucket_public_access_block.main,
+    aws_s3_bucket_public_access_block.frontend,
   ]
 }
-# パブリックアクセスを許可するポリシー
+# CloudFront Distributionからのアクセスのみ許可するポリシー
 data "aws_iam_policy_document" "s3_main_policy" {
   statement {
     sid    = "0"
@@ -55,16 +59,16 @@ data "aws_iam_policy_document" "s3_main_policy" {
     ]
     # アクセス先の設定
     resources = [
-      "${aws_s3_bucket.main.arn}",  # S3バケットへのアクセス。
-      "${aws_s3_bucket.main.arn}/*" # S3バケット配下へのアクセス。
+      "${aws_s3_bucket.frontend.arn}",  # S3バケットへのアクセス。
+      "${aws_s3_bucket.frontend.arn}/*" # S3バケット配下へのアクセス。
     ]
   }
 }
 
 # CORSの設定
-resource "aws_s3_bucket_cors_configuration" "main" {
-  bucket = aws_s3_bucket.main.id
-
+resource "aws_s3_bucket_cors_configuration" "frontend" {
+  # CORを設定するバケットのID
+  bucket = aws_s3_bucket.frontend.id
   # CORSルール
   cors_rule {
     allowed_headers = ["*"]   # 許可するリクエストヘッダー
@@ -75,24 +79,25 @@ resource "aws_s3_bucket_cors_configuration" "main" {
 }
 
 # オブジェクトのバージョン管理の設定
-resource "aws_s3_bucket_versioning" "main" {
-  bucket = aws_s3_bucket.main.id
+resource "aws_s3_bucket_versioning" "frontend" {
+  # バージョン管理を設定するバケットのID
+  bucket = aws_s3_bucket.frontend.id
+  # バージョン管理の設定
   versioning_configuration {
     status = "Enabled"
   }
 }
 
-# ローカルで実行するコマンドの設定
+# Webページのアップロード
 locals {
-  src_dir = var.src_dir                         # アップロード対象のディレクトリ
-  dst_dir = "s3://${aws_s3_bucket.main.bucket}" # アップロード先
+  src_dir = "./webpage"                             # アップロード対象のディレクトリ
+  dst_dir = "s3://${aws_s3_bucket.frontend.bucket}" # アップロード先
 }
 resource "null_resource" "fileupload" {
   # S3バケット作成完了後に実行
   triggers = {
-    trigger = "${aws_s3_bucket.main.id}"
+    trigger = "${aws_s3_bucket.frontend.id}"
   }
-
   # ローカルディレクトリにあるWebページをS3バケットにアップロード
   provisioner "local-exec" {
     command = "aws s3 cp ${local.src_dir} ${local.dst_dir} --recursive"
@@ -101,6 +106,5 @@ resource "null_resource" "fileupload" {
 
 # WebサイトURLのターミナル出力
 output "url" {
-  value = "https://${aws_s3_bucket.main.bucket_domain_name}/index.html"
+  value = "https://${aws_s3_bucket.frontend.bucket_domain_name}/index.html"
 }
-
