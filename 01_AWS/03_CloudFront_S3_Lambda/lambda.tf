@@ -37,14 +37,14 @@ resource "aws_lambda_function" "lambda" {
   s3_key    = "lambda.zip"
   # Lambda関数のタイムアウト時間
   timeout = var.lambda_timeout
-  # 作成するLambdaの説明文
-  description = var.project_name
   # 環境変数の指定
   environment {
     variables = {
       ENV_VAL = "Terraform tutorial"
     }
   }
+  # 作成するLambdaの説明文
+  description = var.project_name
   # タグ
   tags = {
     Name = var.project_name
