@@ -1,6 +1,8 @@
-### ECRリポジトリの作成とコンテナイメージのプッシュ
+#============================================================
+# ECR
+#============================================================
 
-# ECRのリポジトリの設定
+# ECRの作成
 resource "aws_ecr_repository" "main" {
   # リポジトリ名
   name = var.image_name
@@ -18,7 +20,7 @@ resource "aws_ecr_repository" "main" {
   force_delete = true
   # タグ
   tags = {
-    Name = "Terraform検証用"
+    Name = var.project_name
   }
 }
 
@@ -57,7 +59,7 @@ resource "null_resource" "main" {
   }
   # コンテナのビルド
   provisioner "local-exec" {
-    command = "docker build -t ${var.image_name}:latest ${var.dockerfile_dir}"
+    command = "docker build -t ${var.image_name}:latest src"
   }
   # コンテナ名の変更
   provisioner "local-exec" {

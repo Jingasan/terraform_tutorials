@@ -69,7 +69,7 @@ app.post("/job", async (_req: Request, res: Response, _next: NextFunction) => {
   };
   const response1 = await submitJobCommand(input1);
   if (!response1 || !response1.jobId) {
-    return res.status(503).json("Internal Server Error");
+    return res.status(500).json("Internal Server Error");
   }
   // ジョブ２の送信
   const input2: Batch.SubmitJobCommandInput = {
@@ -88,7 +88,7 @@ app.post("/job", async (_req: Request, res: Response, _next: NextFunction) => {
   };
   const response2 = await submitJobCommand(input2);
   if (!response2 || !response2.jobId) {
-    return res.status(503).json("Internal Server Error");
+    return res.status(500).json("Internal Server Error");
   }
   // ジョブ３の送信
   const input3: Batch.SubmitJobCommandInput = {
@@ -107,7 +107,7 @@ app.post("/job", async (_req: Request, res: Response, _next: NextFunction) => {
   };
   const response3 = await submitJobCommand(input3);
   if (!response3 || !response3.jobId) {
-    return res.status(503).json("Internal Server Error");
+    return res.status(500).json("Internal Server Error");
   }
   // レスポンス
   return res
@@ -123,12 +123,12 @@ app.post("/job", async (_req: Request, res: Response, _next: NextFunction) => {
 app.delete("/job", async (req: Request, res: Response, _next: NextFunction) => {
   const jobId = String(req.query?.jobId); // キャンセルするジョブID
   if (!jobId) {
-    return res.status(503).json("Internal Server Error");
+    return res.status(500).json("Internal Server Error");
   }
   // 送信したジョブのキャンセル
   const response = await cancelJobCommand(jobId);
   if (!response) {
-    return res.status(503).json("Internal Server Error");
+    return res.status(500).json("Internal Server Error");
   }
   return res.status(200).json("OK");
 });
