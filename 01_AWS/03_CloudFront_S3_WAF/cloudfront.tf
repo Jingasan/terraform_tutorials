@@ -42,7 +42,7 @@ resource "aws_cloudfront_distribution" "main" {
     }
   }
   # WAFのWebACLの適用
-  web_acl_id = aws_wafv2_web_acl.web_acl.arn
+  web_acl_id = var.waf_used ? "${aws_wafv2_web_acl.web_acl.arn}" : ""
   # 説明
   comment = var.project_name
   # タグ

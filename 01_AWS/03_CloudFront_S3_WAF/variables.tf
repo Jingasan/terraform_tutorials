@@ -19,5 +19,7 @@ variable "cloudfront_price_class" {}
 #============================================================
 # WAF
 #============================================================
+# WAFを利用するか (true/false)
+variable "waf_used" {}
 # アクセスを許可するIPのリスト
 variable "waf_allow_ips" {}
