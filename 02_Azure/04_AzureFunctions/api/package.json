@@ -2,10 +2,10 @@
   "name": "api",
   "version": "1.0.0",
   "description": "",
+  "type": "module",
   "main": "index.js",
   "scripts": {
-    "prebuild": "rm -rf dist/index.js",
-    "build": "tsx esbuild.config.ts"
+    "build": "tsc"
   },
   "keywords": [],
   "author": "",
@@ -17,12 +17,11 @@
     "@types/node": "^20.6.3",
     "@types/source-map-support": "^0.5.7",
     "azure-functions-core-tools": "^4.0.5348",
-    "esbuild": "^0.19.3",
-    "tsx": "^3.12.10",
     "typescript": "^5.2.2"
   },
   "dependencies": {
     "@azure/functions": "^3.5.1",
+    "@types/aws-lambda": "^8.10.125",
     "@vendia/serverless-express": "^4.10.4",
     "azure-function-log-intercept": "^1.1.3",
     "cors": "^2.8.5",
