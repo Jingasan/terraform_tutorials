@@ -4,7 +4,6 @@ import cors from "cors";
 import bodyParser from "body-parser";
 import * as sourceMapSupport from "source-map-support";
 import * as RDSSigner from "@aws-sdk/rds-signer";
-import * as PG from "pg";
 import * as Sequelize from "sequelize";
 sourceMapSupport.install();
 const app: Application = express();
@@ -57,7 +56,6 @@ const initRDSProxyConnection = async (): Promise<
         host: rdsProxyHostname, // RDS Proxyホスト名
         port: rdsPort, // RDSポート番号
         dialect: "postgres",
-        dialectModule: PG,
         dialectOptions: {
           ssl: {
             rejectUnauthorized: false,

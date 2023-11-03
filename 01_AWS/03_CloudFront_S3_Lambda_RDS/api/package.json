@@ -2,23 +2,22 @@
   "name": "node",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "type": "module",
+  "main": "dist/index.mjs",
   "scripts": {
     "prebuild": "rm -rf dist",
-    "build": "tsx esbuild.config.ts"
+    "build": "tsc"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "@types/aws-lambda": "^8.10.119",
-    "@types/cors": "^2.8.13",
-    "@types/express": "^4.17.17",
-    "@types/node": "^20.5.8",
+    "@types/aws-lambda": "^8.10.125",
+    "@types/cors": "^2.8.15",
+    "@types/express": "^4.17.20",
+    "@types/node": "^20.8.10",
     "@types/pg": "^8.10.2",
-    "@types/source-map-support": "^0.5.7",
-    "esbuild": "^0.17.19",
-    "tsx": "^3.12.8",
+    "@types/source-map-support": "^0.5.9",
     "typescript": "^5.2.2"
   },
   "dependencies": {

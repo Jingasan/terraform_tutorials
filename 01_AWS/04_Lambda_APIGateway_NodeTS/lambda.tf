@@ -97,7 +97,7 @@ resource "null_resource" "lambda_update" {
   # ソースコードに差分があった場合にのみ実行
   triggers = {
     code_diff = join("", [
-      for file in fileset("node/src", "{*.ts}")
+      for file in fileset("node/src", "{*.mts}")
       : filebase64("node/src/${file}")
     ])
     package_diff = join("", [
