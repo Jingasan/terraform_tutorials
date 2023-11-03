@@ -133,10 +133,10 @@ resource "aws_batch_job_definition" "job_definition" {
     "FARGATE",
   ]
   # 実行タイムアウト設定(Default:タイムアウトなし)
-  # timeout {
-  #   # 未完了のジョブを強制終了するまでの時間[sec](Minimum:60)
-  #   attempt_duration_seconds = 60
-  # }
+  timeout {
+    # 未完了のジョブを強制終了するまでの時間[sec](Minimum:60)
+    attempt_duration_seconds = 259200
+  }
   # コンテナの設定
   # https://docs.aws.amazon.com/batch/latest/APIReference/API_RegisterJobDefinition.html
   container_properties = jsonencode({

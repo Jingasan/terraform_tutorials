@@ -27,7 +27,7 @@ variable "ecr_docker_image_name" {}
 #============================================================
 # Batch
 #============================================================
-# コンピューティング環境 - 最大vCPU
+# コンピューティング環境 - 最大vCPU数（ジョブの同時実行数=最大vCPU数/ジョブ1つのvCPU数）
 variable "batch_max_vcpus" {}
 # CloudWatchにログを残す期間（日）
 variable "batch_cloudwatch_log_retention_in_days" {}
