@@ -4,7 +4,7 @@ import cors from "cors";
 import bodyParser from "body-parser";
 import * as sourceMapSupport from "source-map-support";
 import * as RDSSigner from "@aws-sdk/rds-signer";
-import * as PG from "pg";
+import PG from "pg";
 sourceMapSupport.install();
 const app: Application = express();
 // リクエストボディのパース用設定
