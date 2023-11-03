@@ -29,7 +29,7 @@ resource "aws_lambda_function" "lambda" {
   # 実行環境の指定(ex: nodejs, python, go, etc.)
   runtime = var.lambda_runtime
   # ハンドラの指定
-  handler = "index.handler"
+  handler = "dist/index.handler"
   # 作成するLambda関数に対して許可するIAMロールの指定
   role = aws_iam_role.lambda_role.arn
   # Lambda関数のコード取得元S3バケットとパス
@@ -58,7 +58,7 @@ resource "null_resource" "lambda_build_upload" {
   # ソースコードに差分があった場合に実行
   triggers = {
     code_diff = join("", [
-      for file in fileset("node/src", "{*.ts}")
+      for file in fileset("node/src", "{*.mts}")
       : filebase64("node/src/${file}")
     ])
     package_diff = join("", [
@@ -80,12 +80,12 @@ resource "null_resource" "lambda_build_upload" {
   }
   # Lambda関数のZIP圧縮
   provisioner "local-exec" {
-    command     = "zip lambda.zip index.js"
-    working_dir = "node/dist"
+    command     = "zip -r lambda.zip dist node_modules"
+    working_dir = "node"
   }
   # S3アップロード
   provisioner "local-exec" {
-    command     = "aws s3 cp ./dist/lambda.zip s3://${aws_s3_bucket.lambda_bucket.bucket}/lambda.zip"
+    command     = "aws s3 cp lambda.zip s3://${aws_s3_bucket.lambda_bucket.bucket}/lambda.zip"
     working_dir = "node"
   }
 }
