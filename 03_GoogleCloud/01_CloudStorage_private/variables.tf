@@ -9,4 +9,4 @@ variable "region" {}
 # Cloud Storage
 #============================================================
 # ストレージクラス
-variable "cloud_storage_storage_class" {}
+variable "gcs_storage_class" {}

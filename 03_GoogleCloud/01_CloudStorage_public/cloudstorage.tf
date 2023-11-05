@@ -6,12 +6,10 @@
 resource "google_storage_bucket" "bucket" {
   # バケット名
   name = var.project_id
-  # プロジェクトID
-  project = var.project_id
   # ロケーション
   location = var.region
   # ストレージクラス
-  storage_class = var.cloud_storage_storage_class
+  storage_class = var.gcs_storage_class
   # パブリックアクセスの防止(enforced:パブリックアクセスを防止(default)/inherited:パブリックアクセスを許可)
   public_access_prevention = "inherited"
   # アクセス制御の設定(true:バケットレベルでの均一なアクセス制御(default)/false:オブジェクトレベル(ACL)でのアクセス制御)

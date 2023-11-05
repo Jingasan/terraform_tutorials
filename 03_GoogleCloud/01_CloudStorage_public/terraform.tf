@@ -22,5 +22,6 @@ terraform {
 
 # プロバイダ設定
 provider "google" {
-  region = var.region # デプロイ先のリージョン
+  region  = var.region     # デプロイ先のリージョン
+  project = var.project_id # プロジェクトID
 }

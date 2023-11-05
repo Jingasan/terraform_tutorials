@@ -7,4 +7,4 @@ region = "asia-northeast1"
 # Cloud Storage
 #============================================================
 # ストレージクラス
-cloud_storage_storage_class = "Standard"
+gcs_storage_class = "Standard"
