@@ -3,9 +3,10 @@
 #============================================================
 
 # 関数コード用バケットの作成
+data "google_project" "project" {}
 resource "google_storage_bucket" "gcf" {
   # バケット名
-  name = "${var.project_id}-gcf-source"
+  name = "gcf-v2-sources-${data.google_project.project.number}-${var.region}"
   # プロジェクトID
   project = var.project_id
   # ロケーション
