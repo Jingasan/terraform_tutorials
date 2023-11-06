@@ -71,7 +71,6 @@ resource "google_cloudfunctions2_function" "gcf" {
     }
     # ビルド時の環境変数
     environment_variables = {
-      "ENV_NAME" = "ENV_VALUE"
     }
   }
   # サービス設定
@@ -90,7 +89,9 @@ resource "google_cloudfunctions2_function" "gcf" {
     max_instance_request_concurrency = var.gcf_max_instance_request_concurrency
     # 関数実行時の環境変数
     environment_variables = {
-      "ENV_NAME" = "ENV_VALUE"
+      "PROJECT_ID"  = var.project_id
+      "BUCKET"      = google_storage_bucket.bucket.name
+      "CREDENTIALS" = base64decode(google_service_account_key.key.private_key)
     }
   }
   # 関数の説明文
