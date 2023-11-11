@@ -52,18 +52,6 @@ resource "aws_cognito_user_pool" "user_pool" {
       sms_message = "{username}様<br><br>初期パスワードは{####}です。<br>初回ログイン後にパスワード変更が必要です。"
     }
   }
-  # 追加のカスタム属性(最大50個まで)
-  schema {
-    name                     = "rank"   # 属性名(「custom:属性名」で利用する)
-    attribute_data_type      = "String" # データ型
-    developer_only_attribute = false    # ユーザーによる登録を許可するか false:許可/true:拒否
-    mutable                  = true     # 可変か true:可変
-    required                 = false    # 必須か true:必須
-    string_attribute_constraints {      # 文字数制限
-      min_length = "1"
-      max_length = "2"
-    }
-  }
   # ユーザーの検証(Confirm)方法(email/phone_number)
   auto_verified_attributes = ["email"]
   # メッセージ送信設定
@@ -166,22 +154,14 @@ resource "aws_cognito_user_pool_domain" "user_pool" {
   user_pool_id = aws_cognito_user_pool.user_pool.id
 }
 
-# ユーザーの作成
-resource "aws_cognito_user" "user" {
-  # 作成先のユーザープールID
-  user_pool_id = aws_cognito_user_pool.user_pool.id
-  # ユーザー名
-  username = "氏名"
-  # 属性
-  attributes = {
-    rank           = "A1"              # カスタム属性
-    email          = "xxxxx@gmail.com" # メールアドレス
-    email_verified = true              # メールアドレス検証済み
-  }
-  # ユーザーの有効化
-  enabled = true
-  # 一時パスワード(passwordと同時設定不可)
-  temporary_password = "password"
-  # 永続パスワード(temporary_password と同時設定不可)
-  # password = "password"
+# ユーザープールIDの表示
+output "pool_id" {
+  description = "ユーザープールID"
+  value       = aws_cognito_user_pool.user_pool.id
+}
+
+# アプリケーションクライアントIDの表示
+output "client_id" {
+  description = "アプリケーションクライアントID"
+  value       = aws_cognito_user_pool_client.user_pool.id
 }
