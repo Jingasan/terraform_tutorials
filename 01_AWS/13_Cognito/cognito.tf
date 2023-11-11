@@ -61,10 +61,10 @@ resource "aws_cognito_user_pool" "user_pool" {
     required                 = false    # 必須か true:必須
     string_attribute_constraints {      # 文字数制限
       min_length = "1"
-      max_length = "4"
+      max_length = "2"
     }
   }
-  # ユーザーの検証(Confirm)方法
+  # ユーザーの検証(Confirm)方法(email/phone_number)
   auto_verified_attributes = ["email"]
   # メッセージ送信設定
   email_configuration {
@@ -75,7 +75,7 @@ resource "aws_cognito_user_pool" "user_pool" {
   }
   # ユーザーの属性情報更新の設定
   user_attribute_update_settings {
-    # 更新するために認証が必要な属性
+    # 更新するために認証が必要な属性(email/phone_number)
     attributes_require_verification_before_update = ["email"]
   }
   # 検証メッセージのテンプレート
