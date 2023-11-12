@@ -13,6 +13,7 @@
   "license": "ISC",
   "devDependencies": {
     "@types/aws-lambda": "^8.10.111",
+    "@types/cookie-session": "^2.0.47",
     "@types/cors": "^2.8.13",
     "@types/express": "^4.17.17",
     "@types/node": "^18.14.1",
@@ -22,6 +23,7 @@
   "dependencies": {
     "@aws-sdk/client-cognito-identity-provider": "^3.449.0",
     "@vendia/serverless-express": "^4.10.1",
+    "cookie-session": "^2.0.0",
     "cors": "^2.8.5",
     "express": "^4.18.2",
     "source-map-support": "^0.5.21"

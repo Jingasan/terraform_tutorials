@@ -23,7 +23,10 @@ export class CognitoClient {
     username: string,
     email: string,
     password: string
-  ): Promise<Cognito.SignUpCommandOutput | false> => {
+  ): Promise<{
+    result: boolean;
+    output: Cognito.SignUpCommandOutput | string;
+  }> => {
     try {
       const command = new Cognito.SignUpCommand({
         ClientId: clientId,
@@ -32,10 +35,13 @@ export class CognitoClient {
         UserAttributes: [{ Name: "email", Value: email }],
       });
       const res = await this.cognitoClient.send(command);
-      return res;
+      return { result: true, output: res };
     } catch (err) {
-      console.error(err);
-      return false;
+      console.error((err as Cognito.InternalErrorException).name);
+      return {
+        result: false,
+        output: (err as Cognito.InternalErrorException).name,
+      };
     }
   };
   /**
@@ -49,7 +55,10 @@ export class CognitoClient {
     userPoolClientId: string,
     username: string,
     confirmationCode: string
-  ): Promise<boolean> => {
+  ): Promise<{
+    result: boolean;
+    output: string;
+  }> => {
     try {
       const command = new Cognito.ConfirmSignUpCommand({
         ClientId: userPoolClientId,
@@ -57,10 +66,13 @@ export class CognitoClient {
         ConfirmationCode: confirmationCode,
       });
       await this.cognitoClient.send(command);
-      return true;
+      return { result: true, output: "" };
     } catch (err) {
-      console.error(err);
-      return false;
+      console.error((err as Cognito.InternalErrorException).name);
+      return {
+        result: false,
+        output: (err as Cognito.InternalErrorException).name,
+      };
     }
   };
   /**
@@ -75,7 +87,10 @@ export class CognitoClient {
     clientId: string,
     username: string,
     password: string
-  ): Promise<Cognito.AdminInitiateAuthCommandOutput | false> => {
+  ): Promise<{
+    result: boolean;
+    output: Cognito.AdminInitiateAuthCommandOutput | string;
+  }> => {
     try {
       const command = new Cognito.InitiateAuthCommand({
         ClientId: clientId,
@@ -84,10 +99,13 @@ export class CognitoClient {
         AuthParameters: { USERNAME: username, PASSWORD: password },
       });
       const res = await this.cognitoClient.send(command);
-      return res;
+      return { result: true, output: res };
     } catch (err) {
       console.error((err as Cognito.InternalErrorException).name);
-      return false;
+      return {
+        result: false,
+        output: (err as Cognito.InternalErrorException).name,
+      };
     }
   };
   /**
@@ -101,7 +119,7 @@ export class CognitoClient {
     previousPassword: string,
     proposedPassword: string,
     accessToken: string
-  ) => {
+  ): Promise<{ result: boolean; output: string }> => {
     try {
       const command = new Cognito.ChangePasswordCommand({
         PreviousPassword: previousPassword,
@@ -109,27 +127,13 @@ export class CognitoClient {
         AccessToken: accessToken,
       });
       await this.cognitoClient.send(command);
-      return true;
+      return { result: true, output: "" };
     } catch (err) {
       console.error((err as Cognito.InternalErrorException).name);
-      return false;
-    }
-  };
-  /**
-   * ユーザーの削除
-   * @param accessToken アクセストークン
-   * @returns true:成功/false:失敗
-   */
-  public deleteUser = async (accessToken: string): Promise<boolean> => {
-    try {
-      const command = new Cognito.DeleteUserCommand({
-        AccessToken: accessToken,
-      });
-      await this.cognitoClient.send(command);
-      return true;
-    } catch (err) {
-      console.error((err as Cognito.InternalErrorException).name);
-      return false;
+      return {
+        result: false,
+        output: (err as Cognito.InternalErrorException).name,
+      };
     }
   };
   /**
@@ -137,16 +141,43 @@ export class CognitoClient {
    * @param accessToken サインイン中のユーザーのアクセストークン
    * @returns true:成功/false:失敗
    */
-  public globalSignOut = async (accessToken: string): Promise<boolean> => {
+  public globalSignOut = async (
+    accessToken: string
+  ): Promise<{ result: boolean; output: string }> => {
     try {
       const command = new Cognito.GlobalSignOutCommand({
         AccessToken: accessToken,
       });
       await this.cognitoClient.send(command);
-      return true;
+      return { result: true, output: "" };
     } catch (err) {
       console.error((err as Cognito.InternalErrorException).name);
-      return false;
+      return {
+        result: false,
+        output: (err as Cognito.InternalErrorException).name,
+      };
+    }
+  };
+  /**
+   * ユーザーの削除
+   * @param accessToken アクセストークン
+   * @returns true:成功/false:失敗
+   */
+  public deleteUser = async (
+    accessToken: string
+  ): Promise<{ result: boolean; output: string }> => {
+    try {
+      const command = new Cognito.DeleteUserCommand({
+        AccessToken: accessToken,
+      });
+      await this.cognitoClient.send(command);
+      return { result: true, output: "" };
+    } catch (err) {
+      console.error((err as Cognito.InternalErrorException).name);
+      return {
+        result: false,
+        output: (err as Cognito.InternalErrorException).name,
+      };
     }
   };
 }
