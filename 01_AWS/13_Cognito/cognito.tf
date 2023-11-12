@@ -83,7 +83,7 @@ resource "aws_cognito_user_pool" "user_pool" {
     # 検証オプション
     # CONFIRM_WITH_CODE:検証コードに検証
     # CONFIRM_WITH_LINK:検証用リンク押下による検証
-    default_email_option = "CONFIRM_WITH_CODE"
+    default_email_option = "CONFIRM_WITH_LINK"
     # 検証コード送信メールのタイトル(検証コードによる検証の場合)
     email_subject = "[${var.project_name}] ユーザー登録完了"
     # 検証コード送信メールの本文(検証コードによる検証の場合)
@@ -171,7 +171,7 @@ resource "aws_cognito_user" "user" {
   # 作成先のユーザープールID
   user_pool_id = aws_cognito_user_pool.user_pool.id
   # ユーザー名
-  username = "氏名"
+  username = "user"
   # 属性
   attributes = {
     rank           = "A1"              # カスタム属性
@@ -184,4 +184,16 @@ resource "aws_cognito_user" "user" {
   temporary_password = "password"
   # 永続パスワード(temporary_password と同時設定不可)
   # password = "password"
+}
+
+# ユーザープールID
+output "user_pool_id" {
+  description = "ユーザープールID"
+  value       = aws_cognito_user_pool.user_pool.id
+}
+
+# ユーザープールクライアントID
+output "user_pool_client_id" {
+  description = "ユーザープールクライアントID"
+  value       = aws_cognito_user_pool_client.user_pool.id
 }
