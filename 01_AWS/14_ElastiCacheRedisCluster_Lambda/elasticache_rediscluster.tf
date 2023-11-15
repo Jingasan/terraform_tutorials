@@ -22,10 +22,12 @@ resource "aws_elasticache_replication_group" "redis" {
   parameter_group_name = var.elasticache_parameter_group_name
   # ノードのタイプ(最小インスタンスの場合：cache.t2.micro)
   node_type = var.elasticache_node_type
-  # シャード数
+  # シャード数(1-500個の値を指定)
   num_node_groups = var.elasticache_num_node_groups
-  # レプリカ数
+  # レプリカ数(0-5個の値を指定)
   replicas_per_node_group = var.elasticache_replicas_per_node_group
+  # データ階層化(ノードタイプr6gd使用時のみ有効)
+  data_tiering_enabled = false
   # ネットワークタイプ
   network_type = "ipv4"
   # IPタイプの検出

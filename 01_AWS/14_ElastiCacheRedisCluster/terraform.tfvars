@@ -38,9 +38,9 @@ elasticache_port = 6379
 elasticache_parameter_group_name = "default.redis7.cluster.on"
 # ノードのタイプ(最小インスタンスの場合：cache.t2.micro)
 elasticache_node_type = "cache.t2.micro"
-# シャード数
+# シャード数(1-500個の値を指定)
 elasticache_num_node_groups = 2
-# レプリカ数
+# レプリカ数(0-5個の値を指定)
 elasticache_replicas_per_node_group = 1
 # バックアップ保持期間(日)
 elasticache_snapshot_retention_limit = 1

@@ -32,9 +32,9 @@ variable "elasticache_port" {}
 variable "elasticache_parameter_group_name" {}
 # ノードのタイプ(最小インスタンスの場合：cache.t2.micro)
 variable "elasticache_node_type" {}
-# シャード数
+# シャード数(1-500個の値を指定)
 variable "elasticache_num_node_groups" {}
-# レプリカ数
+# レプリカ数(0-5個の値を指定)
 variable "elasticache_replicas_per_node_group" {}
 # バックアップ保持期間(日)
 variable "elasticache_snapshot_retention_limit" {}
