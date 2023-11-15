@@ -11,7 +11,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 // CORS
 app.use(cors());
-// Redisクラスター接続の初期化
+// Redis接続の初期化(クラスターモード有効の場合)
 const redisClient = new Redis.Cluster(
   [
     {
@@ -26,6 +26,12 @@ const redisClient = new Redis.Cluster(
     redisOptions: { tls: {} },
   }
 );
+// Redis接続の初期化(クラスターモード無効の場合)
+// const redisClient = new Redis({
+//   host: String(process.env.REDIS_ENDPOINT), // Redisのプライマリエンドポイント
+//   port: Number(process.env.REDIS_PORT), // Redisのポート番号
+//   tls: {}, // ElastiCache Redisにおける転送中の暗号化(TLS通信)の有効化
+// });
 // POST
 app.post("/", async (req, res) => {
   const body = req.body;
