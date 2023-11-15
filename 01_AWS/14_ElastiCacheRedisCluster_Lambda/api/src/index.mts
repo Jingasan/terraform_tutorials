@@ -15,6 +15,7 @@ app.use(cors());
 const redisClient = new Redis.Cluster(
   [
     {
+      // Redisクラスターの設定エンドポイント
       host: String(process.env.REDIS_ENDPOINT),
       port: Number(process.env.REDIS_PORT),
     },
