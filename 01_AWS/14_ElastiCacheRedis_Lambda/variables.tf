@@ -42,3 +42,12 @@ variable "elasticache_snapshot_retention_limit" {}
 variable "elasticache_snapshot_window" {}
 # メンテナンス期間
 variable "elasticache_maintenance_window" {}
+#============================================================
+# Lambda
+#============================================================
+# 実行ランタイム（ex: nodejs, python, go, etc.）
+variable "lambda_runtime" {}
+# Lambda関数のタイムアウト時間
+variable "lambda_timeout" {}
+# CloudWatchにログを残す期間（日）
+variable "lambda_cloudwatch_log_retention_in_days" {}

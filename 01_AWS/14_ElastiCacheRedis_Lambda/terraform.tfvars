@@ -2,54 +2,58 @@
 # 環境変数の定義
 #============================================================
 # プロジェクト名
-variable "project_name" {}
+project_name = "terraform-tutorials"
 #============================================================
 # AWS Account
 #============================================================
 # AWSのリージョン
-variable "region" {}
+region = "ap-northeast-1"
 # AWSアクセスキーのプロファイル
-variable "profile" {}
+profile = "default"
 #============================================================
 # Network
 #============================================================
 # VPC CIDR
-variable "vpc_cidr" {}
+vpc_cidr = "10.0.0.0/16"
 # パブリックサブネット CIDRS
-variable "public_subnet_cidrs" {}
+public_subnet_cidrs = {
+  "a" = "10.0.0.0/24",
+  "c" = "10.0.1.0/24"
+}
 # プライベートサブネット CIDRS
-variable "private_subnet_cidrs" {}
+private_subnet_cidrs = {
+  "a" = "10.0.2.0/24",
+  "c" = "10.0.3.0/24"
+}
 #============================================================
 # ElastiCache for Redis
 #============================================================
 # エンジン(redisのみ有効)
-variable "elasticache_engine" {}
+elasticache_engine = "redis"
 # エンジンのバージョン
-variable "elasticache_engine_version" {}
+elasticache_engine_version = "7.1"
 # ポート番号
-variable "elasticache_port" {}
-# パラメータグループ
-variable "elasticache_parameter_group_name" {}
+elasticache_port = 6379
+# パラメータグループ(クラスターモード有効用のパラメータグループを指定)
+elasticache_parameter_group_name = "default.redis7"
 # ノードのタイプ(最小インスタンスの場合：cache.t2.micro)
-variable "elasticache_node_type" {}
-# シャード数(1-500個の値を指定)
-variable "elasticache_num_node_groups" {}
+elasticache_node_type = "cache.t2.micro"
 # レプリカ数(0-5個の値を指定)
-variable "elasticache_replicas_per_node_group" {}
+elasticache_replicas_per_node_group = 1
 # Redisの接続パスワード(16-128文字で指定)
-variable "elasticache_auth_token" {}
+elasticache_auth_token = "default_user_password"
 # バックアップ保持期間(日)
-variable "elasticache_snapshot_retention_limit" {}
+elasticache_snapshot_retention_limit = 1
 # バックアップ時間(UTC)
-variable "elasticache_snapshot_window" {}
+elasticache_snapshot_window = "00:00-01:00"
 # メンテナンス期間
-variable "elasticache_maintenance_window" {}
+elasticache_maintenance_window = "tue:03:00-tue:04:00"
 #============================================================
 # Lambda
 #============================================================
 # 実行ランタイム（ex: nodejs, python, go, etc.）
-variable "lambda_runtime" {}
+lambda_runtime = "nodejs18.x"
 # Lambda関数のタイムアウト時間
-variable "lambda_timeout" {}
+lambda_timeout = 30
 # CloudWatchにログを残す期間（日）
-variable "lambda_cloudwatch_log_retention_in_days" {}
+lambda_cloudwatch_log_retention_in_days = 30

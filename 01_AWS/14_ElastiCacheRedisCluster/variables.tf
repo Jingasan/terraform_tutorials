@@ -36,6 +36,8 @@ variable "elasticache_node_type" {}
 variable "elasticache_num_node_groups" {}
 # レプリカ数(0-5個の値を指定)
 variable "elasticache_replicas_per_node_group" {}
+# Redisの接続パスワード(16-128文字で指定)
+variable "elasticache_auth_token" {}
 # バックアップ保持期間(日)
 variable "elasticache_snapshot_retention_limit" {}
 # バックアップ時間(UTC)

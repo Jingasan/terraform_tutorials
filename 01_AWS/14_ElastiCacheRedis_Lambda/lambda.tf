@@ -41,7 +41,7 @@ resource "aws_lambda_function" "lambda" {
   environment {
     variables = {
       # ElastiCache Redis Endpoint
-      REDIS_ENDPOINT = aws_elasticache_replication_group.redis.configuration_endpoint_address
+      REDIS_ENDPOINT = aws_elasticache_replication_group.redis.primary_endpoint_address
       # ElastiCache Redis Port
       REDIS_PORT = aws_elasticache_replication_group.redis.port
       # Redisの接続パスワード(16-128文字で指定)

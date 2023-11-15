@@ -24,6 +24,8 @@ resource "aws_elasticache_replication_group" "redis" {
   node_type = var.elasticache_node_type
   # レプリカ数(0-5個の値を指定)
   replicas_per_node_group = var.elasticache_replicas_per_node_group
+  # Redisの接続パスワード(16-128文字で指定)
+  auth_token = var.elasticache_auth_token
   # データ階層化(ノードタイプr6gd使用時のみ有効)
   data_tiering_enabled = false
   # ネットワークタイプ

@@ -2,7 +2,7 @@
 # ElastiCache for Redis
 #============================================================
 
-# Redisクラスターの作成
+# クラスターモード無効Redisの作成
 resource "aws_elasticache_replication_group" "redis" {
   # クラスターの名前
   replication_group_id = var.project_name
@@ -22,8 +22,6 @@ resource "aws_elasticache_replication_group" "redis" {
   parameter_group_name = var.elasticache_parameter_group_name
   # ノードのタイプ(最小インスタンスの場合：cache.t2.micro)
   node_type = var.elasticache_node_type
-  # シャード数(1-500個の値を指定)
-  num_node_groups = var.elasticache_num_node_groups
   # レプリカ数(0-5個の値を指定)
   replicas_per_node_group = var.elasticache_replicas_per_node_group
   # データ階層化(ノードタイプr6gd使用時のみ有効)
@@ -127,8 +125,14 @@ resource "aws_security_group_rule" "elasticache_redis_egress_all" {
   description = "${var.project_name} elasticache redis sgr"
 }
 
-# 設定エンドポイント(ElastiCache RedisClusterの接続エンドポイント)
-output "configuration_endpoint_address" {
-  description = "Endpoint"
-  value       = aws_elasticache_replication_group.redis.configuration_endpoint_address
+# プライマリエンドポイント(ElastiCacheクラスターモード無効RedisのRead/Write用エンドポイント)
+output "primary_endpoint_address" {
+  description = "Primary Endpoint"
+  value       = aws_elasticache_replication_group.redis.primary_endpoint_address
+}
+
+# 読み取り専用エンドポイント(ElastiCacheクラスターモード無効RedisのRead専用エンドポイント)
+output "reader_endpoint_address" {
+  description = "Reader Endpoint"
+  value       = aws_elasticache_replication_group.redis.reader_endpoint_address
 }

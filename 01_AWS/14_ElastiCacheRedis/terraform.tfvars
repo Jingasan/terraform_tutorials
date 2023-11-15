@@ -34,12 +34,14 @@ elasticache_engine = "redis"
 elasticache_engine_version = "7.1"
 # ポート番号
 elasticache_port = 6379
-# パラメータグループ
+# パラメータグループ(クラスターモード無効用のパラメータグループを指定)
 elasticache_parameter_group_name = "default.redis7"
 # ノードのタイプ(最小インスタンスの場合：cache.t2.micro)
 elasticache_node_type = "cache.t2.micro"
 # レプリカ数(0-5個の値を指定)
 elasticache_replicas_per_node_group = 1
+# Redisの接続パスワード(16-128文字で指定)
+elasticache_auth_token = "default_user_password"
 # バックアップ保持期間(日)
 elasticache_snapshot_retention_limit = 1
 # バックアップ時間(UTC)

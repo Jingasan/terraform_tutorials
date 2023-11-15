@@ -38,6 +38,8 @@ resource "aws_elasticache_replication_group" "redis" {
   at_rest_encryption_enabled = true
   # 転送中の暗号化
   transit_encryption_enabled = true
+  # Redisの接続パスワード(16-128文字で指定)
+  auth_token = var.elasticache_auth_token
   # セキュリティグループID
   security_group_ids = [aws_security_group.elasticache_redis.id]
   # バックアップ保持期間(日)
