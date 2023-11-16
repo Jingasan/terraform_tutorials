@@ -83,17 +83,17 @@ resource "aws_cognito_user_pool" "user_pool" {
     # 検証オプション
     # CONFIRM_WITH_CODE:検証コードに検証
     # CONFIRM_WITH_LINK:検証用リンク押下による検証
-    default_email_option = "CONFIRM_WITH_LINK"
+    default_email_option = "CONFIRM_WITH_CODE"
     # 検証コード送信メールのタイトル(検証コードによる検証の場合)
-    email_subject = "[${var.project_name}] ユーザー登録完了"
+    email_subject = "[${var.project_name}] 検証コード"
     # 検証コード送信メールの本文(検証コードによる検証の場合)
-    email_message = "検証コード「{####}」を入力し、ユーザーを有効化してください。"
+    email_message = "検証コードは「{####}」です。"
     # 検証コード送信メールのタイトル(検証用リンク押下による検証の場合)
-    email_subject_by_link = "[${var.project_name}] ユーザー登録完了"
+    email_subject_by_link = "[${var.project_name}] 検証リンク"
     # 検証コード送信メールの本文(検証用リンク押下による検証の場合)
-    email_message_by_link = "{##こちら##}の検証リンクを押下し、ユーザーを有効化してください。"
+    email_message_by_link = "{##こちら##}の検証リンクを押下してください。"
     # 検証コード送信SMSの本文
-    sms_message = "検証コード「{####}」を入力し、ユーザーを有効化してください。"
+    sms_message = "検証コードは「{####}」です。"
   }
   # ユーザープールのアドオン設定
   user_pool_add_ons {
@@ -171,7 +171,7 @@ resource "aws_cognito_user" "user" {
   # 作成先のユーザープールID
   user_pool_id = aws_cognito_user_pool.user_pool.id
   # ユーザー名
-  username = "user"
+  username = "initial-user"
   # 属性
   attributes = {
     rank           = "A1"              # カスタム属性
@@ -181,9 +181,28 @@ resource "aws_cognito_user" "user" {
   # ユーザーの有効化
   enabled = true
   # 一時パスワード(passwordと同時設定不可)
-  temporary_password = "password"
+  # temporary_password = "password"
   # 永続パスワード(temporary_password と同時設定不可)
-  # password = "password"
+  password = "password"
+}
+
+# SessionManagerによるRDS接続開始スクリプト出力
+resource "local_file" "rds_connection_script" {
+  # 出力先
+  filename = "./frontend/src/config.json"
+  # 出力ファイルのパーミッション
+  file_permission = "0644"
+  # 出力ファイルの内容
+  content = <<DOC
+{
+  "Auth": {
+    "region": "ap-northeast-1",
+    "userPoolId": "${aws_cognito_user_pool.user_pool.id}",
+    "userPoolWebClientId": "${aws_cognito_user_pool_client.user_pool.id}",
+    "authenticationFlowType": "USER_SRP_AUTH"
+  }
+}
+DOC
 }
 
 # ユーザープールID
