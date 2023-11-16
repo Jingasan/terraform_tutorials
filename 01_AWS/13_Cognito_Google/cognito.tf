@@ -85,15 +85,15 @@ resource "aws_cognito_user_pool" "user_pool" {
     # CONFIRM_WITH_LINK:検証用リンク押下による検証
     default_email_option = "CONFIRM_WITH_LINK"
     # 検証コード送信メールのタイトル(検証コードによる検証の場合)
-    email_subject = "[${var.project_name}] ユーザー登録完了"
+    email_subject = "[${var.project_name}] 検証コード"
     # 検証コード送信メールの本文(検証コードによる検証の場合)
-    email_message = "検証コード「{####}」を入力し、ユーザーを有効化してください。"
+    email_message = "検証コードは「{####}」です。"
     # 検証コード送信メールのタイトル(検証用リンク押下による検証の場合)
-    email_subject_by_link = "[${var.project_name}] ユーザー登録完了"
+    email_subject_by_link = "[${var.project_name}] 検証リンク"
     # 検証コード送信メールの本文(検証用リンク押下による検証の場合)
-    email_message_by_link = "{##こちら##}の検証リンクを押下し、ユーザーを有効化してください。"
+    email_message_by_link = "{##こちら##}の検証リンクを押下してください。"
     # 検証コード送信SMSの本文
-    sms_message = "検証コード「{####}」を入力し、ユーザーを有効化してください。"
+    sms_message = "検証コードは「{####}」です。"
   }
   # ユーザープールのアドオン設定
   user_pool_add_ons {
