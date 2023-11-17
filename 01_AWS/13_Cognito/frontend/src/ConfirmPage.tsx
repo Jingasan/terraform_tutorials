@@ -77,6 +77,7 @@ export default function ConfirmPage() {
           onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
             setUsername(e.target.value)
           }
+          size={50}
         />
       </div>
       <div>
@@ -87,6 +88,7 @@ export default function ConfirmPage() {
           onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
             setConfirmationCode(e.target.value)
           }
+          size={50}
         />
       </div>
       <div>
@@ -102,6 +104,7 @@ export default function ConfirmPage() {
           onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
             setUsername(e.target.value)
           }
+          size={50}
         />
       </div>
       <div>

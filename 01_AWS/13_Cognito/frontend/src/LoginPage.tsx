@@ -60,6 +60,7 @@ export default function LoginPage(props: Props) {
           placeholder="Username"
           value={username}
           onChange={(e) => setUsername(e.target.value)}
+          size={50}
         />
       </div>
       <div>
@@ -68,6 +69,7 @@ export default function LoginPage(props: Props) {
           placeholder="Password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
+          size={50}
         />
       </div>
       <div>

@@ -76,6 +76,7 @@ export default function PasswordResetPage() {
           placeholder="Username"
           value={username}
           onChange={(e) => setUsername(e.target.value)}
+          size={50}
         />
       </div>
       <div>
@@ -92,6 +93,7 @@ export default function PasswordResetPage() {
           placeholder="Username"
           value={username}
           onChange={(e) => setUsername(e.target.value)}
+          size={50}
         />
       </div>
       <div>
@@ -100,6 +102,7 @@ export default function PasswordResetPage() {
           placeholder="ConfirmationCode"
           value={confirmationCode}
           onChange={(e) => setConfirmationCode(e.target.value)}
+          size={50}
         />
       </div>
       <div>
@@ -108,6 +111,7 @@ export default function PasswordResetPage() {
           placeholder="Password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
+          size={50}
         />
       </div>
       <div>

@@ -62,6 +62,7 @@ export default function SignupPage() {
           onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
             setUsername(e.target.value)
           }
+          size={50}
         />
       </div>
       <div>
@@ -72,6 +73,7 @@ export default function SignupPage() {
           onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
             setEmail(e.target.value)
           }
+          size={50}
         />
       </div>
       <div>
@@ -82,6 +84,7 @@ export default function SignupPage() {
           onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
             setPassword(e.target.value)
           }
+          size={50}
         />
       </div>
       <div>
