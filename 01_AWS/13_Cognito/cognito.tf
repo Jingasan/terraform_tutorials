@@ -187,8 +187,8 @@ resource "aws_cognito_user" "user" {
   password = "password"
 }
 
-# SessionManagerによるRDS接続開始スクリプト出力
-resource "local_file" "rds_connection_script" {
+# フロントエンドで利用するCognito情報ファイルの出力
+resource "local_file" "frontend_cognito_config" {
   # 出力先
   filename = "./frontend/src/config.json"
   # 出力ファイルのパーミッション

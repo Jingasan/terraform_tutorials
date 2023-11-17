@@ -1,5 +1,5 @@
 import React from "react";
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Route, Routes, Navigate } from "react-router-dom";
 import LoginPage from "./LoginPage";
 import UserPage from "./UserPage";
 import SignupPage from "./SignupPage";
@@ -47,6 +47,10 @@ export default function App() {
     <BrowserRouter>
       <Routes>
         {/* ユーザーページ／ログインページ */}
+        <Route
+          path="/index.html"
+          element={<Navigate to="/" replace={true} />}
+        />
         <Route
           path="/"
           element={
