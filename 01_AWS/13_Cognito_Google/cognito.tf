@@ -158,14 +158,15 @@ resource "aws_cognito_user_pool_client" "user_pool" {
   token_validity_units {
     id_token      = "minutes" # IDトークン
     access_token  = "minutes" # アクセストークン
-    refresh_token = "days"    # リフレッシュトークン
+    refresh_token = "hours"   # リフレッシュトークン
   }
   # IDトークンの有効期限
-  id_token_validity = 60
+  id_token_validity = 30
   # アクセストークンの有効期限
-  access_token_validity = 60
+  access_token_validity = 30
   # リフレッシュトークンの有効期限
-  refresh_token_validity = 3
+  # 1-87600hの範囲で指定, IDトークン/アクセストークンよりも長い時間を指定すること
+  refresh_token_validity = 1
   # トークンの取り消しを有効化
   enable_token_revocation = true
   # ユーザー存在エラーの防止
