@@ -52,6 +52,18 @@ resource "aws_cognito_user_pool" "user_pool" {
       sms_message = "{username}様<br><br>初期パスワードは{####}です。<br>初回ログイン後にパスワード変更が必要です。"
     }
   }
+  # 追加のカスタム属性(最大50個まで)
+  schema {
+    name                     = "rank"   # 属性名(「custom:属性名」で利用する)
+    attribute_data_type      = "String" # データ型
+    developer_only_attribute = false    # ユーザーによる登録を許可するか false:許可/true:拒否
+    mutable                  = true     # 可変か true:可変
+    required                 = false    # 必須か true:必須
+    string_attribute_constraints {      # 文字数制限
+      min_length = "1"
+      max_length = "2"
+    }
+  }
   # ユーザーの検証(Confirm)方法(email/phone_number)
   auto_verified_attributes = ["email"]
   # メッセージ送信設定
@@ -119,30 +131,31 @@ resource "aws_cognito_user_pool_client" "user_pool" {
   token_validity_units {
     id_token      = "minutes" # IDトークン
     access_token  = "minutes" # アクセストークン
-    refresh_token = "days"    # リフレッシュトークン
+    refresh_token = "hours"   # リフレッシュトークン
   }
   # IDトークンの有効期限
-  id_token_validity = 60
+  id_token_validity = 30
   # アクセストークンの有効期限
-  access_token_validity = 60
+  access_token_validity = 30
   # リフレッシュトークンの有効期限
-  refresh_token_validity = 3
+  # 1-87600hの範囲で指定, IDトークン/アクセストークンよりも長い時間を指定すること
+  refresh_token_validity = 1
   # トークンの取り消しを有効化
   enable_token_revocation = true
   # ユーザー存在エラーの防止
   prevent_user_existence_errors = "ENABLED"
   # 許可するサインイン後のリダイレクト先URL群
-  callback_urls = ["https://www.google.com/"]
+  callback_urls = []
   # 許可するサインアウト後のリダイレクト先URL群
   logout_urls = []
   # サポートするプロバイダー
   supported_identity_providers = ["COGNITO"]
   # false(default)/true:アプリケーションクライアントでOAuth2.0の機能を利用可能とする
-  allowed_oauth_flows_user_pool_client = true
+  allowed_oauth_flows_user_pool_client = false
   # OAuth2.0で利用する認可フロー(code/implicit/client_credentials)
-  allowed_oauth_flows = ["code"]
+  allowed_oauth_flows = []
   # 許可するOAuth2.0のスコープ(openid/aws.cognito.signin.user.admin)
-  allowed_oauth_scopes = ["openid", "aws.cognito.signin.user.admin"]
+  allowed_oauth_scopes = []
 }
 
 # アプリケーションクライアントのHostedUIの有効化
