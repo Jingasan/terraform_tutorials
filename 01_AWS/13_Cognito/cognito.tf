@@ -122,7 +122,7 @@ resource "aws_cognito_user_pool_client" "user_pool" {
     "ALLOW_REFRESH_TOKEN_AUTH", // リフレッシュトークンベースの認証
     "ALLOW_USER_SRP_AUTH",      // SRP(セキュアリモートパスワード)プロトコルベースの認証(最もセキュアなため、利用推奨)
   ]
-  # 認証フローセッションの持続期間(分)
+  # 認証フローセッションの持続期間(分)(3-15分の範囲で指定)
   auth_session_validity = 3
   # 各トークンの有効期限の単位: seconds/minutes/hours/days
   token_validity_units {
@@ -130,12 +130,12 @@ resource "aws_cognito_user_pool_client" "user_pool" {
     access_token  = "minutes" # アクセストークン
     refresh_token = "hours"   # リフレッシュトークン
   }
-  # IDトークンの有効期限
+  # IDトークンの有効期限(5分-1日の範囲で指定)
   id_token_validity = 30
-  # アクセストークンの有効期限
+  # アクセストークンの有効期限(5分-1日の範囲で指定)
   access_token_validity = 30
   # リフレッシュトークンの有効期限
-  # 1-87600hの範囲で指定, IDトークン/アクセストークンよりも長い時間を指定すること
+  # 60分-10年の範囲で指定, IDトークン/アクセストークンよりも長い時間を指定すること
   refresh_token_validity = 1
   # トークンの取り消しを有効化
   enable_token_revocation = true
