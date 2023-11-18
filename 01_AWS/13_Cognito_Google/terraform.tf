@@ -26,3 +26,11 @@ provider "aws" {
   region  = var.region  # AWSのリージョン
   profile = var.profile # AWSアクセスキーのプロファイル
 }
+
+# ランダムな小文字16進数値の生成
+resource "random_id" "main" {
+  byte_length = 2 # 値の範囲
+}
+locals {
+  lower_random_hex = random_id.main.dec
+}

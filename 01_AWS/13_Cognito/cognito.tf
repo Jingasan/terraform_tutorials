@@ -8,10 +8,10 @@ resource "aws_cognito_user_pool" "user_pool" {
   name = var.project_name
   # ユーザー名の他に認証での利用を許可する属性(email/phone_number/preferred_username)
   # username_attributesと同時利用不可
-  alias_attributes = ["email"]
-  # サインアップ時にユーザー名の代わりに利用可能な属性(email/phone_number)
+  # alias_attributes = ["email", "phone_number", "preferred_username"]
+  # サインアップ時にユーザー名の代わりに利用する属性(email/phone_number)
   # alias_attributesと同時利用不可
-  # username_attributes = ["email"]
+  username_attributes = ["email"]
   # ユーザー名の要件
   username_configuration {
     # false(default): ユーザー名の大文字と小文字を区別しない
@@ -119,11 +119,8 @@ resource "aws_cognito_user_pool_client" "user_pool" {
   generate_secret = false
   # 許可する認証フロー
   explicit_auth_flows = [
-    "ALLOW_ADMIN_USER_PASSWORD_AUTH", // 管理ユーザーによるユーザー名とパスワードでの認証(サーバーサイドで利用)
-    "ALLOW_CUSTOM_AUTH",              // Lambdaトリガーベースのカスタム認証
-    "ALLOW_REFRESH_TOKEN_AUTH",       // リフレッシュトークンベースの認証
-    "ALLOW_USER_PASSWORD_AUTH",       // ユーザー名とパスワードでの認証
-    "ALLOW_USER_SRP_AUTH",            // SRP(セキュアリモートパスワード)プロトコルベースの認証(最もセキュアなため、利用推奨)
+    "ALLOW_REFRESH_TOKEN_AUTH", // リフレッシュトークンベースの認証
+    "ALLOW_USER_SRP_AUTH",      // SRP(セキュアリモートパスワード)プロトコルベースの認証(最もセキュアなため、利用推奨)
   ]
   # 認証フローセッションの持続期間(分)
   auth_session_validity = 3
@@ -145,17 +142,17 @@ resource "aws_cognito_user_pool_client" "user_pool" {
   # ユーザー存在エラーの防止
   prevent_user_existence_errors = "ENABLED"
   # 許可するサインイン後のリダイレクト先URL群
-  callback_urls = ["https://www.google.com/"]
+  callback_urls = []
   # 許可するサインアウト後のリダイレクト先URL群
   logout_urls = []
   # サポートするプロバイダー
   supported_identity_providers = ["COGNITO"]
   # false(default)/true:アプリケーションクライアントでOAuth2.0の機能を利用可能とする
-  allowed_oauth_flows_user_pool_client = true
+  allowed_oauth_flows_user_pool_client = false
   # OAuth2.0で利用する認可フロー(code/implicit/client_credentials)
-  allowed_oauth_flows = ["code"]
+  allowed_oauth_flows = []
   # 許可するOAuth2.0のスコープ(openid/aws.cognito.signin.user.admin)
-  allowed_oauth_scopes = ["openid", "aws.cognito.signin.user.admin"]
+  allowed_oauth_scopes = []
 }
 
 # アプリケーションクライアントのHostedUIの有効化
@@ -167,17 +164,19 @@ resource "aws_cognito_user_pool_domain" "user_pool" {
   user_pool_id = aws_cognito_user_pool.user_pool.id
 }
 
-# ユーザーの作成
+# 初期ユーザーの作成
 resource "aws_cognito_user" "user" {
   # 作成先のユーザープールID
   user_pool_id = aws_cognito_user_pool.user_pool.id
   # ユーザー名
-  username = "initial-user"
+  username = "email@domain"
   # 属性
   attributes = {
-    rank           = "A1"              # カスタム属性
-    email          = "xxxxx@gmail.com" # メールアドレス
-    email_verified = true              # メールアドレス検証済み
+    name               = "initial-user" # ユーザー名
+    preferred_username = "initial-user" # ユーザー名
+    email              = "email@domain" # メールアドレス
+    email_verified     = true           # メールアドレス検証済み
+    rank               = "A1"           # カスタム属性
   }
   # ユーザーの有効化
   enabled = true

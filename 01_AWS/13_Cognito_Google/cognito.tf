@@ -8,10 +8,10 @@ resource "aws_cognito_user_pool" "user_pool" {
   name = var.project_name
   # ユーザー名の他に認証での利用を許可する属性(email/phone_number/preferred_username)
   # username_attributesと同時利用不可
-  alias_attributes = ["email"]
+  # alias_attributes = ["email"]
   # サインアップ時にユーザー名の代わりに利用可能な属性(email/phone_number)
   # alias_attributesと同時利用不可
-  # username_attributes = ["email"]
+  username_attributes = ["email"]
   # ユーザー名の要件
   username_configuration {
     # false(default): ユーザー名の大文字と小文字を区別しない
@@ -83,7 +83,7 @@ resource "aws_cognito_user_pool" "user_pool" {
     # 検証オプション
     # CONFIRM_WITH_CODE:検証コードに検証
     # CONFIRM_WITH_LINK:検証用リンク押下による検証
-    default_email_option = "CONFIRM_WITH_LINK"
+    default_email_option = "CONFIRM_WITH_CODE"
     # 検証コード送信メールのタイトル(検証コードによる検証の場合)
     email_subject = "[${var.project_name}] 検証コード"
     # 検証コード送信メールの本文(検証コードによる検証の場合)
@@ -122,7 +122,7 @@ resource "aws_cognito_identity_provider" "google_provider" {
   # プロバイダーの詳細設定
   provider_details = {
     # OAuth2.0のスコープ(アプリから要求するGoogleのユーザー属性)
-    authorize_scopes = "email"
+    authorize_scopes = "email profile openid"
     # OAuth2.0 APIによるGoogle認証のクライアントID 
     client_id = var.cognito_google_client_id
     # OAuth2.0 APIによるGoogle認証のクライアントシークレット
@@ -130,8 +130,17 @@ resource "aws_cognito_identity_provider" "google_provider" {
   }
   # Googleとユーザープール間での属性のマッピング
   attribute_mapping = {
-    email    = "email" # ユーザープール属性「email」をGoogle属性「email」にマッピング
-    username = "sub"   # ユーザープール属性「sub」をGoogle属性「username」にマッピング
+    # 左:Google属性 = 右:ユーザープール属性
+    email          = "email"          # メールアドレス
+    email_verified = "email_verified" # メールアドレス検証
+    username       = "sub"            # ユーザー名
+    name           = "name"           # 名前
+    family_name    = "family_name"    # Second Name
+    given_name     = "given_name"     # First Name
+    genders        = "gender"         # 性別
+    birthdays      = "birthdate"      # 生年月日
+    phoneNumbers   = "phone_number"   # 電話番号
+    picture        = "picture"        # ユーザーアイコン画像
   }
 }
 
@@ -172,9 +181,9 @@ resource "aws_cognito_user_pool_client" "user_pool" {
   # ユーザー存在エラーの防止
   prevent_user_existence_errors = "ENABLED"
   # 許可するサインイン後のリダイレクト先URL群
-  callback_urls = ["https://www.google.com/"]
+  callback_urls = ["https://${aws_cloudfront_distribution.main.domain_name}"]
   # 許可するサインアウト後のリダイレクト先URL群
-  logout_urls = []
+  logout_urls = ["https://${aws_cloudfront_distribution.main.domain_name}"]
   # サポートするプロバイダー
   supported_identity_providers = ["COGNITO", "Google"]
   # false(default)/true:アプリケーションクライアントでOAuth2.0の機能を利用可能とする
@@ -192,4 +201,42 @@ resource "aws_cognito_user_pool_domain" "user_pool" {
   domain = var.project_name
   # 対象のユーザープールID
   user_pool_id = aws_cognito_user_pool.user_pool.id
+}
+
+# フロントエンドで利用するCognito情報ファイルの出力
+resource "local_file" "frontend_cognito_config" {
+  # 出力先
+  filename = "./frontend/src/config.json"
+  # 出力ファイルのパーミッション
+  file_permission = "0644"
+  # 出力ファイルの内容
+  content = <<DOC
+{
+  "Auth": {
+    "region": "ap-northeast-1",
+    "userPoolId": "${aws_cognito_user_pool.user_pool.id}",
+    "userPoolWebClientId": "${aws_cognito_user_pool_client.user_pool.id}",
+    "authenticationFlowType": "USER_SRP_AUTH",
+	"oauth": {
+      "domain": "${aws_cognito_user_pool_domain.user_pool.domain}.auth.${var.region}.amazoncognito.com",
+      "scope": ["openid", "aws.cognito.signin.user.admin"],
+      "redirectSignIn": "https://${aws_cloudfront_distribution.main.domain_name}",
+      "redirectSignOut": "https://${aws_cloudfront_distribution.main.domain_name}",
+      "responseType": "code"
+    }
+  }
+}
+DOC
+}
+
+# ユーザープールID
+output "user_pool_id" {
+  description = "ユーザープールID"
+  value       = aws_cognito_user_pool.user_pool.id
+}
+
+# ユーザープールクライアントID
+output "user_pool_client_id" {
+  description = "ユーザープールクライアントID"
+  value       = aws_cognito_user_pool_client.user_pool.id
 }

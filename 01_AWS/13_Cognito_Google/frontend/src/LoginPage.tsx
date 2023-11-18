@@ -2,6 +2,7 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { Auth } from "aws-amplify";
 import { CognitoUser } from "amazon-cognito-identity-js";
+import { CognitoHostedUIIdentityProvider } from "@aws-amplify/auth";
 import { getErrorName, getErrorMessage } from "./ErrorMessage";
 
 /**
@@ -58,6 +59,31 @@ export default function LoginPage(props: Props) {
       });
   };
 
+  /**
+   * Googleアカウントによるログイン
+   */
+  const handleLoginGoogle = () => {
+    Auth.federatedSignIn({ provider: CognitoHostedUIIdentityProvider.Google })
+      .then(() => {
+        // 表示メッセージを削除
+        setDisplayMessage(<div></div>);
+      })
+      .catch((err) => {
+        // エラーメッセージの表示
+        setDisplayMessage(
+          <div style={{ color: "red" }}>
+            {getErrorName(err.name)}
+            <br />
+            {getErrorMessage(err.message) ?? err.message}
+          </div>
+        );
+        console.error(err.name);
+        console.error(err.message);
+        // 現在のログインユーザーを更新
+        setLoginUser(undefined);
+      });
+  };
+
   return (
     <div style={{ margin: "30px" }} className="App">
       <h1>ログイン画面</h1>
@@ -88,6 +114,11 @@ export default function LoginPage(props: Props) {
       </div>
       <div>
         <button onClick={handleLogin}>Login</button>
+      </div>
+      <br />
+      <div>Googleアカウントによるログイン</div>
+      <div>
+        <button onClick={handleLoginGoogle}>Login</button>
       </div>
       <br />
       <Link to="/Signup">新規登録</Link>

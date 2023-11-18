@@ -11,6 +11,12 @@ variable "region" {}
 # AWSアクセスキーのプロファイル
 variable "profile" {}
 #============================================================
+# CloudFront
+#============================================================
+# 価格クラス (PriceClass_All/PriceClass_200/PriceClass_100)
+# https://docs.aws.amazon.com/ja_jp/AmazonCloudFront/latest/DeveloperGuide/PriceClass.html
+variable "cloudfront_price_class" {}
+#============================================================
 # Cognito
 #============================================================
 # OAuth2.0 APIによるGoogle認証のクライアントID 
