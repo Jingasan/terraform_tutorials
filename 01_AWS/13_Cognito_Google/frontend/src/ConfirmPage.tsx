@@ -80,7 +80,7 @@ export default function ConfirmPage() {
 
   return (
     <div style={{ margin: "30px" }} className="App">
-      <h1>検証</h1>
+      <h1>検証画面</h1>
       <div>
         登録メールアドレスとメールアドレスに届いた検証コードを入力し、Confirmボタンを押下してください。
       </div>
