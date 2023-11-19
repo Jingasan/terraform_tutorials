@@ -1,4 +1,5 @@
 import React from "react";
+import { useForm } from "react-hook-form";
 import { Auth } from "aws-amplify";
 import { CognitoUser } from "amazon-cognito-identity-js";
 import { getErrorName, getErrorMessage } from "./ErrorMessage";
@@ -12,15 +13,15 @@ export interface Props {
 }
 export default function UserPage(props: Props) {
   const { loginUser, setLoginUser } = props;
+  // ユーザー名とメールアドレス
+  const [name, setName] = React.useState("");
+  const [email, setEmail] = React.useState("");
+  // 入力フォーム
+  const { register, handleSubmit } = useForm();
   // 表示メッセージ
   const [displayMessage, setDisplayMessage] = React.useState<JSX.Element>(
     <div></div>
   );
-  // 現在のパスワード／新しいパスワード
-  const [currentPassword, setCurrentPassword] = React.useState("");
-  const [newPassword, setNewPassword] = React.useState("");
-  const [name, setName] = React.useState("");
-  const [email, setEmail] = React.useState("");
 
   /**
    * ユーザー情報の取得
@@ -38,7 +39,10 @@ export default function UserPage(props: Props) {
   /**
    * パスワードの変更
    */
-  const handleChangePassword = () => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const handleChangePassword = (data: any) => {
+    const currentPassword = data.currentPassword;
+    const newPassword = data.newPassword;
     Auth.currentAuthenticatedUser()
       .then((user) => {
         Auth.changePassword(user, currentPassword, newPassword)
@@ -147,7 +151,6 @@ export default function UserPage(props: Props) {
                   loginUser.getSignInUserSession()?.getIdToken().getJwtToken()
                 )}
                 size={50}
-                required
               />
             </td>
           </tr>
@@ -163,7 +166,6 @@ export default function UserPage(props: Props) {
                     .getJwtToken()
                 )}
                 size={50}
-                required
               />
             </td>
           </tr>
@@ -176,7 +178,6 @@ export default function UserPage(props: Props) {
                   loginUser.getSignInUserSession()?.getRefreshToken().getToken()
                 )}
                 size={50}
-                required
               />
             </td>
           </tr>
@@ -184,42 +185,34 @@ export default function UserPage(props: Props) {
       </table>
       <br />
       <div>パスワード変更</div>
-      <div>
+      <form onSubmit={handleSubmit(handleChangePassword)}>
         <input
-          type="password"
+          type="text"
           placeholder="Current Password"
-          value={currentPassword}
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-            setCurrentPassword(e.target.value)
-          }
           size={50}
           required
+          {...register("currentPassword")}
         />
-      </div>
-      <div>
+        <br />
         <input
-          type="password"
+          type="text"
           placeholder="New Password"
-          value={newPassword}
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-            setNewPassword(e.target.value)
-          }
           size={50}
           required
+          {...register("newPassword")}
         />
-      </div>
+        <br />
+        <button type="submit">変更</button>
+      </form>
+      <br />
+      <div>ログアウトする場合は、ログアウトボタンを押下してください。</div>
       <div>
-        <button onClick={handleChangePassword}>Change</button>
+        <button onClick={handleLogout}>ログアウト</button>
       </div>
       <br />
-      <div>ログアウトする場合は、Logoutボタンを押下してください。</div>
+      <div>退会する場合は、退会ボタンを押下してください。</div>
       <div>
-        <button onClick={handleLogout}>Logout</button>
-      </div>
-      <br />
-      <div>退会する場合は、DeleteUserボタンを押下してください。</div>
-      <div>
-        <button onClick={handleDeleteUser}>DeleteUser</button>
+        <button onClick={handleDeleteUser}>退会</button>
       </div>
       <br />
       <br />

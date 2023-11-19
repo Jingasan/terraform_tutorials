@@ -1,23 +1,21 @@
 import React from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useForm } from "react-hook-form";
 import { Auth } from "aws-amplify";
-import { useNavigate } from "react-router-dom";
 import { getErrorName, getErrorMessage } from "./ErrorMessage";
 
 /**
  * パスワードリセットページ
  */
 export default function PasswordResetPage() {
+  // 入力フォーム
+  const { register, handleSubmit } = useForm();
+  // ページ移動
+  const navigate = useNavigate();
   // 表示メッセージ
   const [displayMessage, setDisplayMessage] = React.useState<JSX.Element>(
     <div></div>
   );
-  // メールアドレス／パスワード／検証コード
-  const [email, setEmail] = React.useState("");
-  const [password, setPassword] = React.useState("");
-  const [confirmationCode, setConfirmationCode] = React.useState("");
-  // ページ移動
-  const navigate = useNavigate();
 
   /**
    * 画面の初期化
@@ -32,12 +30,16 @@ export default function PasswordResetPage() {
   /**
    * パスワードリセットのための検証コードの要求
    */
-  const handleRequestConfirmationCode = () => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const handleRequestConfirmationCode = (data: any) => {
+    const email = data.email1;
     Auth.forgotPassword(email)
       .then((res) => {
         console.debug(res);
-        // 表示メッセージを削除
-        setDisplayMessage(<div></div>);
+        // メッセージを表示
+        setDisplayMessage(
+          <div style={{ color: "blue" }}>検証コードを送信しました。</div>
+        );
       })
       .catch((err) => {
         // エラーメッセージの表示
@@ -56,7 +58,11 @@ export default function PasswordResetPage() {
   /**
    * パスワードリセット
    */
-  const handleResetPassword = () => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const handleResetPassword = (data: any) => {
+    const email = data.email2;
+    const confirmationCode = data.confirmationCode;
+    const password = data.password;
     Auth.forgotPasswordSubmit(email, confirmationCode, password)
       .then((res) => {
         // 表示メッセージを削除
@@ -83,67 +89,51 @@ export default function PasswordResetPage() {
     <div style={{ margin: "30px" }} className="App">
       <h1>パスワード再設定画面</h1>
       <div>
-        １．登録メールアドレスを入力し、Requestボタンを押下してください。検証コードが記載されたメールが届きます。
+        １．登録メールアドレスを入力し、送信ボタンを押下してください。検証コードが記載されたメールが届きます。
       </div>
-      <div>
+      <form onSubmit={handleSubmit(handleRequestConfirmationCode)}>
         <input
           type="email"
           placeholder="email@domain"
-          value={email}
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-            setEmail(e.target.value)
-          }
           size={50}
           required
+          {...register("email1")}
         />
-      </div>
-      <div>
-        <button onClick={handleRequestConfirmationCode}>Request</button>
-      </div>
+        <br />
+        <button type="submit">送信</button>
+      </form>
       <br />
       <br />
       <div>
-        ２．登録メールアドレス／検証コード／新しいパスワードを入力し、Resetボタンを押下してください。
+        ２．登録メールアドレス／検証コード／新しいパスワードを入力し、リセットボタンを押下してください。
       </div>
-      <div>
+      <form onSubmit={handleSubmit(handleResetPassword)}>
         <input
           type="email"
           placeholder="email@domain"
-          value={email}
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-            setEmail(e.target.value)
-          }
           size={50}
           required
+          {...register("email2")}
         />
-      </div>
-      <div>
+        <br />
         <input
           type="text"
-          placeholder="ConfirmationCode"
-          value={confirmationCode}
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-            setConfirmationCode(e.target.value)
-          }
+          placeholder="Confirmation Code"
           size={50}
           required
+          {...register("confirmationCode")}
         />
-      </div>
-      <div>
+        <br />
         <input
-          type="password"
+          type="text"
           placeholder="Password"
-          value={password}
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-            setPassword(e.target.value)
-          }
           size={50}
           required
+          {...register("password")}
         />
-      </div>
-      <div>
-        <button onClick={handleResetPassword}>Reset</button>
-      </div>
+        <br />
+        <button type="submit">リセット</button>
+      </form>
       <br />
       <Link to="/">ログイン</Link>
       <br />

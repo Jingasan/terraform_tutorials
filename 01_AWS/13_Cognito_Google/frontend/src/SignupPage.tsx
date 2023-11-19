@@ -1,23 +1,21 @@
 import React from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useForm } from "react-hook-form";
 import { Auth } from "aws-amplify";
-import { useNavigate } from "react-router-dom";
 import { getErrorName, getErrorMessage } from "./ErrorMessage";
 
 /**
  * サインアップページ
  */
 export default function SignupPage() {
+  // ページ移動
+  const navigate = useNavigate();
+  // 入力フォーム
+  const { register, handleSubmit } = useForm();
   // 表示メッセージ
   const [displayMessage, setDisplayMessage] = React.useState<JSX.Element>(
     <div></div>
   );
-  // ユーザー名／メールアドレス／パスワード
-  const [username, setUsername] = React.useState("");
-  const [email, setEmail] = React.useState("");
-  const [password, setPassword] = React.useState("");
-  // ページ移動
-  const navigate = useNavigate();
 
   /**
    * 画面の初期化：ログイン状態をチェック
@@ -32,7 +30,11 @@ export default function SignupPage() {
   /**
    * サインアップ処理
    */
-  const handleSignup = () => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const handleSignup = (data: any) => {
+    const username = data.username;
+    const email = data.email;
+    const password = data.password;
     Auth.signUp({
       username: email,
       password: password,
@@ -67,48 +69,36 @@ export default function SignupPage() {
     <div style={{ margin: "30px" }} className="App">
       <h1>サインアップ画面</h1>
       <div>
-        ユーザー名／メールアドレス／パスワードを入力し、Signupボタンを押下してください。
+        ユーザー名／メールアドレス／パスワードを入力し、新規登録ボタンを押下してください。
       </div>
       <div>入力したメールアドレス宛てに検証コードが届きます。</div>
-      <div>
+      <form onSubmit={handleSubmit(handleSignup)}>
         <input
           type="text"
           placeholder="Username"
-          value={username}
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-            setUsername(e.target.value)
-          }
           size={50}
           required
+          {...register("username")}
         />
-      </div>
-      <div>
+        <br />
         <input
           type="email"
           placeholder="email@domain"
-          value={email}
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-            setEmail(e.target.value)
-          }
           size={50}
           required
+          {...register("email")}
         />
-      </div>
-      <div>
+        <br />
         <input
-          type="password"
+          type="text"
           placeholder="Password"
-          value={password}
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-            setPassword(e.target.value)
-          }
           size={50}
           required
+          {...register("password")}
         />
-      </div>
-      <div>
-        <button onClick={handleSignup}>Signup</button>
-      </div>
+        <br />
+        <button type="submit">新規登録</button>
+      </form>
       <br />
       <Link to="/">ログイン</Link>
       <br />

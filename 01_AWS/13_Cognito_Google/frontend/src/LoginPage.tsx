@@ -1,5 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
+import { useForm } from "react-hook-form";
 import { Auth } from "aws-amplify";
 import { CognitoUser } from "amazon-cognito-identity-js";
 import { CognitoHostedUIIdentityProvider } from "@aws-amplify/auth";
@@ -13,13 +14,12 @@ export interface Props {
 }
 export default function LoginPage(props: Props) {
   const { setLoginUser } = props;
+  // 入力フォーム
+  const { register, handleSubmit } = useForm();
   // 表示メッセージ
   const [displayMessage, setDisplayMessage] = React.useState<JSX.Element>(
     <div></div>
   );
-  // メールアドレス／パスワード
-  const [email, setEmail] = React.useState("");
-  const [password, setPassword] = React.useState("");
 
   /**
    * 画面の初期化
@@ -34,7 +34,10 @@ export default function LoginPage(props: Props) {
   /**
    * ログイン処理
    */
-  const handleLogin = () => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const handleLogin = (data: any) => {
+    const email = data.email;
+    const password = data.password;
     Auth.signIn(email, password)
       .then((user) => {
         // 表示メッセージを削除
@@ -87,40 +90,30 @@ export default function LoginPage(props: Props) {
   return (
     <div style={{ margin: "30px" }} className="App">
       <h1>ログイン画面</h1>
-      <div>
-        登録メールアドレス／パスワードを入力し、Loginボタンを押下してください。
-      </div>
-      <div>
+      <div>メールアドレス／パスワードによるログイン</div>
+      <form onSubmit={handleSubmit(handleLogin)}>
         <input
           type="email"
           placeholder="email@domain"
-          value={email}
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-            setEmail(e.target.value)
-          }
           size={50}
           required
+          {...register("email")}
         />
-      </div>
-      <div>
+        <br />
         <input
-          type="password"
+          type="text"
           placeholder="Password"
-          value={password}
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-            setPassword(e.target.value)
-          }
           size={50}
           required
+          {...register("password")}
         />
-      </div>
-      <div>
-        <button onClick={handleLogin}>Login</button>
-      </div>
+        <br />
+        <button type="submit">ログイン</button>
+      </form>
       <br />
       <div>Googleアカウントによるログイン</div>
       <div>
-        <button onClick={handleLoginGoogle}>Login</button>
+        <button onClick={handleLoginGoogle}>Googleログイン</button>
       </div>
       <br />
       <Link to="/Signup">新規登録</Link>
