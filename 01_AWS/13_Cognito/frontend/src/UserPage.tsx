@@ -127,7 +127,7 @@ export default function UserPage(props: Props) {
 
   return (
     <div style={{ margin: "30px" }} className="App">
-      <h1>ユーザーページ</h1>
+      <h1>ユーザー画面</h1>
       <table>
         <tbody>
           <tr>
