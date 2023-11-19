@@ -194,8 +194,8 @@ resource "aws_cognito_user_pool_client" "user_pool" {
   allowed_oauth_scopes = ["openid", "aws.cognito.signin.user.admin"]
 }
 
-# アプリケーションクライアントのHostedUIの有効化
-# ドメインが有効になり、検証用の簡単なログイン画面が有効になる
+# ユーザープールドメインの有効化
+# ドメインが有効になり、HostedUI(ログイン画面)が利用可能になる
 resource "aws_cognito_user_pool_domain" "user_pool" {
   # ドメイン
   domain = var.project_name

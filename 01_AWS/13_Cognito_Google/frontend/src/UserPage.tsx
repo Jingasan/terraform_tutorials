@@ -147,6 +147,7 @@ export default function UserPage(props: Props) {
                   loginUser.getSignInUserSession()?.getIdToken().getJwtToken()
                 )}
                 size={50}
+                required
               />
             </td>
           </tr>
@@ -162,6 +163,7 @@ export default function UserPage(props: Props) {
                     .getJwtToken()
                 )}
                 size={50}
+                required
               />
             </td>
           </tr>
@@ -174,6 +176,7 @@ export default function UserPage(props: Props) {
                   loginUser.getSignInUserSession()?.getRefreshToken().getToken()
                 )}
                 size={50}
+                required
               />
             </td>
           </tr>
@@ -189,6 +192,8 @@ export default function UserPage(props: Props) {
           onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
             setCurrentPassword(e.target.value)
           }
+          size={50}
+          required
         />
       </div>
       <div>
@@ -199,6 +204,8 @@ export default function UserPage(props: Props) {
           onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
             setNewPassword(e.target.value)
           }
+          size={50}
+          required
         />
       </div>
       <div>

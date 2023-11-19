@@ -23,7 +23,7 @@ app.use(
     keys: [randomUUID()], // [Option] セッションの署名に使用する鍵
     path: "/", // [Option] "/"(default): Cookieを送信するPATH
     httpOnly: true, // [Option] true(default): httpのみで使用, document.cookieを使ってCookieを扱えなくする
-    maxAge: 30 * 1000, // [Option] Cookieの有効期限[ms]
+    maxAge: Number(process.env.SESSION_TIMEOUT) * 1000, // [Option] Cookieの有効期限[ms]
     secure: false, // [Option] false(default) trueにすると、HTTPS接続のときのみCookieを発行する
     // trueを設定した場合、「app.set("trust proxy", 1)」を設定する必要がある。
     // Proxy背後にExpressを配置すると、Express自体はHTTPで起動するため、Cookieが発行されないが、
@@ -41,13 +41,14 @@ const applicationClientId = String(process.env.APPLICATION_CLIENT_ID);
  */
 app.get("/signup", async (_req, res) => {
   res.send(`
-    <h1>Signup Page</h1>
+    <h1>サインアップ画面</h1>
     <form action="/signup" method="post">
       <input type="text" name="username" placeholder="Username" required><br>
-      <input type="email" name="email" placeholder="EMail" required><br>
+      <input type="email" name="email" placeholder="email@domain" required><br>
       <input type="password" name="password" placeholder="Password" required><br>
       <button type="submit">Signup</button>
     </form>
+    <a href="/signin">ログイン</a>
   `);
 });
 
@@ -79,7 +80,7 @@ app.post("/signup", async (req, res) => {
       .json({ Result: result.result, Error: result.output });
 
   // サインインページにリダイレクト
-  return res.redirect("/confirm");
+  return res.status(302).redirect("/confirm");
 });
 
 /**
@@ -87,12 +88,13 @@ app.post("/signup", async (req, res) => {
  */
 app.get("/confirm", async (_req, res) => {
   res.send(`
-    <h1>Confirm Signup Page</h1>
+    <h1>サインアップ検証画面</h1>
     <form action="/confirm" method="post">
       <input type="text" name="username" placeholder="Username" required><br>
       <input type="text" name="code" placeholder="Confirm Code" required><br>
       <button type="submit">Confirm</button>
     </form>
+    <a href="/signin">ログイン</a>
   `);
 });
 
@@ -121,20 +123,24 @@ app.post("/confirm", async (req, res) => {
       .json({ Result: result.result, Error: result.output });
 
   // サインインページにリダイレクト
-  return res.redirect("/signin");
+  return res.status(302).redirect("/signin");
 });
 
 /**
  * サインインページ
  */
+app.get("/", async (_req, res) => {
+  return res.status(302).redirect("/signin");
+});
 app.get("/signin", async (_req, res) => {
   res.send(`
-    <h1>Signin Page</h1>
+    <h1>ログイン画面</h1>
     <form action="/signin" method="post">
       <input type="text" name="username" placeholder="Username" required><br>
       <input type="password" name="password" placeholder="Password" required><br>
       <button type="submit">Signin</button>
     </form>
+    <a href="/signup">新規登録</a>
   `);
 });
 
@@ -156,41 +162,42 @@ app.post("/signin", async (req, res) => {
     body.username,
     body.password
   );
-  console.log(result);
+  console.log(JSON.stringify(result, null, "  "));
   if (!result.result || typeof result.output === "string")
     return res
       .status(400)
       .json({ Result: result.result, Error: result.output });
 
   // Cookieにセッションを設定
+  // Cookieの上限容量は4096Byte以内であるため、リフレッシュトークンのみを格納する
   req.session.update = Date.now();
   req.session.isAuthenticated = true;
   req.session.user = body.username;
-  req.session.accessToken = result.output.AuthenticationResult.AccessToken;
+  req.session.refreshToken = result.output.AuthenticationResult.RefreshToken;
 
   // メインページにリダイレクト
-  return res.redirect("/main");
+  return res.status(302).redirect("/user");
 });
 
 /**
  * メインページ
  */
-app.get("/main", async (req, res) => {
+app.get("/user", async (req, res) => {
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   const isAuthenticated = req.session.isAuthenticated || false;
   // 未認証時
   if (!isAuthenticated) {
     // サインインページにリダイレクト
-    return res.status(401).redirect("/signin");
+    return res.status(302).redirect("/signin");
   } else {
     // セッションの有効期限を更新
     req.session.update = Date.now();
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     const user = req.session.user;
-    // メインページ
+    // ユーザー画面
     return res.send(`
-      <h1>Main Page</h1>
-      <div>UserName: ${user}</div>
+      <h1>ユーザー画面</h1>
+      <div>ログインユーザー名：${user}</div>
       <h2>パスワード変更</h2>
       <form action="/changepassword" method="post">
         <input type="text" name="currentPassword" placeholder="CurrentPassword" required><br>
@@ -248,7 +255,7 @@ app.post("/changepassword", async (req, res) => {
       .json({ Result: result.result, Error: result.output });
 
   // メインページにリダイレクト
-  return res.redirect("/main");
+  return res.redirect("/user");
 });
 
 /**
@@ -260,7 +267,7 @@ app.post("/signout", async (req, res) => {
   // 未認証時
   if (!isAuthenticated) {
     // サインインページにリダイレクト
-    return res.status(401).redirect("/signin");
+    return res.status(302).redirect("/signin");
   }
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   const accessToken = req.session.accessToken;
@@ -277,7 +284,7 @@ app.post("/signout", async (req, res) => {
   req.session = null;
 
   // サインインページにリダイレクト
-  return res.redirect("/signin");
+  return res.status(302).redirect("/signin");
 });
 
 /**
@@ -289,7 +296,7 @@ app.post("/deleteuser", async (req, res) => {
   // 未認証時
   if (!isAuthenticated) {
     // サインインページにリダイレクト
-    return res.status(401).redirect("/signin");
+    return res.status(302).redirect("/signin");
   }
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   const accessToken = req.session.accessToken;
@@ -306,7 +313,7 @@ app.post("/deleteuser", async (req, res) => {
   req.session = null;
 
   // サインアップページにリダイレクト
-  return res.redirect("/signup");
+  return res.status(302).redirect("/signup");
 });
 
 /**

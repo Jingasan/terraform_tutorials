@@ -40,8 +40,12 @@ resource "aws_lambda_function" "lambda" {
   # 環境変数の指定
   environment {
     variables = {
-      USER_POOL_ID          = aws_cognito_user_pool.user_pool.id
+      # ユーザープールID
+      USER_POOL_ID = aws_cognito_user_pool.user_pool.id
+      # アプリケーションクライアントID
       APPLICATION_CLIENT_ID = aws_cognito_user_pool_client.user_pool.id
+      # セッションの有効期限(秒)：Cognitoのアクセストークンの有効期限と同じ時間に設定
+      SESSION_TIMEOUT = aws_cognito_user_pool_client.user_pool.access_token_validity
     }
   }
   # 作成するLambdaの説明文
@@ -196,5 +200,5 @@ resource "aws_lambda_function_url" "lambda" {
 # サインアップページURL
 output "lambda_function_url" {
   description = "サインアップページURL"
-  value       = "${aws_lambda_function_url.lambda.function_url}signup"
+  value       = "${aws_lambda_function_url.lambda.function_url}signin"
 }

@@ -99,6 +99,7 @@ export default function LoginPage(props: Props) {
             setEmail(e.target.value)
           }
           size={50}
+          required
         />
       </div>
       <div>
@@ -110,6 +111,7 @@ export default function LoginPage(props: Props) {
             setPassword(e.target.value)
           }
           size={50}
+          required
         />
       </div>
       <div>

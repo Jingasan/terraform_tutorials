@@ -94,6 +94,7 @@ export default function PasswordResetPage() {
             setEmail(e.target.value)
           }
           size={50}
+          required
         />
       </div>
       <div>
@@ -113,6 +114,7 @@ export default function PasswordResetPage() {
             setEmail(e.target.value)
           }
           size={50}
+          required
         />
       </div>
       <div>
@@ -124,6 +126,7 @@ export default function PasswordResetPage() {
             setConfirmationCode(e.target.value)
           }
           size={50}
+          required
         />
       </div>
       <div>
@@ -135,6 +138,7 @@ export default function PasswordResetPage() {
             setPassword(e.target.value)
           }
           size={50}
+          required
         />
       </div>
       <div>

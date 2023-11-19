@@ -79,6 +79,7 @@ export default function SignupPage() {
             setUsername(e.target.value)
           }
           size={50}
+          required
         />
       </div>
       <div>
@@ -90,6 +91,7 @@ export default function SignupPage() {
             setEmail(e.target.value)
           }
           size={50}
+          required
         />
       </div>
       <div>
@@ -101,6 +103,7 @@ export default function SignupPage() {
             setPassword(e.target.value)
           }
           size={50}
+          required
         />
       </div>
       <div>

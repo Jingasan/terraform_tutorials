@@ -93,6 +93,7 @@ export default function ConfirmPage() {
             setEmail(e.target.value)
           }
           size={50}
+          required
         />
       </div>
       <div>
@@ -104,6 +105,7 @@ export default function ConfirmPage() {
             setConfirmationCode(e.target.value)
           }
           size={50}
+          required
         />
       </div>
       <div>
@@ -120,6 +122,7 @@ export default function ConfirmPage() {
             setEmail(e.target.value)
           }
           size={50}
+          required
         />
       </div>
       <div>

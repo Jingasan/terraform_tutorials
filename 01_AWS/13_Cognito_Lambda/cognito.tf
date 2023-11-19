@@ -129,17 +129,17 @@ resource "aws_cognito_user_pool_client" "user_pool" {
   auth_session_validity = 3
   # 各トークンの有効期限の単位: seconds/minutes/hours/days
   token_validity_units {
-    id_token      = "minutes" # IDトークン
-    access_token  = "minutes" # アクセストークン
-    refresh_token = "hours"   # リフレッシュトークン
+    id_token      = "seconds" # IDトークン
+    access_token  = "seconds" # アクセストークン
+    refresh_token = "seconds" # リフレッシュトークン
   }
   # IDトークンの有効期限(5分-1日の範囲で指定)
-  id_token_validity = 30
+  id_token_validity = var.cognito_id_token_validity
   # アクセストークンの有効期限(5分-1日の範囲で指定)
-  access_token_validity = 30
+  access_token_validity = var.cognito_access_token_validity
   # リフレッシュトークンの有効期限
   # 60分-10年の範囲で指定, IDトークン/アクセストークンよりも長い時間を指定すること
-  refresh_token_validity = 1
+  refresh_token_validity = var.cognito_refresh_token_validity
   # トークンの取り消しを有効化
   enable_token_revocation = true
   # ユーザー存在エラーの防止
@@ -158,8 +158,8 @@ resource "aws_cognito_user_pool_client" "user_pool" {
   allowed_oauth_scopes = []
 }
 
-# アプリケーションクライアントのHostedUIの有効化
-# ドメインが有効になり、検証用の簡単なログイン画面が有効になる
+# ユーザープールドメインの有効化
+# ドメインが有効になり、HostedUI(ログイン画面)が利用可能になる
 resource "aws_cognito_user_pool_domain" "user_pool" {
   # ドメイン
   domain = var.project_name

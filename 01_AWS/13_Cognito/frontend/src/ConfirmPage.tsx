@@ -1,22 +1,21 @@
 import React from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useForm } from "react-hook-form";
 import { Auth } from "aws-amplify";
-import { useNavigate } from "react-router-dom";
 import { getErrorName, getErrorMessage } from "./ErrorMessage";
 
 /**
  * 検証ページ
  */
 export default function ConfirmPage() {
+  // ページ移動
+  const navigate = useNavigate();
+  // 入力フォーム
+  const { register, handleSubmit } = useForm();
   // 表示メッセージ
   const [displayMessage, setDisplayMessage] = React.useState<JSX.Element>(
     <div></div>
   );
-  // メールアドレス／パスワード
-  const [email, setEmail] = React.useState("");
-  const [confirmationCode, setConfirmationCode] = React.useState("");
-  // ページ移動
-  const navigate = useNavigate();
 
   /**
    * 画面の初期化
@@ -31,7 +30,10 @@ export default function ConfirmPage() {
   /**
    * 検証
    */
-  const handleConfirm = () => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const handleConfirm = (data: any) => {
+    const email = data.email1;
+    const confirmationCode = data.confirmationCode;
     Auth.confirmSignUp(email, confirmationCode)
       .then((res) => {
         console.debug(res);
@@ -57,12 +59,16 @@ export default function ConfirmPage() {
   /**
    * 検証コードの再送
    */
-  const handleResendConfirmationCode = () => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const handleResendConfirmationCode = (data: any) => {
+    const email = data.email2;
     Auth.resendSignUp(email)
       .then((res) => {
         console.debug(res);
-        // 表示メッセージを削除
-        setDisplayMessage(<div></div>);
+        // メッセージを表示
+        setDisplayMessage(
+          <div style={{ color: "blue" }}>検証コードを再送しました。</div>
+        );
       })
       .catch((err) => {
         // エラーメッセージの表示
@@ -82,49 +88,42 @@ export default function ConfirmPage() {
     <div style={{ margin: "30px" }} className="App">
       <h1>検証画面</h1>
       <div>
-        登録メールアドレスとメールアドレスに届いた検証コードを入力し、Confirmボタンを押下してください。
+        登録メールアドレスとメールアドレスに届いた検証コードを入力し、検証ボタンを押下してください。
       </div>
-      <div>
+      <form onSubmit={handleSubmit(handleConfirm)}>
         <input
           type="email"
           placeholder="email@domain"
-          value={email}
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-            setEmail(e.target.value)
-          }
           size={50}
+          required
+          {...register("email1")}
         />
-      </div>
-      <div>
+        <br />
         <input
           type="text"
           placeholder="Confirmation Code"
-          value={confirmationCode}
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-            setConfirmationCode(e.target.value)
-          }
           size={50}
+          required
+          {...register("confirmationCode")}
         />
-      </div>
-      <div>
-        <button onClick={handleConfirm}>Confirm</button>
-      </div>
+        <br />
+        <button type="submit">検証</button>
+      </form>
       <br />
-      <div>検証コードを再送する場合は以下のボタンを押下してください。</div>
       <div>
+        検証コードを再送する場合は、登録メールアドレスを入力し、再送ボタンを押下してください。
+      </div>
+      <form onSubmit={handleSubmit(handleResendConfirmationCode)}>
         <input
           type="email"
           placeholder="email@domain"
-          value={email}
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-            setEmail(e.target.value)
-          }
           size={50}
+          required
+          {...register("email2")}
         />
-      </div>
-      <div>
-        <button onClick={handleResendConfirmationCode}>Resend</button>
-      </div>
+        <br />
+        <button type="submit">再送</button>
+      </form>
       <br />
       <Link to="/">ログイン</Link>
       <br />
