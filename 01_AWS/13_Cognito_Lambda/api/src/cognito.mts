@@ -22,25 +22,30 @@ export class CognitoClient {
     clientId: string,
     username: string,
     email: string,
+    name: string,
     password: string
   ): Promise<{
-    result: boolean;
-    output: Cognito.SignUpCommandOutput | string;
+    res: Cognito.SignUpCommandOutput | false;
+    error?: Cognito.InternalErrorException;
   }> => {
     try {
       const command = new Cognito.SignUpCommand({
         ClientId: clientId,
         Username: username,
         Password: password,
-        UserAttributes: [{ Name: "email", Value: email }],
+        UserAttributes: [
+          { Name: "email", Value: email },
+          { Name: "name", Value: name },
+        ],
       });
       const res = await this.cognitoClient.send(command);
-      return { result: true, output: res };
+      return { res: res };
     } catch (err) {
       console.error((err as Cognito.InternalErrorException).name);
+      console.error((err as Cognito.InternalErrorException).message);
       return {
-        result: false,
-        output: (err as Cognito.InternalErrorException).name,
+        res: undefined,
+        error: err as Cognito.InternalErrorException,
       };
     }
   };
@@ -56,8 +61,8 @@ export class CognitoClient {
     username: string,
     confirmationCode: string
   ): Promise<{
-    result: boolean;
-    output: string;
+    res: boolean;
+    error?: Cognito.InternalErrorException;
   }> => {
     try {
       const command = new Cognito.ConfirmSignUpCommand({
@@ -66,18 +71,18 @@ export class CognitoClient {
         ConfirmationCode: confirmationCode,
       });
       await this.cognitoClient.send(command);
-      return { result: true, output: "" };
+      return { res: true };
     } catch (err) {
       console.error((err as Cognito.InternalErrorException).name);
+      console.error((err as Cognito.InternalErrorException).message);
       return {
-        result: false,
-        output: (err as Cognito.InternalErrorException).name,
+        res: false,
+        error: err as Cognito.InternalErrorException,
       };
     }
   };
   /**
    * サインイン
-   * @param userPoolId ユーザープールID
    * @param clientId アプリケーションクライアントID
    * @param username ユーザー名
    * @param password パスワード
@@ -88,8 +93,8 @@ export class CognitoClient {
     username: string,
     password: string
   ): Promise<{
-    result: boolean;
-    output: Cognito.AdminInitiateAuthCommandOutput | string;
+    res: Cognito.AdminInitiateAuthCommandOutput | false;
+    error?: Cognito.InternalErrorException;
   }> => {
     try {
       const command = new Cognito.InitiateAuthCommand({
@@ -99,12 +104,70 @@ export class CognitoClient {
         AuthParameters: { USERNAME: username, PASSWORD: password },
       });
       const res = await this.cognitoClient.send(command);
-      return { result: true, output: res };
+      return { res: res };
     } catch (err) {
       console.error((err as Cognito.InternalErrorException).name);
+      console.error((err as Cognito.InternalErrorException).message);
       return {
-        result: false,
-        output: (err as Cognito.InternalErrorException).name,
+        res: false,
+        error: err as Cognito.InternalErrorException,
+      };
+    }
+  };
+  /**
+   * トークンの更新
+   * @param clientId アプリケーションクライアントID
+   * @param refreshToken リフレッシュトークン
+   * @returns 更新後のトークン/false:失敗
+   */
+  public updateToken = async (
+    clientId: string,
+    refreshToken: string
+  ): Promise<{
+    res: Cognito.AdminInitiateAuthCommandOutput | false;
+    error?: Cognito.InternalErrorException;
+  }> => {
+    try {
+      const command = new Cognito.InitiateAuthCommand({
+        ClientId: clientId,
+        // ユーザープールの設定でALLOW_REFRESH_TOKEN_AUTHの有効化が必要
+        AuthFlow: Cognito.AuthFlowType.REFRESH_TOKEN,
+        AuthParameters: { REFRESH_TOKEN: refreshToken },
+      });
+      const res = await this.cognitoClient.send(command);
+      return { res: res };
+    } catch (err) {
+      console.error((err as Cognito.InternalErrorException).name);
+      console.error((err as Cognito.InternalErrorException).message);
+      return {
+        res: false,
+        error: err as Cognito.InternalErrorException,
+      };
+    }
+  };
+  /**
+   * ユーザー属性データの取得
+   * @param accessToken アクセストークン
+   * @returns ユーザー属性データ/false:取得失敗
+   */
+  public getUserData = async (
+    accessToken: string
+  ): Promise<{
+    res: Cognito.GetUserCommandOutput | false;
+    error?: Cognito.InternalErrorException;
+  }> => {
+    try {
+      const command = new Cognito.GetUserCommand({
+        AccessToken: accessToken,
+      });
+      const res = await this.cognitoClient.send(command);
+      return { res: res };
+    } catch (err) {
+      console.error((err as Cognito.InternalErrorException).name);
+      console.error((err as Cognito.InternalErrorException).message);
+      return {
+        res: undefined,
+        error: err as Cognito.InternalErrorException,
       };
     }
   };
@@ -119,7 +182,7 @@ export class CognitoClient {
     previousPassword: string,
     proposedPassword: string,
     accessToken: string
-  ): Promise<{ result: boolean; output: string }> => {
+  ): Promise<{ res: boolean; error?: Cognito.InternalErrorException }> => {
     try {
       const command = new Cognito.ChangePasswordCommand({
         PreviousPassword: previousPassword,
@@ -127,12 +190,13 @@ export class CognitoClient {
         AccessToken: accessToken,
       });
       await this.cognitoClient.send(command);
-      return { result: true, output: "" };
+      return { res: true };
     } catch (err) {
       console.error((err as Cognito.InternalErrorException).name);
+      console.error((err as Cognito.InternalErrorException).message);
       return {
-        result: false,
-        output: (err as Cognito.InternalErrorException).name,
+        res: false,
+        error: err as Cognito.InternalErrorException,
       };
     }
   };
@@ -143,18 +207,19 @@ export class CognitoClient {
    */
   public globalSignOut = async (
     accessToken: string
-  ): Promise<{ result: boolean; output: string }> => {
+  ): Promise<{ result: boolean; error?: Cognito.InternalErrorException }> => {
     try {
       const command = new Cognito.GlobalSignOutCommand({
         AccessToken: accessToken,
       });
       await this.cognitoClient.send(command);
-      return { result: true, output: "" };
+      return { result: true };
     } catch (err) {
       console.error((err as Cognito.InternalErrorException).name);
+      console.error((err as Cognito.InternalErrorException).message);
       return {
         result: false,
-        output: (err as Cognito.InternalErrorException).name,
+        error: err as Cognito.InternalErrorException,
       };
     }
   };
@@ -165,18 +230,19 @@ export class CognitoClient {
    */
   public deleteUser = async (
     accessToken: string
-  ): Promise<{ result: boolean; output: string }> => {
+  ): Promise<{ result: boolean; error?: Cognito.InternalErrorException }> => {
     try {
       const command = new Cognito.DeleteUserCommand({
         AccessToken: accessToken,
       });
       await this.cognitoClient.send(command);
-      return { result: true, output: "" };
+      return { result: true };
     } catch (err) {
       console.error((err as Cognito.InternalErrorException).name);
+      console.error((err as Cognito.InternalErrorException).message);
       return {
         result: false,
-        output: (err as Cognito.InternalErrorException).name,
+        error: err as Cognito.InternalErrorException,
       };
     }
   };

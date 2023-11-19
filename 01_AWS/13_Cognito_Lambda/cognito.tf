@@ -8,10 +8,10 @@ resource "aws_cognito_user_pool" "user_pool" {
   name = var.project_name
   # ユーザー名の他に認証での利用を許可する属性(email/phone_number/preferred_username)
   # username_attributesと同時利用不可
-  alias_attributes = ["email"]
+  # alias_attributes = ["email"]
   # サインアップ時にユーザー名の代わりに利用可能な属性(email/phone_number)
   # alias_attributesと同時利用不可
-  # username_attributes = ["email"]
+  username_attributes = ["email"]
   # ユーザー名の要件
   username_configuration {
     # false(default): ユーザー名の大文字と小文字を区別しない
