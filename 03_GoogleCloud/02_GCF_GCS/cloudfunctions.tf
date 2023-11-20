@@ -94,7 +94,7 @@ resource "google_cloudfunctions2_function" "gcf" {
     }
   }
   # 関数の説明文
-  description = var.region
+  description = var.project_id
   # ラベル
   labels = {
     name = var.project_id
