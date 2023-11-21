@@ -29,6 +29,7 @@ resource "google_artifact_registry_repository" "docker" {
 # コンテナイメージのビルドとリポジトリへのプッシュ
 locals {
   dockerfile_dir = "docker"
+  image_url      = "${google_artifact_registry_repository.docker.location}-docker.pkg.dev/${var.project_id}/${google_artifact_registry_repository.docker.repository_id}/${var.gar_image_name}:latest"
 }
 resource "null_resource" "main" {
   # リポジトリ作成後に実行
@@ -39,10 +40,15 @@ resource "null_resource" "main" {
   }
   # コンテナのビルド
   provisioner "local-exec" {
-    command = "docker build -t ${google_artifact_registry_repository.docker.location}-docker.pkg.dev/${var.project_id}/${google_artifact_registry_repository.docker.repository_id}/${var.gar_image_name}:latest ${local.dockerfile_dir}"
+    command = "docker build -t ${local.image_url} ${local.dockerfile_dir}"
   }
   # リポジトリへのコンテナのプッシュ
   provisioner "local-exec" {
-    command = "docker push ${google_artifact_registry_repository.docker.location}-docker.pkg.dev/${var.project_id}/${google_artifact_registry_repository.docker.repository_id}/${var.gar_image_name}:latest"
+    command = "docker push ${local.image_url}"
   }
+}
+
+# コンテナイメージのURL
+output "image_url" {
+  value = local.image_url
 }
