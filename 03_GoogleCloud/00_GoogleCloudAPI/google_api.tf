@@ -5,7 +5,7 @@
 # 有効化するAPIの一覧
 locals {
   services = {
-    "Cloud Run Admin API" : "run.googleapis.com",
+    "Cloud Run API" : "run.googleapis.com",
     "Cloud Functions API" : "cloudfunctions.googleapis.com",
     "Cloud Build API" : "cloudbuild.googleapis.com",
     "Google Cloud Storage JSON API" : "storage-api.googleapis.com",
