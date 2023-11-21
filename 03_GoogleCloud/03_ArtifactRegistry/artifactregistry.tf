@@ -28,8 +28,10 @@ resource "google_artifact_registry_repository" "docker" {
 
 # コンテナイメージのビルドとリポジトリへのプッシュ
 locals {
+  # Dockerfileのあるディレクトリパス
   dockerfile_dir = "docker"
-  image_url      = "${google_artifact_registry_repository.docker.location}-docker.pkg.dev/${var.project_id}/${google_artifact_registry_repository.docker.repository_id}/${var.gar_image_name}:latest"
+  # リポジトリのイメージURL
+  image_url = "${google_artifact_registry_repository.docker.location}-docker.pkg.dev/${var.project_id}/${google_artifact_registry_repository.docker.repository_id}/${var.gar_image_name}:latest"
 }
 resource "null_resource" "main" {
   # リポジトリ作成後に実行
