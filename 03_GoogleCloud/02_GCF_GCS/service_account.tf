@@ -13,7 +13,7 @@ resource "google_service_account" "gcs" {
   description = "Service Account for publishing GCS PresignedURL"
 }
 
-# サービスアカウント
+# サービスアカウントに権限(ロール)を割り当て
 resource "google_project_iam_member" "gcs" {
   # プロジェクトID
   project = var.project_id
