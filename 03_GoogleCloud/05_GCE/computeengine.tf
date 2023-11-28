@@ -3,7 +3,7 @@
 #============================================================
 
 # VMインスタンスの作成
-resource "google_compute_instance" "instance-1" {
+resource "google_compute_instance" "instance" {
   # VMインスタンス名
   name = var.project_id
   # ゾーン
@@ -41,6 +41,11 @@ resource "google_compute_instance" "instance-1" {
   }
   # 画面キャプチャツールと録画ツールの有効化(true:有効/false:無効(default))
   enable_display = false
+  # サービスアカウントの設定
+  service_account {
+    email  = google_service_account.gce.email
+    scopes = ["cloud-platform"]
+  }
   # ファイアウォール設定
   tags = [
     "ssh-server",     # ファイアウォール設定でSSHを許可するためのタグ
@@ -92,6 +97,16 @@ resource "google_compute_instance" "instance-1" {
   }
 }
 
+# ComputeEngine用のサービスアカウントの作成
+resource "google_service_account" "gce" {
+  # サービスアカウントID
+  account_id = var.project_id
+  # 表示名
+  display_name = var.project_id
+  # 説明文
+  description = var.project_id
+}
+
 # VPCネットワークの作成
 resource "google_compute_network" "vpc" {
   # VPCネットワーク名
@@ -118,7 +133,7 @@ resource "google_compute_subnetwork" "subnet" {
 }
 
 # ファイアウォール設定の作成
-resource "google_compute_firewall" "my_network" {
+resource "google_compute_firewall" "gce" {
   # ファイアウォール設定名
   name = var.project_id
   # ファイアウォール設定先のVPCネットワークの指定
@@ -146,17 +161,17 @@ resource "google_compute_firewall" "my_network" {
 
 # ユーザーに対するロールの付与
 # 特定のGoogleアカウントにインスタンスへのSSH接続を許可する
-resource "google_project_iam_binding" "ssh_access_user" {
+resource "google_project_iam_binding" "gce_ssh_access_user" {
   # プロジェクトIDの指定
   project = var.project_id
   # 割り当てるロール
-  role = google_project_iam_custom_role.ssh_access_role.id
+  role = google_project_iam_custom_role.gce_ssh_access_role.id
   # 割り当て先の対象ユーザー
   members = var.gce_allow_ssh_user
 }
 
 # カスタムロールの作成
-resource "google_project_iam_custom_role" "ssh_access_role" {
+resource "google_project_iam_custom_role" "gce_ssh_access_role" {
   # カスタムロールのID
   role_id = "CutomRole"
   # カスタムロールのタイトル
