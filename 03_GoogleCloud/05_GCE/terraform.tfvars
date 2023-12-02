@@ -7,7 +7,7 @@ region = "asia-northeast1"
 # Compute Engine
 #============================================================
 # ゾーン
-gce_zone = "asia-northeast1-a"
+gce_zone = "asia-northeast1-b"
 # OSイメージ
 gce_image = "projects/debian-cloud/global/images/debian-11-bullseye-v20231115"
 # マシンタイプ(インスタンスのvCPU数/メモリサイズの設定)

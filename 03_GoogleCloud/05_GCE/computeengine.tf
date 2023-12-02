@@ -4,6 +4,7 @@
 
 # VMインスタンスの作成
 resource "google_compute_instance" "instance" {
+  depends_on = [google_project_service.apis]
   # VMインスタンス名
   name = var.project_id
   # ゾーン
@@ -109,6 +110,7 @@ resource "google_service_account" "gce" {
 
 # VPCネットワークの作成
 resource "google_compute_network" "vpc" {
+  depends_on = [google_project_service.apis]
   # VPCネットワーク名
   name = var.project_id
   # サブネットの自動生成(true:自動生成/false)
