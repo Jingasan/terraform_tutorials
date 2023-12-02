@@ -7,7 +7,6 @@ locals {
   services = {
     "Cloud OS Login API" : "oslogin.googleapis.com",
     "Compute Engine API" : "compute.googleapis.com",
-    #"VM Manager (OS Config API)" : "osconfig.googleapis.com",
   }
 }
 
