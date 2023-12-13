@@ -1,0 +1,111 @@
+#============================================================
+# Cloud SQL
+#============================================================
+
+# SQLインスタンスの作成
+resource "google_sql_database_instance" "default" {
+  depends_on = [google_project_service.apis]
+  # インスタンスID
+  name = var.project_id
+  # ルートパスワード
+  root_password = "Password_1234"
+  # データベースのバージョン
+  database_version = "POSTGRES_15"
+  # リージョン
+  region = var.region
+  # SQLインスタンスの削除の禁止(true:削除を禁止/false:削除を許可)
+  deletion_protection = false
+  # 詳細設定
+  settings {
+    # Cloud SQLのエディション選択
+    edition = "ENTERPRISE"
+    # 料金プラン:従量課金(PER_USE)のみ選択可能
+    pricing_plan = "PER_USE"
+    # ゾーンの可用性(ZONAL:シングルゾーン/REGIONAL:複数のゾーン)
+    availability_type = "ZONAL"
+    # プライマリゾーン
+    location_preference {
+      zone = "asia-northeast1-b"
+    }
+    # カスタムシェイプ
+    tier = "db-custom-1-3840"
+    # ストレージの種類(PD_SSD(default)(推奨)/PD_HDD)
+    disk_type = "PD_SSD"
+    # ストレージ容量(GB)
+    disk_size = 10
+    # ストレージの自動増量の有効化(true:有効)
+    disk_autoresize = true
+    # 自動増量の最大サイズ(GB)
+    disk_autoresize_limit = 10
+    # 接続の設定
+    ip_configuration {
+      # プライベートIPの有効化(true:有効)
+      enable_private_path_for_google_cloud_services = false
+      # IPv4アドレスの有効化(true:有効)
+      ipv4_enabled = true
+      # SSLを必須とするか(true:必須)
+      require_ssl = false
+    }
+    # バックアップ設定
+    backup_configuration {
+      # バックアップの有効化(true:有効/false:無効)
+      enabled = true
+      # バックアップ先の地域
+      location = "asia"
+      # 日次バックアップの設定
+      backup_retention_settings {
+        # バックアップ数
+        retained_backups = 7
+        # 単位:数(COUNT)のみ利用可能
+        retention_unit = "COUNT"
+      }
+      # バックアップの開始時間(バックアップは開始時間から最大4時間)
+      start_time = "12:00"
+      # ポイントインタイムリカバリの有効化(true:有効化/false:無効化)
+      point_in_time_recovery_enabled = true
+      # ログの日数
+      transaction_log_retention_days = 7
+      # バイナリロギングの有効化(MySQLでのみ利用可能)(true:有効/false:無効)
+      binary_log_enabled = false
+    }
+    # SQLインスタンスの削除の禁止(true:削除を禁止/false:削除を許可)
+    deletion_protection_enabled = false
+    # Query Insightsの設定
+    insights_config {
+      # クエリ分析情報を有効化(true:有効)
+      query_insights_enabled = false
+      # クライアントIPアドレスの保存(true:保存)
+      record_client_address = false
+      # アプリケーションタグの保存(true:保存)
+      record_application_tags = false
+      # クエリの長さ(256-4500byte, default:1024)
+      query_string_length = 256
+      # 最大サンプリングレート(0-20/分, default:5, 0:サンプリング無効)
+      query_plans_per_minute = 0
+    }
+    # メンテナンスの設定
+    maintenance_window {
+      # メンテナンス日(1:月,2:火,3:水,4:木,5:金,6:土,7:日)
+      day = 1
+      # メンテナンス開始時間(0-23)
+      hour = 0
+    }
+    # パスワードポリシー
+    password_validation_policy {
+      # パスワードポリシーの有効化(true:有効)
+      enable_password_policy = true
+      # パスワードの許容する最小の長さ
+      min_length = 8
+      # パスワードに英大文字, 英小文字, 数字, 記号を含めることを要求
+      complexity = "COMPLEXITY_DEFAULT"
+      # パスワードにユーザー名を許容しない(true:許容しない)
+      disallow_username_substring = true
+      # パスワード再利用の制限(0:制限しない, 0以上:指定した回数以上他のパスワードの設定を必要とする)
+      reuse_interval = 0
+    }
+    # タグ
+    user_labels = {
+      name = var.project_id
+    }
+  }
+}
