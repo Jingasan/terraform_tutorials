@@ -7,10 +7,10 @@ resource "google_sql_database_instance" "default" {
   depends_on = [google_project_service.apis]
   # インスタンスID
   name = var.project_id
-  # ルートパスワード
-  root_password = "Password_1234"
   # データベースのバージョン
-  database_version = "POSTGRES_15"
+  database_version = var.sql_database_version
+  # ルートパスワード
+  root_password = var.sql_root_password
   # リージョン
   region = var.region
   # SQLインスタンスの削除の禁止(true:削除を禁止/false:削除を許可)
@@ -18,25 +18,25 @@ resource "google_sql_database_instance" "default" {
   # 詳細設定
   settings {
     # Cloud SQLのエディション選択
-    edition = "ENTERPRISE"
+    edition = var.sql_edition
     # 料金プラン:従量課金(PER_USE)のみ選択可能
     pricing_plan = "PER_USE"
     # ゾーンの可用性(ZONAL:シングルゾーン/REGIONAL:複数のゾーン)
-    availability_type = "ZONAL"
+    availability_type = var.sql_availability_type
     # プライマリゾーン
     location_preference {
-      zone = "asia-northeast1-b"
+      zone = var.sql_zone
     }
-    # カスタムシェイプ
-    tier = "db-custom-1-3840"
+    # マシンの構成
+    tier = var.sql_tier
     # ストレージの種類(PD_SSD(default)(推奨)/PD_HDD)
-    disk_type = "PD_SSD"
+    disk_type = var.sql_disk_type
     # ストレージ容量(GB)
-    disk_size = 10
+    disk_size = var.sql_disk_size
     # ストレージの自動増量の有効化(true:有効)
-    disk_autoresize = true
+    disk_autoresize = var.sql_disk_autoresize
     # 自動増量の最大サイズ(GB)
-    disk_autoresize_limit = 10
+    disk_autoresize_limit = var.sql_disk_autoresize_limit
     # 接続の設定
     ip_configuration {
       # プライベートIPの有効化(true:有効)
@@ -55,16 +55,16 @@ resource "google_sql_database_instance" "default" {
       # 日次バックアップの設定
       backup_retention_settings {
         # バックアップ数
-        retained_backups = 7
+        retained_backups = var.sql_retained_backups
         # 単位:数(COUNT)のみ利用可能
         retention_unit = "COUNT"
       }
       # バックアップの開始時間(バックアップは開始時間から最大4時間)
-      start_time = "12:00"
+      start_time = var.sql_backup_start_time
       # ポイントインタイムリカバリの有効化(true:有効化/false:無効化)
       point_in_time_recovery_enabled = true
-      # ログの日数
-      transaction_log_retention_days = 7
+      # ログの日数(日)
+      transaction_log_retention_days = var.sql_transaction_log_retention_days
       # バイナリロギングの有効化(MySQLでのみ利用可能)(true:有効/false:無効)
       binary_log_enabled = false
     }
@@ -86,9 +86,9 @@ resource "google_sql_database_instance" "default" {
     # メンテナンスの設定
     maintenance_window {
       # メンテナンス日(1:月,2:火,3:水,4:木,5:金,6:土,7:日)
-      day = 1
-      # メンテナンス開始時間(0-23)
-      hour = 0
+      day = var.sql_maintenance_day
+      # メンテナンス開始時間(0-23時)
+      hour = var.sql_maintenance_start_hour
     }
     # パスワードポリシー
     password_validation_policy {
