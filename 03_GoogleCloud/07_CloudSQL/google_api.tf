@@ -7,6 +7,7 @@ locals {
   services = {
     "Cloud OS Login API" : "oslogin.googleapis.com",
     "Compute Engine API" : "compute.googleapis.com",
+    "Cloud SQL Admin API" : "sqladmin.googleapis.com",
   }
 }
 
