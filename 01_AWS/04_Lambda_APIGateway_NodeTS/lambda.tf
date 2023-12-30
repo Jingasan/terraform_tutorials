@@ -80,7 +80,7 @@ resource "null_resource" "lambda_build_upload" {
   }
   # Lambda関数のZIP圧縮
   provisioner "local-exec" {
-    command     = "zip -r lambda.zip dist node_modules"
+    command     = "zip -r lambda.zip dist node_modules public"
     working_dir = "node"
   }
   # S3アップロード
