@@ -128,6 +128,6 @@ resource "google_sql_database" "database" {
 
 # CloudSQLインスタンスのプライベートIPアドレスの出力
 output "cloudsql_privateip" {
-  description = "Private IP Address"
+  description = "CloudSQL Private IP Address"
   value       = google_sql_database_instance.default.private_ip_address
 }
