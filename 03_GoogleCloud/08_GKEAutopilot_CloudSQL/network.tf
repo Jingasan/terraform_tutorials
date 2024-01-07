@@ -11,7 +11,6 @@ resource "google_compute_network" "vpc" {
   auto_create_subnetworks = false
   # 説明文
   description = var.project_id
-
 }
 
 # サブネットの作成
