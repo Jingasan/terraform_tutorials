@@ -13,12 +13,6 @@ app.use(express.urlencoded({ limit: "50mb", extended: true }));
 app.use(cors());
 // GET
 app.get("/", async (_req, res) => {
-  return res.status(200).send({
-    message: "Hello World!",
-  });
-});
-// GET
-app.get("/rds", async (_req, res) => {
   console.log(`HOST: ${String(process.env.RDS_HOST)}`);
   console.log(`PORT: ${String(process.env.RDS_PORT)}`);
   console.log(`DATABASE: ${String(process.env.RDS_DATABASE)}`);

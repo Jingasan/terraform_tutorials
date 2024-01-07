@@ -29,13 +29,24 @@ resource "google_artifact_registry_repository" "docker" {
 # コンテナイメージのビルドとリポジトリへのプッシュ
 locals {
   # Dockerfileのあるディレクトリパス
-  dockerfile_dir = "docker"
+  dockerfile_dir = "api"
   # リポジトリのイメージURL
   image_url = "${google_artifact_registry_repository.docker.location}-docker.pkg.dev/${var.project_id}/${google_artifact_registry_repository.docker.repository_id}/${var.gar_image_name}:latest"
 }
 resource "null_resource" "main" {
   # リポジトリ作成後に実行
   depends_on = [google_artifact_registry_repository.docker]
+  # ソースコードに差分があった場合にのみ実行
+  triggers = {
+    code_diff = join("", [
+      for file in fileset("${local.dockerfile_dir}/node/src", "{*.mts}")
+      : filebase64("${local.dockerfile_dir}/node/src/${file}")
+    ])
+    package_diff = join("", [
+      for file in fileset("${local.dockerfile_dir}/node", "{package*.json}")
+      : filebase64("${local.dockerfile_dir}/node/${file}")
+    ])
+  }
   # ログイン
   provisioner "local-exec" {
     command = "gcloud auth configure-docker ${google_artifact_registry_repository.docker.location}-docker.pkg.dev --quiet"

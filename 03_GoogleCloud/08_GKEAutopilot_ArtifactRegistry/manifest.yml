@@ -3,43 +3,43 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: "nginx-service" # Serviceの名前
+  name: "api-service" # Serviceの名前
   namespace: "default" # デプロイ先の名前空間
   labels: # Serviceのラベル名
-    app: "nginx-service"
+    app: "api-service"
 spec:
   type: LoadBalancer
   selector: # どのPodをServiceの対象とするかをPodのラベルで指定
-    app: "nginx" # Podのラベル名(1)と一致すること
+    app: "api" # Podのラベル名(1)と一致すること
   ports:
     - name: "http-port"
       protocol: "TCP"
       port: 80 # ClusterIPで受け付けるPort番号
-      targetPort: 80 # 転送先のコンテナのPort番号
+      targetPort: 3000 # 転送先のコンテナのPort番号
 ---
 # Deploymentの定義
 apiVersion: "apps/v1"
 kind: "Deployment"
 metadata:
-  name: "nginx-deployment" # Deploymentの名前(2)
+  name: "api-deployment" # Deploymentの名前(2)
   namespace: "default" # デプロイ先の名前空間
   labels: # Deploymentのラベル名
-    app: "nginx-deployment"
+    app: "api-deployment"
 spec:
   replicas: 3
   selector: # どのPodをDeploymentの対象とするかをPodのラベルで指定
     matchLabels:
-      app: "nginx" # Podのラベル名(1)と一致すること
+      app: "api" # Podのラベル名(1)と一致すること
   template:
     metadata:
       labels: # Podのラベル名
-        app: "nginx" # (1)
+        app: "api" # (1)
     spec:
       containers:
-        - name: "nginx"
-          image: "asia-northeast1-docker.pkg.dev/tribal-pride-403908/nginx/nginx:latest"
+        - name: "api"
+          image: "asia-northeast1-docker.pkg.dev/tribal-pride-403908/api/api:latest"
           ports:
-            - containerPort: 80
+            - containerPort: 3000
           resources: # [Option]
             limits: # [Option] CPUやメモリなどのリソースの上限値
               memory: 512Mi
@@ -52,14 +52,14 @@ spec:
 apiVersion: "autoscaling/v2"
 kind: "HorizontalPodAutoscaler"
 metadata:
-  name: "nginx-hpa" # HPAの名前
+  name: "api-hpa" # HPAの名前
   namespace: "default" # デプロイ先の名前空間
   labels: # HPAのラベル名
-    app: "nginx-hpa"
+    app: "api-hpa"
 spec:
   scaleTargetRef:
     kind: "Deployment" # オートスケーリング対象をDeploymentとする
-    name: "nginx-deployment" # オートスケーリング対象のDeploymentリソース名(2)
+    name: "api-deployment" # オートスケーリング対象のDeploymentリソース名(2)
     apiVersion: "apps/v1" # DeploymentのAPIバージョン
   minReplicas: 1 # Pod数の最小値
   maxReplicas: 5 # Pod数の最大値

@@ -6,4 +6,4 @@ region = "asia-northeast1"
 #============================================================
 # Artifact Registry
 #============================================================
-gar_image_name = "nginx"
+gar_image_name = "api"
