@@ -42,7 +42,7 @@ spec:
             - containerPort: 3000
           env:
             - name: RDS_HOST
-              value: "10.186.0.3"
+              value: "10.200.0.3"
             - name: RDS_PORT
               value: "5432"
             - name: RDS_DATABASE
