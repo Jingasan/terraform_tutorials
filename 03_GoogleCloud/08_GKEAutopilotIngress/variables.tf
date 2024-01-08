@@ -5,5 +5,3 @@
 variable "project_id" {}
 # リージョン
 variable "region" {}
-# ドメイン
-variable "domain" {}
