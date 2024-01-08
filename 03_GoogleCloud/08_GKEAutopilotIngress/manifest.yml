@@ -6,8 +6,8 @@ metadata:
   name: nginx-ingress
   namespace: default
   annotations:
-    kubernetes.io/ingress.class: "gce" # 外部HTTP(S)ロードバランサーを指定
-    kubernetes.io/ingress.global-static-ip-name: tribal-pride-403908 # 静的外部IPアドレスの名称
+    kubernetes.io/ingress.class: "gce" # 外部HTTP(S)ロードバランサーを作成
+    kubernetes.io/ingress.global-static-ip-name: tribal-pride-403908 # 静的外部IPアドレスの名称指定
 spec:
   defaultBackend:
     service:
