@@ -56,3 +56,9 @@ resource "google_compute_subnetwork" "subnet" {
   # 説明文
   description = var.project_id
 }
+
+# kubeconfig作成コマンドの出力
+output "generate_kubeconfig_command" {
+  description = "Next: Generate kubeconfig with following command:"
+  value       = "gcloud container clusters get-credentials ${google_container_cluster.cluster.name} --region=${var.region}"
+}
