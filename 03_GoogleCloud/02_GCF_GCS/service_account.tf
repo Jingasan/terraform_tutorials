@@ -28,4 +28,3 @@ resource "google_service_account_key" "key" {
   # アカウントキーを作成するサービスアカウントのID
   service_account_id = google_service_account.gcs.name
 }
-

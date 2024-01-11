@@ -14,7 +14,6 @@ app.use(cors());
 const bucket = String(process.env.BUCKET);
 // Put用PresignedURLの取得
 app.get("/presignedurl", async (_req: Request, res: Response) => {
-  console.log(`Bucket: ${bucket}`);
   const path = randomUUID().toString() + ".json";
   const expires = 24 * 60 * 60; // 24h
   const objectList = await gcsClient.getPutPresignedURL(bucket, path, expires);
@@ -22,8 +21,6 @@ app.get("/presignedurl", async (_req: Request, res: Response) => {
 });
 // オブジェクト一覧取得API
 app.get("/object_list", async (_req: Request, res: Response) => {
-  console.log(`Bucket: ${bucket}`);
-  console.log(JSON.parse(process.env.CREDENTIALS));
   const objectList = await gcsClient.listObjects(bucket);
   return res.status(200).json(objectList);
 });
@@ -51,6 +48,8 @@ app.delete("/object", async (req: Request, res: Response) => {
 });
 // Error 404 Not Found
 app.use((_req: Request, res: Response) => {
+  console.log(`Bucket: ${bucket}`);
+  console.log(JSON.parse(process.env.CREDENTIALS));
   return res.status(404).json({ error: "Not Found" });
 });
 // 関数のエンドポイント

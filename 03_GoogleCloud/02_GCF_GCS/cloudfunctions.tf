@@ -5,6 +5,7 @@
 # 関数コード用バケットの作成
 data "google_project" "project" {}
 resource "google_storage_bucket" "gcf" {
+  depends_on = [google_project_service.apis]
   # バケット名
   name = "gcf-v2-sources-${data.google_project.project.number}-${var.region}"
   # プロジェクトID
@@ -41,6 +42,7 @@ data "archive_file" "gcf" {
 
 # ZIP圧縮した関数のGCSアップロード
 resource "google_storage_bucket_object" "object" {
+  depends_on = [google_project_service.apis]
   # アップロード先のオブジェクトパス
   name = "cloudfunctions.${data.archive_file.gcf.output_md5}.zip"
   # アップロード先のバケット
@@ -104,6 +106,7 @@ resource "google_cloudfunctions2_function" "gcf" {
 # CloudFunctions(実体はCloudRun)に対してIAMポリシーを割り当て
 # すべてのユーザーが認証なし(Authorizationヘッダーなし)でAPIを実行できるようにする
 resource "google_cloud_run_service_iam_member" "gcf" {
+  depends_on = [google_project_service.apis]
   # 割り当て先のリソース
   service = google_cloudfunctions2_function.gcf.name
   # リソースのロケーション
