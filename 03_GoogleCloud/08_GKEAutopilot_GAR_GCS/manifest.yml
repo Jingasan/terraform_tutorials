@@ -41,16 +41,11 @@ spec:
           ports:
             - containerPort: 3000
           env:
-            - name: RDS_HOST
-              value: "10.200.0.3"
-            - name: RDS_PORT
-              value: "5432"
-            - name: RDS_DATABASE
-              value: "db"
-            - name: RDS_USERNAME
-              value: "user"
-            - name: RDS_PASSWORD
-              value: "Password_1234"
+            - name: CREDENTIALS
+              valueFrom:
+                secretKeyRef:
+                  name: gcs-access-key
+                  key: gcs-access.key
           resources: # [Option]
             limits: # [Option] CPUやメモリなどのリソースの上限値
               memory: 512Mi

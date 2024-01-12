@@ -37,7 +37,7 @@ spec:
     spec:
       containers:
         - name: "api"
-          image: "asia-northeast1-docker.pkg.dev/tribal-pride-403908/api/api:latest"
+          image: "asia-northeast1-docker.pkg.dev/goo-tutorial/api/api:latest"
           ports:
             - containerPort: 3000
           resources: # [Option]
