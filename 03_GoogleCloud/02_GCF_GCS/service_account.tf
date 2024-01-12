@@ -19,7 +19,7 @@ resource "google_project_iam_member" "gcs" {
   project = var.project_id
   # ロール割り当て先のユーザー：サービスアカウントを指定
   member = "serviceAccount:${google_service_account.gcs.email}"
-  # 割り当てるロール：ストレージ管理者
+  # 割り当てるロール：ストレージオブジェクト管理者
   role = "roles/storage.objectAdmin"
 }
 
