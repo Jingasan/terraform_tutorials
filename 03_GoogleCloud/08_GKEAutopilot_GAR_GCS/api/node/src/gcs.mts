@@ -2,7 +2,7 @@ import * as GCS from "@google-cloud/storage";
 
 export class GCSClient {
   private gcsClient = new GCS.Storage({
-    credentials: JSON.parse(process.env.CREDENTIALS), // PresignedURLを取得するために必要
+    credentials: JSON.parse(process.env.CREDENTIALS),
   });
 
   /**

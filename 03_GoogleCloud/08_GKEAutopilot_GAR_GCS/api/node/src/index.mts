@@ -14,8 +14,6 @@ app.use(express.urlencoded({ limit: "50mb", extended: true }));
 app.use(cors());
 // GET
 app.get("/", async (_req, res) => {
-  //   const bucket = String(process.env.BUCKET);
-  //   const list = await gcsClient.listObjects(bucket);
   const list = await gcsClient.listBuckets();
   console.log("List:");
   console.log(list);
@@ -23,7 +21,6 @@ app.get("/", async (_req, res) => {
 });
 // Error 404 Not Found
 app.use((_req, res) => {
-  //   console.log(`Bucket: ${process.env.BUCKET}`);
   console.log(JSON.parse(process.env.CREDENTIALS));
   return res.status(404).json({ error: "Not Found" });
 });
