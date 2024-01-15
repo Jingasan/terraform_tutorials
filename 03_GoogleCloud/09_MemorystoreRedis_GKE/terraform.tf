@@ -9,7 +9,16 @@ terraform {
 
   # Providerのバージョン指定
   required_providers {
-    google = ">=5.4.0" # GoogleCloud
+    # GoogleCloud
+    google = {
+      source  = "hashicorp/google"
+      version = "~>5"
+    }
+    # GoogleCloud (プライベートVPC接続削除時のエラー対策)
+    google-beta = {
+      source  = "hashicorp/google-beta"
+      version = "~>4"
+    }
   }
 
   # .tfstateをGCS(Cloud Storage)で管理する設定
