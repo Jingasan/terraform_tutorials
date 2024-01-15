@@ -61,9 +61,9 @@ resource "google_compute_subnetwork" "subnet" {
 output "next_command" {
   description = "Next command:"
   value = {
-    command1 = "gcloud container clusters get-credentials ${google_container_cluster.cluster.name} --region=${var.region}"
-    command2 = "kubectl create secret generic gcs-access-key --from-file=gcs-access.key=./service_account_key.json"
-    command3 = "kubectl apply -f manifest.yml"
-    command4 = "kubectl get svc --watch"
+    command1 = "1. gcloud container clusters get-credentials ${google_container_cluster.cluster.name} --region=${var.region}"
+    command2 = "2. kubectl create secret generic gcs-access-key --from-file=gcs-access.key=./service_account_key.json"
+    command3 = "3. kubectl apply -f manifest.yml"
+    command4 = "4. kubectl get svc --watch"
   }
 }

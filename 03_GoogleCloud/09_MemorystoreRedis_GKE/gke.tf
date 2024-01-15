@@ -34,7 +34,7 @@ output "next_command" {
   description = "Next command:"
   value = {
     command1 = "1. gcloud container clusters get-credentials ${google_container_cluster.cluster.name} --region=${var.region}"
-    command2 = "2. Set CloudSQL endpoint to manifest.yml"
+    command2 = "2. Set Redis endpoint to manifest.yml"
     command3 = "3. kubectl apply -f manifest.yml"
     command4 = "4. kubectl get svc --watch"
   }
