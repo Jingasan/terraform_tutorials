@@ -15,7 +15,6 @@ app.use(cors());
 const redisClient = new IORedis.Redis({
   host: String(process.env.REDIS_HOST), // Redisホスト名
   port: Number(process.env.REDIS_PORT), // Redisポート番号
-  username: "default", // needs Redis >= 6
 });
 // key-valueの追加
 app.post("/:key", async (req, res) => {
@@ -71,16 +70,10 @@ app.get("/", async (_req, res) => {
   });
 });
 // Error 404 Not Found
-app.use((_req, res) => {
-  return res.status(404).json({ error: "Not Found" });
-});
+app.use((_req, res) => res.status(404).json({ error: "Not Found" }));
 // サーバーを起動する処理
 try {
-  app.listen(PORT, () => {
-    console.log("server running at port:" + PORT);
-  });
+  app.listen(PORT, () => console.log("server running at port:" + PORT));
 } catch (e) {
-  if (e instanceof Error) {
-    console.error(e.message);
-  }
+  if (e instanceof Error) console.error(e.message);
 }

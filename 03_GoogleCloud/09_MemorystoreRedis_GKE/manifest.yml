@@ -42,7 +42,7 @@ spec:
             - containerPort: 3000
           env:
             - name: REDIS_HOST
-              value: "10.2.0.3"
+              value: "10.78.0.3"
             - name: REDIS_PORT
               value: "6379"
           resources: # [Option]

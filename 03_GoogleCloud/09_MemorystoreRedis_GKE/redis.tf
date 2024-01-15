@@ -31,3 +31,12 @@ resource "google_redis_instance" "instance" {
     prevent_destroy = false
   }
 }
+
+# Redisインスタンスのプライマリエンドポイントの出力
+output "redis_primary_endpoint" {
+  description = "Redis Primary Endpoint"
+  value = {
+    primary_endpoint = "${google_redis_instance.instance.host}"
+    port             = "${google_redis_instance.instance.port}"
+  }
+}
