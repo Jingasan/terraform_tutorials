@@ -24,7 +24,7 @@ resource "google_redis_cluster" "cluster" {
   # 転送中のTLS暗号化の有効化
   # TRANSIT_ENCRYPTION_MODE_UNSPECIFIED/TRANSIT_ENCRYPTION_MODE_DISABLED/TRANSIT_ENCRYPTION_MODE_SERVER_AUTHENTICATION
   transit_encryption_mode = "TRANSIT_ENCRYPTION_MODE_DISABLED"
-  # SQLインスタンスの削除の禁止(true:削除を禁止/false:削除を許可)
+  # Redisクラスターの削除の禁止(true:削除を禁止/false:削除を許可)
   lifecycle {
     prevent_destroy = false
   }
