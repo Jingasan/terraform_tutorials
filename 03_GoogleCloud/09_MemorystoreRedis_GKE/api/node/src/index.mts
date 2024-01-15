@@ -22,14 +22,12 @@ const redisClient = new IORedis.Redis({
 // key-valueの追加
 app.post("/:key", async (req, res) => {
   try {
-    console.info("Host: " + String(process.env.REDIS_HOST));
     // URLパラメータとBodyからのkey-value値の取得
     const key = req.params.key;
     const body = req.body;
     if (!("value" in body)) return res.status(400).json("Bad Request");
     // key-valueの追加(期限は30秒)
     await redisClient.set(key, JSON.stringify(body.value), "EX", 30);
-    console.info("Port: " + Number(process.env.REDIS_PORT));
     // レスポンス
     return res.status(200).json("OK");
   } catch (err) {
@@ -40,14 +38,12 @@ app.post("/:key", async (req, res) => {
 // key-valueの取得
 app.get("/:key", async (req, res) => {
   try {
-    console.info("Host: " + String(process.env.REDIS_HOST));
     // 指定したkeyの値の取得
     const key = req.params.key;
     const value = await redisClient.get(key);
     // レスポンス
     let json: any = {};
     json[key] = JSON.parse(value);
-    console.info("Port: " + Number(process.env.REDIS_PORT));
     return res.status(200).json(json);
   } catch (err) {
     // レスポンス
@@ -70,8 +66,6 @@ app.delete("/:key", async (req, res) => {
 // GET
 app.get("/", async (_req, res) => {
   console.info("API is called.");
-  console.info("Host: " + String(process.env.REDIS_HOST));
-  console.info("Port: " + Number(process.env.REDIS_PORT));
   return res.status(200).json({
     message: `API is called. Host: ${String(
       process.env.REDIS_HOST
