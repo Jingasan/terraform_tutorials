@@ -6,7 +6,14 @@ region = "asia-northeast1"
 #============================================================
 # Memorystore Redis
 #============================================================
-# ティア
-gms_redis_tier = "BASIC"
 # Redisバージョン
 gms_redis_version = "REDIS_6_X"
+# ティア
+gms_redis_tier = "BASIC"
+# 実メモリ容量(GB)
+# ティアがBASICの場合は最小値:1,最大値:300
+# ティアがSTANDARDの場合は最小値:5,最大値:300
+gms_redis_memory_size_gb = 1
+# 読み取りアクセス用のレプリカノード数
+# ティアがSTANDARDの場合のみ、1-5で指定可能(default:2)
+gms_redis_replica_count = 0
