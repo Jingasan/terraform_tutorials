@@ -11,6 +11,10 @@ resource "google_compute_instance" "instance" {
   zone = var.gce_zone
   # マシンタイプ(インスタンスのvCPU数/メモリサイズの設定)
   machine_type = var.gce_machine_type
+  # Confidential VMs サービスの有効化(true:有効)
+  confidential_instance_config {
+    enable_confidential_compute = false
+  }
   # ブートディスクの設定
   boot_disk {
     # 名前(VMインスタンス名と同一にすること)
@@ -24,7 +28,7 @@ resource "google_compute_instance" "instance" {
       # pd-extremeエクストリーム永続ディスク
       # pd-ssd：SSD永続ディスク
       # pd-standard：標準永続ディスク
-      type = "pd-balanced"
+      type = var.gce_type
       # ディスクサイズ(GB)(10-65536GBの範囲で指定)
       size = var.gce_size
     }
@@ -36,7 +40,7 @@ resource "google_compute_instance" "instance" {
   # プロビジョニング設定
   scheduling {
     # VMプロビジョニングモデル(STANDARD/SPOT)
-    provisioning_model = "STANDARD"
+    provisioning_model = var.gce_provisioning_model
     # 自動再起動の有効化(true:有効(default)/false:無効)
     automatic_restart = true
   }
@@ -64,13 +68,12 @@ resource "google_compute_instance" "instance" {
       # STANDARD:単一リージョン内で閉じたサービス向け, PREMIUMよりも安価
       # PREMIUM(default):グローバルな可用性を必要とするサービス向け
       # https://cloud.google.com/network-tiers/docs/overview
-      network_tier = "STANDARD"
+      network_tier = var.gce_network_tier
     }
     # VPCネットワーク
     network = google_compute_network.vpc.id
     # サブネットワーク
     subnetwork = google_compute_subnetwork.subnet.id
-    #"projects/tribal-pride-403908/regions/asia-northeast1/subnetworks/default"
   }
   # セキュリティ設定
   shielded_instance_config {

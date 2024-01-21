@@ -7,12 +7,25 @@ region = "asia-northeast1"
 # Compute Engine
 #============================================================
 # ゾーン
-gce_zone = "asia-northeast1-b"
+gce_zone = "asia-northeast1-a"
 # OSイメージ
-gce_image = "projects/debian-cloud/global/images/debian-11-bullseye-v20231115"
+gce_image = "projects/debian-cloud/global/images/debian-12-bookworm-v20240110"
 # マシンタイプ(インスタンスのvCPU数/メモリサイズの設定)
-gce_machine_type = "custom-1-1024"
+gce_machine_type = "e2-medium"
+# ブートディスクの種類
+# pd-balanced：バランス永続ディスク
+# pd-extremeエクストリーム永続ディスク
+# pd-ssd：SSD永続ディスク
+# pd-standard：標準永続ディスク
+gce_type = "pd-balanced"
 # ディスクサイズ(GB)(10-65536GBの範囲で指定)
 gce_size = 10
+# VMプロビジョニングモデル(STANDARD/SPOT)
+gce_provisioning_model = "STANDARD"
 # SSH接続を許可するユーザー
-gce_allow_ssh_user = ["user:xxx@gmail.com"]
+gce_allow_ssh_user = ["user:info.alpain@gmail.com"]
+# ネットワークサービスのプラン
+# STANDARD:単一リージョン内で閉じたサービス向け, PREMIUMよりも安価
+# PREMIUM(default):グローバルな可用性を必要とするサービス向け
+# https://cloud.google.com/network-tiers/docs/overview
+gce_network_tier = "PREMIUM"
