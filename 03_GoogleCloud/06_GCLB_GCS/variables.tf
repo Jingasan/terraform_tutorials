@@ -13,4 +13,5 @@ variable "gcs_storage_class" {}
 #============================================================
 # Certificate Manager
 #============================================================
+# ドメイン(事前にCloudDomainsで取得しておく)
 variable "certificate_manager_domain" {}

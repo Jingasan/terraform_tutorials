@@ -5,8 +5,6 @@
 # GoogleマネージドSSL証明書の作成
 resource "google_compute_managed_ssl_certificate" "ssl" {
   depends_on = [google_project_service.apis]
-  # プロバイダ
-  provider = google-beta
   # 証明書名
   name = var.project_id
   # プロジェクトID

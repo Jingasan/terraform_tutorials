@@ -11,4 +11,5 @@ gcs_storage_class = "Standard"
 #============================================================
 # Certificate Manager
 #============================================================
+# ドメイン(事前にCloudDomainsで取得しておく)
 certificate_manager_domain = "xxxxx.com"
