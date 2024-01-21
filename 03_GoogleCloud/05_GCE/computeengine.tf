@@ -103,6 +103,7 @@ resource "google_compute_instance" "instance" {
 
 # ComputeEngine用のサービスアカウントの作成
 resource "google_service_account" "gce" {
+  depends_on = [google_project_service.apis]
   # サービスアカウントID
   account_id = var.project_id
   # 表示名
@@ -124,6 +125,7 @@ resource "google_compute_network" "vpc" {
 
 # サブネットの作成
 resource "google_compute_subnetwork" "subnet" {
+  depends_on = [google_project_service.apis]
   # サブネット名
   name = var.project_id
   # リージョン
@@ -139,6 +141,7 @@ resource "google_compute_subnetwork" "subnet" {
 
 # ファイアウォール設定の作成
 resource "google_compute_firewall" "gce" {
+  depends_on = [google_project_service.apis]
   # ファイアウォール設定名
   name = var.project_id
   # ファイアウォール設定先のVPCネットワークの指定
@@ -167,6 +170,7 @@ resource "google_compute_firewall" "gce" {
 # ユーザーに対するロールの付与
 # 特定のGoogleアカウントにインスタンスへのSSH接続を許可する
 resource "google_project_iam_binding" "gce_ssh_access_user" {
+  depends_on = [google_project_service.apis]
   # プロジェクトIDの指定
   project = var.project_id
   # 割り当てるロール
@@ -177,6 +181,7 @@ resource "google_project_iam_binding" "gce_ssh_access_user" {
 
 # カスタムロールの作成
 resource "google_project_iam_custom_role" "gce_ssh_access_role" {
+  depends_on = [google_project_service.apis]
   # カスタムロールのID
   role_id = "CutomRole"
   # カスタムロールのタイトル
