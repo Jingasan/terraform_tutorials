@@ -53,10 +53,10 @@ resource "google_compute_instance" "instance" {
   }
   # ファイアウォール設定
   tags = [
-    "ssh-server",     # ファイアウォール設定でSSHを許可するためのタグ
-    "http-server",    # HTTPトラフィックを許可する
-    "https-server",   # HTTPSトラフィックを許可する
-    "lb-health-check" # ロードバランサのヘルスチェックを許可する
+    "http-server",     # HTTP通信のファイアウォール設定用のタグ
+    "https-server",    # HTTPS通信のファイアウォール設定用のタグ
+    "lb-health-check", # ロードバランサーヘルスチェックのファイアウォール設定用のタグ
+    "ssh-server",      # SSH通信のファイアウォール設定用のタグ
   ]
   # IP転送設定(true:VMインスタンスがパケットをルーティングする/false(default))
   can_ip_forward = false
@@ -139,11 +139,92 @@ resource "google_compute_subnetwork" "subnet" {
   }
 }
 
-# ファイアウォール設定の作成
-resource "google_compute_firewall" "gce" {
+# ファイアウォール設定の作成(HTTP)
+resource "google_compute_firewall" "http" {
   depends_on = [google_project_service.apis]
   # ファイアウォール設定名
-  name = var.project_id
+  name = "${var.project_id}-http"
+  # ファイアウォール設定先のVPCネットワークの指定
+  network = google_compute_network.vpc.id
+  # ファイアウォールの対象とする通信方向
+  direction = "INGRESS" # 外から中への通信
+  # 通信を許可するプロトコルとポート
+  allow {
+    # HTTP通信を許可
+    protocol = "tcp"
+    ports    = ["80"]
+  }
+  # 対象のVMインスタンスのタグを指定する
+  target_tags = ["http-server"]
+  # 接続を許可するIPアドレス範囲の指定
+  # 現在使用中のグローバルIPアドレスだけを許可する場合、
+  # $ curl httpbin.org/ip で取得したIPアドレスを以下のように指定する
+  # 例：123.123.123.123/32
+  source_ranges = ["0.0.0.0/0"]
+  # CloudLogggingにFlowLogを出力する設定
+  log_config {
+    metadata = "INCLUDE_ALL_METADATA"
+  }
+}
+
+# ファイアウォール設定の作成(HTTPS)
+resource "google_compute_firewall" "https" {
+  depends_on = [google_project_service.apis]
+  # ファイアウォール設定名
+  name = "${var.project_id}-https"
+  # ファイアウォール設定先のVPCネットワークの指定
+  network = google_compute_network.vpc.id
+  # ファイアウォールの対象とする通信方向
+  direction = "INGRESS" # 外から中への通信
+  # 通信を許可するプロトコルとポート
+  allow {
+    # HTTP通信を許可
+    protocol = "tcp"
+    ports    = ["443"]
+  }
+  # 対象のVMインスタンスのタグを指定する
+  target_tags = ["https-server"]
+  # 接続を許可するIPアドレス範囲の指定
+  # 現在使用中のグローバルIPアドレスだけを許可する場合、
+  # $ curl httpbin.org/ip で取得したIPアドレスを以下のように指定する
+  # 例：123.123.123.123/32
+  source_ranges = ["0.0.0.0/0"]
+  # CloudLogggingにFlowLogを出力する設定
+  log_config {
+    metadata = "INCLUDE_ALL_METADATA"
+  }
+}
+
+# ファイアウォール設定の作成(ロードバランサーヘルスチェック)
+resource "google_compute_firewall" "lb_health_check" {
+  depends_on = [google_project_service.apis]
+  # ファイアウォール設定名
+  name = "${var.project_id}-lb-health-check"
+  # ファイアウォール設定先のVPCネットワークの指定
+  network = google_compute_network.vpc.id
+  # ファイアウォールの対象とする通信方向
+  direction = "INGRESS" # 外から中への通信
+  # 通信を許可するプロトコルとポート
+  allow {
+    # HTTP通信を許可
+    protocol = "tcp"
+    ports    = ["80"]
+  }
+  # 対象のVMインスタンスのタグを指定する
+  target_tags = ["lb-health-check"]
+  # 接続を許可するIPアドレス範囲の指定
+  source_ranges = ["130.211.0.0/22", "35.191.0.0/16"]
+  # CloudLogggingにFlowLogを出力する設定
+  log_config {
+    metadata = "INCLUDE_ALL_METADATA"
+  }
+}
+
+# ファイアウォール設定の作成(SSH)
+resource "google_compute_firewall" "ssh" {
+  depends_on = [google_project_service.apis]
+  # ファイアウォール設定名
+  name = "${var.project_id}-ssh"
   # ファイアウォール設定先のVPCネットワークの指定
   network = google_compute_network.vpc.id
   # ファイアウォールの対象とする通信方向
@@ -156,7 +237,7 @@ resource "google_compute_firewall" "gce" {
   }
   # 対象のVMインスタンスのタグを指定する
   target_tags = ["ssh-server"]
-  # 接続を許可するSSH接続元IPアドレス範囲の指定
+  # 接続を許可するIPアドレス範囲の指定
   # 現在使用中のグローバルIPアドレスだけを許可する場合、
   # $ curl httpbin.org/ip で取得したIPアドレスを以下のように指定する
   # 例：123.123.123.123/32
@@ -167,8 +248,7 @@ resource "google_compute_firewall" "gce" {
   }
 }
 
-# ユーザーに対するロールの付与
-# 特定のGoogleアカウントにインスタンスへのSSH接続を許可する
+# ユーザーに対するロールの付与：特定のGoogleアカウントにVMインスタンスへのSSH接続を許可する
 resource "google_project_iam_binding" "gce_ssh_access_user" {
   depends_on = [google_project_service.apis]
   # プロジェクトIDの指定
@@ -179,7 +259,7 @@ resource "google_project_iam_binding" "gce_ssh_access_user" {
   members = var.gce_allow_ssh_user
 }
 
-# カスタムロールの作成
+# SSH接続のためのカスタムロールの作成
 resource "google_project_iam_custom_role" "gce_ssh_access_role" {
   depends_on = [google_project_service.apis]
   # カスタムロールのID
