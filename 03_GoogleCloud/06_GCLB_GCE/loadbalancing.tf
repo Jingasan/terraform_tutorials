@@ -120,7 +120,7 @@ resource "google_compute_url_map" "http" {
   depends_on = [google_project_service.apis]
   # ルーティングルール名
   name = "${var.project_id}-http"
-  # default_url_redirectを指定する場合は、default_servicは指定してはいけない
+  # default_url_redirectを指定する場合は、default_serviceは指定してはいけない
   default_url_redirect {
     # クエリの無効化(true:無効/false:無効化しない)
     strip_query = false
