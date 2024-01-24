@@ -1,10 +1,10 @@
 #============================================================
-# Cloud Run
+# Cloud Run Service
 #============================================================
 
 # サービスの作成
 resource "google_cloud_run_v2_service" "service" {
-  depends_on = [google_project_service.apis]
+  depends_on = [google_project_service.apis, google_artifact_registry_repository.docker]
   # サービス名
   name = var.project_id
   # ロケーション
