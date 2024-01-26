@@ -18,21 +18,21 @@ app.post("/create", async (_req, res) => {
   return res.status(200).json({ JobID: jobId });
 });
 // ジョブの一覧取得
-app.get("/list", async (_req, res) => {
+app.post("/list", async (_req, res) => {
   const list = await batchClient.listJobs(projectId, region);
   return res.status(200).json(list);
 });
 // ジョブ情報の取得
-app.get("/jobinfo", async (req, res) => {
-  if (!req.query.jobId) return res.status(400).json("No Job ID");
-  const jobId = String(req.query.jobId);
+app.post("/jobinfo", async (req, res) => {
+  if (!req.body.jobId) return res.status(400).json("No Job ID");
+  const jobId = String(req.body.jobId);
   const jobInfo = await batchClient.getJobInfo(jobId);
   return res.status(200).json(jobInfo);
 });
 // ジョブの削除
-app.delete("/delete", async (req, res) => {
-  if (!req.query.jobId) return res.status(400).json("No Job ID");
-  const jobId = String(req.query.jobId);
+app.post("/delete", async (req, res) => {
+  if (!req.body.jobId) return res.status(400).json("No Job ID");
+  const jobId = String(req.body.jobId);
   await batchClient.deleteJob(jobId);
   return res.status(200).json("OK");
 });
