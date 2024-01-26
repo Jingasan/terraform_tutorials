@@ -5,6 +5,9 @@
 # 有効化するAPIの一覧
 locals {
   services = {
+    "Batch API" : "batch.googleapis.com",
+    "Compute Engine API" : "compute.googleapis.com",
+    "Cloud OS Login API" : "oslogin.googleapis.com",
     "Cloud Run API" : "run.googleapis.com",
     "Cloud Functions API" : "cloudfunctions.googleapis.com",
     "Cloud Build API" : "cloudbuild.googleapis.com",
