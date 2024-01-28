@@ -4,7 +4,7 @@
 
 # サービスの作成
 resource "google_cloud_run_v2_service" "service" {
-  depends_on = [google_project_service.apis, google_artifact_registry_repository.docker]
+  depends_on = [google_project_service.apis, null_resource.container_image_build_push]
   # サービス名
   name = var.project_id
   # ロケーション

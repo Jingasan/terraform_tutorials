@@ -3,7 +3,7 @@
 #============================================================
 
 # リポジトリの作成
-resource "google_artifact_registry_repository" "docker" {
+resource "google_artifact_registry_repository" "container_repository" {
   depends_on = [google_project_service.apis]
   # リポジトリ名
   repository_id = var.gar_image_name
@@ -29,14 +29,14 @@ resource "google_artifact_registry_repository" "docker" {
 # コンテナイメージのビルドとリポジトリへのプッシュ
 locals {
   # リポジトリのイメージURL
-  image_url = "${google_artifact_registry_repository.docker.location}-docker.pkg.dev/${var.project_id}/${google_artifact_registry_repository.docker.repository_id}/${var.gar_image_name}:latest"
+  image_url = "${google_artifact_registry_repository.container_repository.location}-docker.pkg.dev/${var.project_id}/${google_artifact_registry_repository.container_repository.repository_id}/${var.gar_image_name}:latest"
 }
-resource "null_resource" "main" {
+resource "null_resource" "container_image_build_push" {
   # リポジトリ作成後に実行
-  depends_on = [google_artifact_registry_repository.docker]
+  depends_on = [google_artifact_registry_repository.container_repository]
   # ログイン
   provisioner "local-exec" {
-    command = "gcloud auth configure-docker ${google_artifact_registry_repository.docker.location}-docker.pkg.dev --quiet"
+    command = "gcloud auth configure-docker ${google_artifact_registry_repository.container_repository.location}-docker.pkg.dev --quiet"
   }
   # コンテナのビルド
   provisioner "local-exec" {
