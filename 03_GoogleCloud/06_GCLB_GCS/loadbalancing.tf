@@ -59,6 +59,8 @@ resource "google_compute_global_forwarding_rule" "https" {
   labels = {
     name = var.project_id
   }
+  # 説明文
+  description = var.project_id
 }
 resource "google_compute_global_forwarding_rule" "http" {
   depends_on = [google_project_service.apis]
@@ -76,6 +78,8 @@ resource "google_compute_global_forwarding_rule" "http" {
   labels = {
     name = var.project_id
   }
+  # 説明文
+  description = var.project_id
 }
 
 # ロードバランサ―のバックエンドバケットの作成
@@ -149,6 +153,8 @@ resource "google_compute_url_map" "http" {
     # httpsリダイレクト(true:有効)
     https_redirect = true
   }
+  # 説明文
+  description = var.project_id
 }
 
 # ドメイン名の表示

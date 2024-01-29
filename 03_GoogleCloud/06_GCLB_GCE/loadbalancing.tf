@@ -40,6 +40,8 @@ resource "google_compute_global_forwarding_rule" "https" {
   labels = {
     name = var.project_id
   }
+  # 説明文
+  description = var.project_id
 }
 resource "google_compute_global_forwarding_rule" "http" {
   depends_on = [google_project_service.apis]
@@ -55,6 +57,8 @@ resource "google_compute_global_forwarding_rule" "http" {
   labels = {
     name = var.project_id
   }
+  # 説明文
+  description = var.project_id
 }
 
 # ヘルスチェックの作成
