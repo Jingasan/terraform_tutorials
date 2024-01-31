@@ -1,0 +1,14 @@
+steps:
+  # (1)コンテナイメージのビルドを実行
+  - name: "gcr.io/cloud-builders/docker"
+    args:
+      [
+        "build",
+        "-t",
+        "asia-northeast1-docker.pkg.dev/${PROJECT_ID}/api/api:latest",
+        ".",
+      ]
+  # (2)ビルドしたコンテナイメージをArtifactRegistryにプッシュ
+  - name: "gcr.io/cloud-builders/docker"
+    args:
+      ["push", "asia-northeast1-docker.pkg.dev/${PROJECT_ID}/api/api:latest"]
