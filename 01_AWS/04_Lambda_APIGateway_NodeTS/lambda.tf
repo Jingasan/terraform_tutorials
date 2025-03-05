@@ -150,14 +150,6 @@ resource "aws_iam_role" "lambda_role" {
   }
 }
 
-# IAMロールにポリシーを割り当て
-resource "aws_iam_role_policy_attachment" "lambda_basic_execution" {
-  # IAMロール名
-  role = aws_iam_role.lambda_role.name
-  # 割り当てるポリシーのARN
-  policy_arn = aws_iam_policy.lambda_policy.arn
-}
-
 # IAMロールに紐付けるポリシーの設定
 resource "aws_iam_policy" "lambda_policy" {
   # ポリシー名
@@ -187,6 +179,14 @@ resource "aws_iam_policy" "lambda_policy" {
   tags = {
     Name = var.project_name
   }
+}
+
+# IAMロールにポリシーを割り当て
+resource "aws_iam_role_policy_attachment" "lambda_basic_execution" {
+  # IAMロール名
+  role = aws_iam_role.lambda_role.name
+  # 割り当てるポリシーのARN
+  policy_arn = aws_iam_policy.lambda_policy.arn
 }
 
 # Lambda関数名のコンソール出力
