@@ -3,8 +3,6 @@ import express, { Application, Request, Response, NextFunction } from "express";
 import cors from "cors";
 import bodyParser from "body-parser";
 import * as sourceMapSupport from "source-map-support";
-import * as fs from "fs";
-import * as path from "path";
 sourceMapSupport.install();
 const app: Application = express();
 // リクエストボディのパース用設定

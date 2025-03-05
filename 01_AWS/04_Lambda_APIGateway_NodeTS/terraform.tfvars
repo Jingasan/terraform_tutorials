@@ -14,7 +14,7 @@ profile = "default"
 # Lambda
 #============================================================
 # 実行ランタイム（ex: nodejs, python, go, etc.）
-lambda_runtime = "nodejs18.x"
+lambda_runtime = "nodejs22.x"
 # Lambda関数のタイムアウト時間
 lambda_timeout = 30
 # CloudWatchにログを残す期間（日）

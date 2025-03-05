@@ -5,11 +5,11 @@
 # Terraformの設定
 terraform {
   # Terraformのバージョン指定
-  required_version = ">= 1.3.8"
+  required_version = ">= 1.11.0"
 
   # AWSのバージョン指定
   required_providers {
-    aws = ">=5.24.0"
+    aws = ">=5.89.0"
   }
 
   # .tfstateをS3で管理する設定
