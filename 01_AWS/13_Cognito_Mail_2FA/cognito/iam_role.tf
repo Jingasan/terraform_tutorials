@@ -115,7 +115,7 @@ resource "aws_iam_role_policy_attachment" "backup_policy" {
 
 # AWSマネージドのリストアポリシー
 data "aws_iam_policy" "aws_backup_service_role_policy_for_restore" {
-  arn = "arn:aws:iam::aws:policy/service-role/AWSBackupServiceRolePolicyForBackup"
+  arn = "arn:aws:iam::aws:policy/service-role/AWSBackupServiceRolePolicyForRestores"
 }
 
 # IAMロールにポリシーを割り当て
