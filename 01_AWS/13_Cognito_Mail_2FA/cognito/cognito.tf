@@ -21,49 +21,77 @@ resource "aws_cognito_user_pool" "user_pool" {
   }
   # パスワードのポリシー
   password_policy {
-    minimum_length                   = 8     # 最低文字数
-    require_uppercase                = false # 大文字を必須とするか
-    require_lowercase                = false # 小文字を必須とするか
-    require_numbers                  = false # 数字を必須とするか
-    require_symbols                  = false # 記号を必須とするか
-    temporary_password_validity_days = 7     # 管理者によって設定された仮パスワードの有効期間(日)
+    minimum_length                   = var.cognito_password_minimum_length          # 最低文字数
+    require_uppercase                = var.cognito_password_require_uppercase       # 大文字を必須とするか
+    require_lowercase                = var.cognito_password_require_lowercase       # 小文字を必須とするか
+    require_numbers                  = var.cognito_password_require_numbers         # 数字を必須とするか
+    require_symbols                  = var.cognito_password_require_symbols         # 記号を必須とするか
+    temporary_password_validity_days = var.cognito_temporary_password_validity_days # 管理者によって設定された仮パスワードの有効期間(日)
+    password_history_size            = var.cognito_password_history_size            # 以前のパスワードの再利用防止(指定回数まで)
   }
   # INACTIVE(default):ユーザープールの削除を許可/ACTIVE:ユーザープールの削除を拒否
   deletion_protection = "INACTIVE"
-  # 多要素認証(MFA)の強制 ON(default)/OFF/OPTIONAL
-  mfa_configuration = "OFF"
-  # ユーザーアカウントの復旧方法
-  account_recovery_setting {
-    # メールによる復旧を優先度1に設定
-    recovery_mechanism {
-      name     = "verified_email"
-      priority = 1
-    }
-  }
   # 管理者によるユーザー作成の設定
   admin_create_user_config {
-    # true:ユーザーによるサインアップを有効化/false:管理者によるユーザー作成のみ許可
+    # true:管理者によるユーザー作成のみ許可/false:ユーザーによるサインアップを有効化
     allow_admin_create_user_only = false
     # 管理者によるユーザー作成時に送信する招待メールのテンプレート
     invite_message_template {
       # メールタイトル
       email_subject = "[${var.project_name}] ユーザー登録完了"
       # メール本文
-      email_message = "{username}様<br><br>初期パスワードは{####}です。<br>初回ログイン後にパスワード変更が必要です。"
+      email_message = "{username} 様<br/><br/>初期パスワードは{####}です。<br>ログインURLは以下となります。<br>https://xxx<br>初回ログイン後にパスワード変更が必要です。"
       # SMSメッセージ
-      sms_message = "{username}様<br><br>初期パスワードは{####}です。<br>初回ログイン後にパスワード変更が必要です。"
+      sms_message = "{username} 様<br/><br/>初期パスワードは{####}です。<br>ログインURLは以下となります。<br>https://xxx<br>初回ログイン後にパスワード変更が必要です。"
     }
   }
   # 追加のカスタム属性(最大50個まで)
+  # メールアドレス（Cognito既定）
   schema {
-    name                     = "rank"   # 属性名(「custom:属性名」で利用する)
+    name                     = "email"  # 属性名
     attribute_data_type      = "String" # データ型
-    developer_only_attribute = false    # ユーザーによる登録を許可するか false:許可/true:拒否
+    required                 = true     # 必須か true:必須(カスタム属性では必須にできない)
     mutable                  = true     # 可変か true:可変
-    required                 = false    # 必須か true:必須
-    string_attribute_constraints {      # 文字数制限
-      min_length = "1"
-      max_length = "2"
+    developer_only_attribute = false    # ユーザーによる登録を許可するか false:許可/true:拒否
+    string_attribute_constraints {
+      max_length = "512" # 最大文字数
+      min_length = "0"   # 最小文字数
+    }
+  }
+  # パスワード設定日（Custom属性）
+  schema {
+    name                     = "password_set_date" # 属性名(「custom:属性名」で利用する)
+    attribute_data_type      = "String"            # データ型
+    required                 = false               # 必須か true:必須(カスタム属性では必須にできない)
+    mutable                  = true                # 可変か true:可変
+    developer_only_attribute = false               # ユーザーによる登録を許可するか false:許可/true:拒否
+    string_attribute_constraints {
+      max_length = "128" # 最大文字数
+      min_length = "0"   # 最小文字数
+    }
+  }
+  # 利用開始日（Custom属性）
+  schema {
+    name                     = "usage_start_date" # 属性名(「custom:属性名」で利用する)
+    attribute_data_type      = "String"           # データ型
+    required                 = false              # 必須か true:必須(カスタム属性では必須にできない)
+    mutable                  = true               # 可変か true:可変
+    developer_only_attribute = false              # ユーザーによる登録を許可するか false:許可/true:拒否
+    string_attribute_constraints {
+      max_length = "128" # 最大文字数
+      min_length = "0"   # 最小文字数
+    }
+  }
+  # 利用終了日（Custom属性）
+  schema {
+    name                     = "usage_end_date" # 属性名(「custom:属性名」で利用する)
+    attribute_data_type      = "String"         # データ型
+    required                 = false            # 必須か true:必須(カスタム属性では必須にできない)
+    mutable                  = true             # 可変か true:可変
+    developer_only_attribute = false            # ユーザーによる登録を許可するか false:許可/true:拒否
+    string_attribute_constraints {
+      max_length = "128" # 最大文字数
+      min_length = "0"   # 最小文字数
     }
   }
   # ユーザーがサインアップした際に自動的に検証される属性(email/phone_number)
@@ -73,7 +101,11 @@ resource "aws_cognito_user_pool" "user_pool" {
     # メールプロバイダーの設定
     # COGNITO_DEFAULT:CognitoでEメールを送信
     # DEVELOPER(default):Amazon SESでEメールを送信(推奨)
-    email_sending_account = "COGNITO_DEFAULT"
+    email_sending_account = "DEVELOPER"
+    # SESで認証するメールアドレスのARN
+    source_arn = "arn:aws:ses:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:identity/${var.cognito_from_email_address}"
+    # 送信元メールアドレス
+    from_email_address = var.cognito_from_email_address
   }
   # ユーザーの属性情報更新の設定
   user_attribute_update_settings {
@@ -104,7 +136,18 @@ resource "aws_cognito_user_pool" "user_pool" {
   }
   # Lambdaトリガーの設定
   # 設定すると、ユーザープールにアクションがあった際にLambda関数を呼び出すことができる
-  lambda_config {}
+  lambda_config {
+    # ユーザーログイン直前にパスワード有効期限，利用開始日，利用終了日のチェックを実施
+    pre_authentication = aws_lambda_function.lambda_pre_authentication.arn
+    # ユーザーログイン時にLambda経由でログイン通知をユーザーに送信
+    # post_authentication = aws_lambda_function.lambda_login_notification.arn
+    # USER_PASSWORD_AUTH(ユーザー名/パスワード)による認証後にCUSTOM_CHALLENGE(OTP認証)を追加
+    define_auth_challenge = aws_lambda_function.lambda_define_auth_challenge.arn
+    # メールでOTPを送信
+    create_auth_challenge = aws_lambda_function.lambda_create_auth_challenge.arn
+    # CUSTOM_CHALLENGE(OTP認証)の場合にユーザーが入力したOTPを検証
+    verify_auth_challenge_response = aws_lambda_function.lambda_verify_auth_challenge_response.arn
+  }
   # タグ
   tags = {
     "name" = var.project_name
@@ -128,7 +171,7 @@ resource "aws_cognito_user_pool_client" "user_pool" {
     "ALLOW_USER_SRP_AUTH",            // SRP(セキュアリモートパスワード)プロトコルベースの認証(最もセキュアなため、利用推奨)
   ]
   # 認証フローセッションの持続期間(分)(3-15分の範囲で指定)
-  auth_session_validity = 3
+  auth_session_validity = var.cognito_auth_session_validity
   # 各トークンの有効期限の単位: seconds/minutes/hours/days
   token_validity_units {
     id_token      = "seconds" # IDトークン
@@ -160,13 +203,18 @@ resource "aws_cognito_user_pool_client" "user_pool" {
   allowed_oauth_scopes = []
 }
 
-# ユーザープールドメインの有効化
-# ドメインが有効になり、HostedUI(ログイン画面)が利用可能になる
-resource "aws_cognito_user_pool_domain" "user_pool" {
-  # ドメイン
-  domain = var.project_name
-  # 対象のユーザープールID
-  user_pool_id = aws_cognito_user_pool.user_pool.id
+# バックエンドの.envファイル生成
+resource "local_file" "env" {
+  # 出力先
+  filename = "../backend/.env"
+  # 出力ファイルのパーミッション
+  file_permission = "0644"
+  # 出力ファイルの内容
+  content = <<DOC
+REGION=${data.aws_region.current.name}
+USER_POOL_ID=${aws_cognito_user_pool.user_pool.id}
+APPLICATION_CLIENT_ID=${aws_cognito_user_pool_client.user_pool.id}
+DOC
 }
 
 # ユーザープールIDの表示

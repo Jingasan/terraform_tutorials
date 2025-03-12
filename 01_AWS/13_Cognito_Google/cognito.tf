@@ -6,10 +6,12 @@
 resource "aws_cognito_user_pool" "user_pool" {
   # ユーザープール名
   name = var.project_name
-  # ユーザー名の他に認証での利用を許可する属性(email/phone_number/preferred_username)
+  # ユーザー名の代わりに認証に利用できる属性(email/phone_number/preferred_username)
+  # aliasに指定した属性には一意制約がかかる（＝同じ属性値を登録できない）
   # username_attributesと同時利用不可
   # alias_attributes = ["email"]
-  # サインアップ時にユーザー名の代わりに利用可能な属性(email/phone_number)
+  # ユーザー登録時にユーザー名として使用する属性(email/phone_number)
+  # ただし、ユーザー名にemailやphone_numberを利用すると、emailやphone_numberの変更ができなくなる
   # alias_attributesと同時利用不可
   username_attributes = ["email"]
   # ユーザー名の要件
@@ -64,7 +66,7 @@ resource "aws_cognito_user_pool" "user_pool" {
       max_length = "2"
     }
   }
-  # ユーザーの検証(Confirm)方法(email/phone_number)
+  # ユーザーがサインアップした際に自動的に検証される属性(email/phone_number)
   auto_verified_attributes = ["email"]
   # メッセージ送信設定
   email_configuration {
