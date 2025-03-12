@@ -1,3 +1,7 @@
+#============================================================
+# Lambda関連のIAMロール
+#============================================================
+
 # IAMロールの設定
 resource "aws_iam_role" "lambda_role" {
   # IAMロール名
@@ -64,4 +68,60 @@ resource "aws_iam_role_policy_attachment" "lambda_basic_execution" {
   role = aws_iam_role.lambda_role.name
   # 割り当てるポリシーのARN
   policy_arn = aws_iam_policy.lambda_policy.arn
+}
+
+
+#============================================================
+# AWS Backup関連のIAMロール
+#============================================================
+
+# IAMロールの設定
+resource "aws_iam_role" "backup_role" {
+  # IAMロール名
+  name = "${var.project_name}-backup-${local.lower_random_hex}"
+  # AWS Backupに割り当てるIAMポリシー
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Principal = {
+          Service = "backup.amazonaws.com"
+        }
+        Action = "sts:AssumeRole"
+      }
+    ]
+  })
+  # 説明
+  description = var.project_name
+  # タグ
+  tags = {
+    Name = var.project_name
+  }
+}
+
+# AWSマネージドのバックアップポリシー
+data "aws_iam_policy" "aws_backup_service_role_policy_for_backup" {
+  arn = "arn:aws:iam::aws:policy/service-role/AWSBackupServiceRolePolicyForBackup"
+}
+
+# IAMロールにポリシーを割り当て
+resource "aws_iam_role_policy_attachment" "backup_policy" {
+  # IAMロール
+  role = aws_iam_role.backup_role.name
+  # 割り当てるポリシーのARN
+  policy_arn = data.aws_iam_policy.aws_backup_service_role_policy_for_backup.arn
+}
+
+# AWSマネージドのリストアポリシー
+data "aws_iam_policy" "aws_backup_service_role_policy_for_restore" {
+  arn = "arn:aws:iam::aws:policy/service-role/AWSBackupServiceRolePolicyForBackup"
+}
+
+# IAMロールにポリシーを割り当て
+resource "aws_iam_role_policy_attachment" "backup_restore" {
+  # IAMロール
+  role = aws_iam_role.backup_role.name
+  # 割り当てるポリシーのARN
+  policy_arn = data.aws_iam_policy.aws_backup_service_role_policy_for_restore.arn
 }

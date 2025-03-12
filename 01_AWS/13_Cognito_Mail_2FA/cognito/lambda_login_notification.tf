@@ -1,22 +1,4 @@
 #============================================================
-# S3：ビルドしたLambda関数zipファイルをデプロイするバケットの設定
-#============================================================
-
-# Lambda関数のzipファイルをデプロイするS3バケットの設定
-resource "aws_s3_bucket" "bucket_lambda_login_notification" {
-  # S3バケット名
-  bucket = "${var.project_name}-lambda-login-notification-${local.lower_random_hex}"
-  # バケットの中にオブジェクトが入っていてもTerraformに削除を許可するかどうか(true:許可)
-  force_destroy = true
-  # タグ
-  tags = {
-    Name = var.project_name
-  }
-}
-
-
-
-#============================================================
 # Lambda
 #============================================================
 
@@ -25,7 +7,7 @@ resource "aws_lambda_function" "lambda_login_notification" {
   # 関数のZIPファイルをS3にアップロードした後に実行
   depends_on = [null_resource.build_upload_lambda_login_notification]
   # 関数名
-  function_name = "${var.project_name}-login-notify"
+  function_name = "${var.project_name}-login-notify-${local.lower_random_hex}"
   # 実行環境の指定(ex: nodejs, python, go, etc.)
   runtime = var.lambda_runtime
   # ハンドラの指定
@@ -33,8 +15,8 @@ resource "aws_lambda_function" "lambda_login_notification" {
   # 作成するLambda関数に対して許可するIAMロールの指定
   role = aws_iam_role.lambda_role.arn
   # Lambda関数のコード取得元S3バケットとパス
-  s3_bucket = aws_s3_bucket.bucket_lambda_login_notification.bucket
-  s3_key    = "lambda.zip"
+  s3_bucket = aws_s3_bucket.bucket_lambda.bucket
+  s3_key    = "login-notify/lambda.zip"
   # Lambda関数のタイムアウト時間
   timeout = var.lambda_timeout
   # 環境変数の指定
@@ -57,7 +39,7 @@ resource "aws_lambda_function" "lambda_login_notification" {
 # Lambda関数のビルドとS3アップロード
 resource "null_resource" "build_upload_lambda_login_notification" {
   # ビルド済み関数ZIPのアップロード先S3バケットが生成されたら実行
-  depends_on = [aws_s3_bucket.bucket_lambda_login_notification]
+  depends_on = [aws_s3_bucket.bucket_lambda]
   # ソースコードに差分があった場合に実行
   triggers = {
     code_diff = join("", [
@@ -88,7 +70,7 @@ resource "null_resource" "build_upload_lambda_login_notification" {
   }
   # S3アップロード
   provisioner "local-exec" {
-    command     = "aws s3 cp lambda.zip s3://${aws_s3_bucket.bucket_lambda_login_notification.bucket}/lambda.zip"
+    command     = "aws s3 cp lambda.zip s3://${aws_s3_bucket.bucket_lambda.bucket}/login-notify/lambda.zip"
     working_dir = "lambda_login_notification"
   }
 }
@@ -110,7 +92,7 @@ resource "null_resource" "update_lambda_login_notification" {
   }
   # Lambda関数を更新
   provisioner "local-exec" {
-    command     = "aws lambda update-function-code --function-name ${aws_lambda_function.lambda_login_notification.function_name} --s3-bucket ${aws_s3_bucket.bucket_lambda_login_notification.bucket} --s3-key lambda.zip --publish --no-cli-pager"
+    command     = "aws lambda update-function-code --function-name ${aws_lambda_function.lambda_login_notification.function_name} --s3-bucket ${aws_s3_bucket.bucket_lambda.bucket} --s3-key login-notify/lambda.zip --publish --no-cli-pager"
     working_dir = "lambda_login_notification"
   }
 }

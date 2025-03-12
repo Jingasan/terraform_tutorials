@@ -30,5 +30,7 @@ resource "aws_secretsmanager_secret_version" "secretsmanager" {
     passwordExpirationDays = "${var.cognito_password_expiration_days}"
     # パスワード有効期限日の何日前から通知を行うか(日)
     reminderDaysBeforePasswordExpiry = "${var.cognito_reminder_days_before_password_expiry}"
+    # Cognitoのユーザー情報をバックアップするバケット名
+    cognitoBackupBucketName = "${aws_s3_bucket.bucket_cognito_backup.bucket}"
   })
 }

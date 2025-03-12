@@ -34,6 +34,12 @@ variable "secret_manager_recovery_window_in_days" {
 #============================================================
 # Cognito
 #============================================================
+# ユーザープールの削除保護(INACTIVE(default):ユーザープールの削除を許可/ACTIVE:ユーザープールの削除を拒否)
+variable "cognito_deletion_protection" {
+  type        = string
+  description = "ユーザープールの削除保護（INACTIVE(default):ユーザープールの削除を許可/ACTIVE:ユーザープールの削除を拒否）"
+  default     = "ACTIVE"
+}
 # IDトークンの有効期限(秒)(5分-1日の範囲で指定)
 variable "cognito_id_token_validity" {
   type        = number
@@ -118,6 +124,21 @@ variable "cognito_reminder_days_before_password_expiry" {
   type        = number
   description = "パスワード有効期限日の何日前から通知を行うか(日)"
   default     = 7
+}
+#============================================================
+# AWS Backup
+#============================================================
+# Vaultの中にバックアップデータが入っていてもTerraformに削除を許可するかどうか(true:許可)
+variable "backup_force_destroy" {
+  type        = bool
+  description = "Vaultの中にバックアップデータが入っていてもTerraformに削除を許可するかどうか(true:許可)"
+  default     = false
+}
+# 何日後にバックアップデータを削除するか(日)
+variable "backup_delete_after" {
+  type        = number
+  description = "何日後にバックアップデータを削除するか"
+  default     = 365
 }
 #============================================================
 # Lambda

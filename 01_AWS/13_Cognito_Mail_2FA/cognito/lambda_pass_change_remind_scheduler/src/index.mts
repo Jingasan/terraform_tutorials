@@ -30,7 +30,6 @@ const secretsManagerClient = new SecretsManager.SecretsManagerClient({
 const getSecrets = async (): Promise<
   | {
       cognitoUserPoolId: string;
-      cognitoAppClientId: string;
       passwordExpirationDays: number;
       reminderDaysBeforePasswordExpiry: number;
     }
@@ -52,18 +51,16 @@ const getSecrets = async (): Promise<
     const secret = JSON.parse(res.SecretString);
     if (
       secret.cognitoUserPoolId === undefined ||
-      secret.cognitoAppClientId === undefined ||
       secret.passwordExpirationDays === undefined ||
       secret.reminderDaysBeforePasswordExpiry === undefined
     ) {
       console.error(
-        "cognitoUserPoolId, cognitoAppClientId, passwordExpirationDays or reminderDaysBeforeExpiry is not found"
+        "cognitoUserPoolId, passwordExpirationDays or reminderDaysBeforeExpiry is not found"
       );
       return undefined;
     }
     return {
       cognitoUserPoolId: secret.cognitoUserPoolId,
-      cognitoAppClientId: secret.cognitoAppClientId,
       passwordExpirationDays: secret.passwordExpirationDays,
       reminderDaysBeforePasswordExpiry: secret.reminderDaysBeforePasswordExpiry,
     };
@@ -105,7 +102,7 @@ const listAllUsers = async (
 };
 
 /**
- * 深夜0時に定期実行されるハンドラ
+ * 定刻にパスワード変更依頼メールまたはパスワード有効期限切れ通知メールを送信するハンドラ
  * @param event イベント
  * @returns イベント
  */
@@ -120,7 +117,7 @@ export const handler: ScheduledHandler = async (event: ScheduledEvent) => {
 
   // 本日の日付を取得
   const todayDate = new Date(parseISO(event.time));
-  todayDate.setHours(0, 15, 0, 0);
+  todayDate.setHours(15, 0, 0, 0);
   console.log("TodayDate: ", todayDate);
 
   // パスワード有効期限が迫ったユーザーに対し、更新依頼メールを送信

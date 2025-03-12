@@ -18,17 +18,19 @@ secret_manager_recovery_window_in_days = 0 # 保存しない
 #============================================================
 # Cognito
 #============================================================
+# ユーザープールの削除保護(INACTIVE(default):ユーザープールの削除を許可/ACTIVE:ユーザープールの削除を拒否)
+cognito_deletion_protection = "INACTIVE"
 # IDトークンの有効期限(秒)(5分-1日の範囲で指定)
-cognito_id_token_validity = 1800
+cognito_id_token_validity = 3600
 # アクセストークンの有効期限(秒)(5分-1日の範囲で指定)
-cognito_access_token_validity = 1800
+cognito_access_token_validity = 3600
 # リフレッシュトークンの有効期限(秒)
 # 60分-10年の範囲で指定, IDトークン/アクセストークンよりも長い時間を指定すること
-cognito_refresh_token_validity = 3600
+cognito_refresh_token_validity = 2592000
 # 認証フローセッションの持続期間(分)(3-15分の範囲で指定)
 cognito_auth_session_validity = 3
 # メールの送信元アドレス(SESで事前に確認済みのメールアドレス)
-cognito_from_email_address = "mail@domain"
+cognito_from_email_address = "user@domain"
 # パスワードの最低文字数
 cognito_password_minimum_length = 8
 # パスワードに大文字を必須とするか
@@ -47,6 +49,13 @@ cognito_password_history_size = 2
 cognito_password_expiration_days = 0
 # パスワード有効期限日の何日前から通知を行うか(日)
 cognito_reminder_days_before_password_expiry = 7
+#============================================================
+# AWS Backup
+#============================================================
+# Vaultの中にバックアップデータが入っていてもTerraformに削除を許可するかどうか(true:許可)
+backup_force_destroy = true
+# 何日後にバックアップデータを削除するか(日)
+backup_delete_after = 365
 #============================================================
 # Lambda
 #============================================================

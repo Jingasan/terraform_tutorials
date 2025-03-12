@@ -5,7 +5,7 @@
 # ユーザープールの作成
 resource "aws_cognito_user_pool" "user_pool" {
   # ユーザープール名
-  name = var.project_name
+  name = "${var.project_name}-${local.lower_random_hex}"
   # ユーザー名の代わりに認証に利用できる属性(email/phone_number/preferred_username)
   # aliasに指定した属性には一意制約がかかる（＝同じ属性値を登録できない）
   # username_attributesと同時利用不可
@@ -29,8 +29,8 @@ resource "aws_cognito_user_pool" "user_pool" {
     temporary_password_validity_days = var.cognito_temporary_password_validity_days # 管理者によって設定された仮パスワードの有効期間(日)
     password_history_size            = var.cognito_password_history_size            # 以前のパスワードの再利用防止(指定回数まで)
   }
-  # INACTIVE(default):ユーザープールの削除を許可/ACTIVE:ユーザープールの削除を拒否
-  deletion_protection = "INACTIVE"
+  # ユーザープールの削除保護(INACTIVE(default):ユーザープールの削除を許可/ACTIVE:ユーザープールの削除を拒否)
+  deletion_protection = var.cognito_deletion_protection
   # 管理者によるユーザー作成の設定
   admin_create_user_config {
     # true:管理者によるユーザー作成のみ許可/false:ユーザーによるサインアップを有効化
