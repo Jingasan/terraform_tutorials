@@ -46,7 +46,7 @@ cognito_temporary_password_validity_days = 90
 # 以前のパスワードの再利用防止(指定回数まで)
 cognito_password_history_size = 2
 # パスワード有効期間(日)
-cognito_password_expiration_days = 0
+cognito_password_expiration_days = 90
 # パスワード有効期限日の何日前から通知を行うか(日)
 cognito_reminder_days_before_password_expiry = 7
 #============================================================
