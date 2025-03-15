@@ -30,3 +30,26 @@ resource "aws_s3_bucket" "bucket_cognito_backup" {
     Name = var.project_name
   }
 }
+
+# バックアップを許可するバケットポリシーの設定
+resource "aws_s3_bucket_policy" "backup_policy" {
+  # 割り当て先のバケット
+  bucket = aws_s3_bucket.bucket_cognito_backup.id
+  # バケットポリシー
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Effect = "Allow"
+      Principal = {
+        AWS = "${aws_iam_role.backup_role.arn}"
+      }
+      Action = [
+        "s3:*",
+      ]
+      Resource = [
+        "${aws_s3_bucket.bucket_cognito_backup.arn}",
+        "${aws_s3_bucket.bucket_cognito_backup.arn}/*"
+      ]
+    }]
+  })
+}

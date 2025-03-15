@@ -1,11 +1,4 @@
-import {
-  parseISO,
-  addDays,
-  isAfter,
-  isBefore,
-  isEqual,
-  format,
-} from "date-fns";
+import { addDays, format } from "date-fns";
 import { ScheduledHandler, ScheduledEvent } from "aws-lambda";
 import * as SES from "@aws-sdk/client-sesv2";
 import * as SecretsManager from "@aws-sdk/client-secrets-manager";
@@ -22,6 +15,16 @@ const sesClient = new SES.SESv2Client({ region: REGION });
 const secretsManagerClient = new SecretsManager.SecretsManagerClient({
   region: REGION,
 });
+
+/**
+ * 日本時刻での日付を取得
+ * @param date UNIX時刻
+ * @returns 日本時刻での日付(yyyy/MM/dd)
+ */
+const getJSTDate = (date: Date): string => {
+  const jstDate = new TZDate(date, "Asia/Tokyo");
+  return format(jstDate, "yyyy-MM-dd");
+};
 
 /**
  * SecretsManagerからシークレットおよび設定値を取得する
@@ -116,8 +119,8 @@ export const handler: ScheduledHandler = async (event: ScheduledEvent) => {
   console.log(userList);
 
   // 本日の日付を取得
-  const todayDate = new Date(parseISO(event.time));
-  todayDate.setHours(15, 0, 0, 0);
+  const eventTime = new Date(event.time);
+  const todayDate = getJSTDate(eventTime);
   console.log("TodayDate: ", todayDate);
 
   // パスワード有効期限が迫ったユーザーに対し、更新依頼メールを送信
@@ -138,58 +141,40 @@ export const handler: ScheduledHandler = async (event: ScheduledEvent) => {
         return;
       }
 
-      /** パスワード有効期限日 */
-      const expiryDate = addDays(
-        parseISO(passwordSetDate),
-        secrets.passwordExpirationDays
-      );
-      /** パスワード更新依頼通知開始日 */
-      const reminderStartDate = addDays(
-        expiryDate,
-        -secrets.reminderDaysBeforePasswordExpiry
-      );
-      /** パスワード有効期限切れ通知日 */
-      const expiredNotificationDate = addDays(expiryDate, 1);
+      /** 本日(ミリ秒換算) */
+      const todayDateMS = new Date(todayDate).getTime();
+      /** パスワード設定日(ミリ秒換算) */
+      const passwordSetDateMS = new Date(passwordSetDate).getTime();
+      /** パスワード有効期限日(ミリ秒換算) */
+      const expiryDateMS =
+        passwordSetDateMS +
+        secrets.passwordExpirationDays * 24 * 60 * 60 * 1000;
+      /** パスワード有効期限切れ通知日(ミリ秒換算) */
+      const expiredNotificationDateMS = expiryDateMS + 1 * 24 * 60 * 60 * 1000;
+      /** パスワード更新依頼通知開始日(ミリ秒換算) */
+      const reminderStartDateMS =
+        expiredNotificationDateMS -
+        secrets.reminderDaysBeforePasswordExpiry * 24 * 60 * 60 * 1000;
+
       console.log("Email: ", email);
-      console.log("PasswordSetDate: ", parseISO(passwordSetDate));
-      console.log("ExpiryDate: ", expiryDate);
-      console.log("ReminderStartDate: ", reminderStartDate);
-      console.log("ExpiredNotificationDate: ", expiredNotificationDate);
-      console.log("TodayDate: ", todayDate);
-      console.log(
-        "isAfter(todayDate, reminderStartDate): ",
-        isAfter(todayDate, reminderStartDate)
-      );
-      console.log(
-        "isEqual(todayDate, reminderStartDate)): ",
-        isEqual(todayDate, reminderStartDate)
-      );
-      console.log(
-        "isBefore(todayDate, expiryDate): ",
-        isBefore(todayDate, expiryDate)
-      );
-      console.log(
-        "isEqual(todayDate, expiryDate): ",
-        isEqual(todayDate, expiryDate)
-      );
-      console.log(
-        "isEqual(todayDate, expiredNotificationDate): ",
-        isEqual(todayDate, expiredNotificationDate)
-      );
+      console.log("passwordSetDateMS: ", passwordSetDateMS);
+      console.log("expiryDateMS: ", expiryDateMS);
+      console.log("expiredNotificationDateMS: ", expiredNotificationDateMS);
+      console.log("reminderStartDateMS: ", reminderStartDateMS);
+      console.log("todayDateMS: ", todayDateMS);
 
       // 期限7日前〜当日までパスワード更新依頼メールを送信
-      if (
-        (isAfter(todayDate, reminderStartDate) ||
-          isEqual(todayDate, reminderStartDate)) &&
-        (isBefore(todayDate, expiryDate) || isEqual(todayDate, expiryDate))
-      ) {
-        // パスワード有効期限日を日本時刻(JST)に変換
-        const jstDate = new TZDate(expiryDate, "Asia/Tokyo");
+      if (reminderStartDateMS <= todayDateMS && todayDateMS <= expiryDateMS) {
+        // パスワード有効期限日(日本時刻yyyy/MM/dd)
+        const ExpiryDate = format(
+          addDays(new Date(passwordSetDate), secrets.passwordExpirationDays),
+          "yyyy/MM/dd"
+        );
         // メール内容
         const mailSub = `${SERVICE_NAME} パスワード更新のお願い`;
         const mailBody = `${email} 様<br/><br/>
 いつもご利用いただき、ありがとうございます。<br/>
-現在のパスワードの有効期限は ${format(jstDate, "yyyy/MM/dd")} までです。<br/>
+現在のパスワードの有効期限は ${ExpiryDate} までです。<br/>
 有効期限が切れると、現在のパスワードでサービスにログインできなくなります。<br/>
 サービスにログインし、パスワードを更新してください。`;
         // メール送信
@@ -209,7 +194,7 @@ export const handler: ScheduledHandler = async (event: ScheduledEvent) => {
       }
 
       // パスワード有効期限日翌日に有効期限切れの通知メールを送信
-      if (isEqual(todayDate, expiredNotificationDate)) {
+      if (todayDateMS === expiredNotificationDateMS) {
         // メール内容
         const mailSub = `${SERVICE_NAME} パスワードの有効期限が切れました`;
         const mailBody = `${email} 様<br/><br/>

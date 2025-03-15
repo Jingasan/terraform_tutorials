@@ -1,4 +1,16 @@
 import * as Cognito from "@aws-sdk/client-cognito-identity-provider";
+import { format } from "date-fns";
+import { TZDate } from "@date-fns/tz";
+
+/**
+ * 日本時刻での日付を取得
+ * @param date UNIX時刻
+ * @returns 日本時刻での日付(yyyy/MM/dd)
+ */
+const getJSTDate = (date: Date): string => {
+  const jstDate = new TZDate(date, "Asia/Tokyo");
+  return format(jstDate, "yyyy-MM-dd");
+};
 
 /**
  * Cognitoクライアントクラス
@@ -24,14 +36,26 @@ export class CognitoClient {
   public adminCreateUser = async (args: {
     userPoolId: string;
     username: string;
-    usageStartDate?: Date;
-    usageEndDate?: Date;
+    usageStartDate?: string; // 日本時刻(yyyy-MM-dd)
+    usageEndDate?: string; // 日本時刻(yyyy-MM-dd)
     userAttributes?: Cognito.AttributeType[];
   }): Promise<{
     res: Cognito.AdminCreateUserCommandOutput | false;
     error?: Cognito.InternalErrorException;
   }> => {
     const userAttributes = args.userAttributes ?? [];
+    const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+    if (
+      args.usageStartDate &&
+      args.usageEndDate &&
+      !dateRegex.test(args.usageStartDate) &&
+      !dateRegex.test(args.usageEndDate)
+    ) {
+      console.error(
+        "usageStartDate and usageEndDate format must be yyyy-MM-dd."
+      );
+      return { res: false };
+    }
     if (
       args.usageStartDate &&
       args.usageEndDate &&
@@ -41,21 +65,15 @@ export class CognitoClient {
       return { res: false };
     }
     if (args.usageStartDate) {
-      const usageStartDate = new Date(
-        args.usageStartDate.setHours(0, 0, 0, 0)
-      ).toISOString();
       userAttributes.push({
         Name: "custom:usage_start_date",
-        Value: usageStartDate,
+        Value: args.usageStartDate,
       });
     }
     if (args.usageEndDate) {
-      const usageEndDate = new Date(
-        args.usageEndDate.setHours(0, 0, 0, 0)
-      ).toISOString();
       userAttributes.push({
         Name: "custom:usage_end_date",
-        Value: usageEndDate,
+        Value: args.usageEndDate,
       });
     }
     try {
@@ -199,9 +217,7 @@ export class CognitoClient {
     username: string
   ): Promise<{ res: boolean; error?: Cognito.InternalErrorException }> => {
     // パスワード設定日時(ISO8601形式)をCognitoのユーザー属性に設定
-    const passwordSetDate = new Date(
-      new Date().setHours(0, 0, 0, 0)
-    ).toISOString();
+    const passwordSetDate = getJSTDate(new Date());
     try {
       // https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/client/cognito-identity-provider/command/AdminUpdateUserAttributesCommand/
       const command = new Cognito.AdminUpdateUserAttributesCommand({
@@ -458,9 +474,7 @@ export class CognitoClient {
     error?: Cognito.InternalErrorException;
   }> => {
     // パスワード設定日時(ISO8601形式)をCognitoのユーザー属性に設定
-    const passwordSetDate = new Date(
-      new Date().setHours(0, 0, 0, 0)
-    ).toISOString();
+    const passwordSetDate = getJSTDate(new Date());
     const userAttributes = args.userAttributes ?? [];
     userAttributes.push({
       Name: "custom:password_set_date",
@@ -839,9 +853,7 @@ export class CognitoClient {
     accessToken: string
   ): Promise<{ res: boolean; error?: Cognito.InternalErrorException }> => {
     // パスワード設定日時(ISO8601形式)をCognitoのユーザー属性に設定
-    const passwordSetDate = new Date(
-      new Date().setHours(0, 0, 0, 0)
-    ).toISOString();
+    const passwordSetDate = getJSTDate(new Date());
     try {
       // https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/client/cognito-identity-provider/command/UpdateUserAttributesCommand/
       const command = new Cognito.UpdateUserAttributesCommand({

@@ -19,6 +19,8 @@
   },
   "dependencies": {
     "@aws-sdk/client-secrets-manager": "^3.758.0",
+    "@date-fns/tz": "^1.2.0",
+    "date-fns": "^4.1.0",
     "source-map-support": "^0.5.21"
   }
 }

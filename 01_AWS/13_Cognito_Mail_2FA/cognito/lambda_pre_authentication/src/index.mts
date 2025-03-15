@@ -1,3 +1,5 @@
+import { format } from "date-fns";
+import { TZDate } from "@date-fns/tz";
 import { PreAuthenticationTriggerEvent } from "aws-lambda";
 import * as SecretsManager from "@aws-sdk/client-secrets-manager";
 const REGION = process.env.REGION || "ap-northeast-1";
@@ -7,6 +9,16 @@ const secretsManagerClient = new SecretsManager.SecretsManagerClient({
 });
 /** デフォルトのパスワード有効期間(日) */
 const DEFAULT_EXPIRATION_DAYS = 90;
+
+/**
+ * 日本時刻での日付を取得
+ * @param date UNIX時刻
+ * @returns 日本時刻での日付(yyyy/MM/dd)
+ */
+const getJSTDate = (date: Date): string => {
+  const jstDate = new TZDate(date, "Asia/Tokyo");
+  return format(jstDate, "yyyy-MM-dd");
+};
 
 /**
  * パスワード有効期間(日)をSecretsManagerから取得(取得できない場合はデフォルト値を返す)
@@ -40,12 +52,12 @@ const getPasswordExpirationDays = async (): Promise<number> => {
 
 /**
  * パスワードが有効かどうかチェック
- * @param currentLoginTime ログイン現在時刻
- * @param passwordSetDate パスワード設定日(ISO8601形式)
+ * @param currentLoginDate 現在ログイン日(日本時刻yyyy/MM/dd)
+ * @param passwordSetDate パスワード設定日(日本時刻yyyy/MM/dd)
  * @returns true: 有効期限内, false: 有効期限切れ
  */
 const checkPasswordNotExpired = async (
-  currentLoginTime: number,
+  currentLoginDate: string,
   passwordSetDate?: string
 ): Promise<boolean> => {
   try {
@@ -54,15 +66,18 @@ const checkPasswordNotExpired = async (
     // パスワード有効期間を取得
     const passwordExpirationDays = await getPasswordExpirationDays();
     console.log("Password expiration days:", passwordExpirationDays);
-    // パスワード設定日(UTC秒)を取得
-    const passwordSetTime = new Date(passwordSetDate).getTime();
-    console.log("Password set time:", passwordSetTime);
-    // パスワード有効期限日(UTC秒)を計算
-    const expiryTime =
-      passwordSetTime + passwordExpirationDays * 24 * 60 * 60 * 1000;
-    console.log("Expiry time:", expiryTime);
+    // パスワード設定日(ミリ秒換算)を取得
+    const passwordSetDateMS = new Date(passwordSetDate).getTime();
+    console.log("Password set date [ms]:", passwordSetDateMS);
+    // パスワード有効期限日(ミリ秒換算)を計算
+    const expiryDateMS =
+      passwordSetDateMS + passwordExpirationDays * 24 * 60 * 60 * 1000;
+    console.log("Expiry date [ms]:", expiryDateMS);
+    // 現在ログイン日(ミリ秒換算)を取得
+    const currentLoginDateMS = new Date(currentLoginDate).getTime();
+    console.log("Current login date [ms]:", currentLoginDateMS);
     // true: 有効期限内, false: 有効期限切れ
-    return currentLoginTime <= expiryTime;
+    return currentLoginDateMS <= expiryDateMS;
   } catch (error) {
     console.error("checkPasswordNotExpired Exception:", error);
     return false;
@@ -71,21 +86,24 @@ const checkPasswordNotExpired = async (
 
 /**
  * 利用開始日に至っているかどうかチェック
- * @param currentLoginTime ログイン現在時刻
- * @param usageStartDate 利用開始日(ISO8601形式)
+ * @param currentLoginDate 現在ログイン日(日本時刻yyyy/MM/dd)
+ * @param usageStartDate 利用開始日(日本時刻yyyy/MM/dd)
  * @returns true: 利用開始日に至っている, false: 利用開始日に至っていない
  */
 const checkAfterUsageStartDate = (
-  currentLoginTime: number,
+  currentLoginDate: string,
   usageStartDate?: string
 ) => {
   try {
     console.log("Usage start date:", usageStartDate);
     if (!usageStartDate) return true;
-    // 利用開始日(UTC秒)を取得
-    const usageStartTime = new Date(usageStartDate).getTime();
-    console.log("Usage start time:", usageStartTime);
-    return usageStartTime <= currentLoginTime;
+    // 利用開始日(ミリ秒換算)を取得
+    const usageStartDateMS = new Date(usageStartDate).getTime();
+    console.log("Usage start date [ms]:", usageStartDateMS);
+    // 現在ログイン日(ミリ秒換算)を取得
+    const currentLoginDateMS = new Date(currentLoginDate).getTime();
+    console.log("Current login date [ms]:", currentLoginDateMS);
+    return usageStartDateMS <= currentLoginDateMS;
   } catch (error) {
     console.error("checkAfterUsageStartDate Exception:", error);
     return false;
@@ -94,21 +112,24 @@ const checkAfterUsageStartDate = (
 
 /**
  * 利用終了日を過ぎていないかどうかチェック
- * @param currentLoginTime ログイン現在時刻
- * @param usageEndDate 利用終了日(ISO8601形式)
+ * @param currentLoginDate 現在ログイン日(日本時刻yyyy/MM/dd)
+ * @param usageEndDate 利用終了日(日本時刻yyyy/MM/dd)
  * @returns true: 利用終了日を過ぎていない, false: 利用終了日を過ぎている
  */
 const checkBeforeUsageEndDate = (
-  currentLoginTime: number,
+  currentLoginDate: string,
   usageEndDate: string
 ) => {
   try {
     console.log("Usage end date:", usageEndDate);
     if (!usageEndDate) return true;
-    // 利用終了日(UTC秒)を取得
-    const usageEndTime = new Date(usageEndDate).getTime();
-    console.log("Usage end time:", usageEndTime);
-    return currentLoginTime <= usageEndTime;
+    // 利用終了日(ミリ秒換算)を取得
+    const usageEndDateMS = new Date(usageEndDate).getTime();
+    console.log("Usage end date [ms]:", usageEndDateMS);
+    // 現在ログイン日(ミリ秒換算)を取得
+    const currentLoginDateMS = new Date(currentLoginDate).getTime();
+    console.log("Current login date [ms]:", currentLoginDateMS);
+    return currentLoginDateMS <= usageEndDateMS;
   } catch (error) {
     console.error("checkBeforeUsageEndDate Exception:", error);
     return false;
@@ -143,24 +164,24 @@ export const handler = async (event: PreAuthenticationTriggerEvent) => {
     return event;
   }
 
-  // ログイン現在時刻(UTC秒)を取得
-  const currentLoginTime = Date.now();
-  console.log("Current login time:", currentLoginTime);
+  // ログイン日(日本時刻)を取得
+  const currentLoginDate = getJSTDate(new Date());
+  console.log("Current login date:", currentLoginDate);
 
   // パスワードが有効期限切れの場合：認証エラー
-  if (!(await checkPasswordNotExpired(currentLoginTime, passwordSetDate))) {
+  if (!(await checkPasswordNotExpired(currentLoginDate, passwordSetDate))) {
     console.log("Your password has expired. Please reset your password.");
     throw new Error("PASSWORD_HAS_EXPIRED");
   }
 
   // 利用開始日に至ってない場合：認証エラー
-  if (!checkAfterUsageStartDate(currentLoginTime, usageStartDate)) {
+  if (!checkAfterUsageStartDate(currentLoginDate, usageStartDate)) {
     console.log("Your usage period has not started yet.");
     throw new Error("USAGE_PERIOD_HAS_NOT_STARTED");
   }
 
   // 利用終了日を過ぎている場合：認証エラー
-  if (!checkBeforeUsageEndDate(currentLoginTime, usageEndDate)) {
+  if (!checkBeforeUsageEndDate(currentLoginDate, usageEndDate)) {
     console.log("Your usage period has passed.");
     throw new Error("USAGE_PERIOD_HAS_PASSED");
   }

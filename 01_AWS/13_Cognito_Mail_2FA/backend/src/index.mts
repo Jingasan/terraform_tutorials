@@ -77,6 +77,8 @@ app.get("/admin", async (_req, res) => {
     <h2>新規ユーザー登録</h2>
     <form action="/create_user" method="post">
       <input type="email" name="email" placeholder="email@domain" required><br/>
+      <input type="text" name="usageStartDate" placeholder="利用開始日(yyyy-MM-dd)"><br/>
+      <input type="text" name="usageEndDate" placeholder="利用終了日(yyyy-MM-dd)"><br/>
       <button type="submit">新規登録</button>
     </form>
     <h2>ユーザー一覧</h2>
@@ -92,22 +94,26 @@ app.get("/admin", async (_req, res) => {
       </thead>
       <tbody>`;
   sendPage += result.res.map((user) => {
-    return `<tr><td>${user.Username}</td><td>${
-      user.Attributes.find((attr) => attr.Name === "email")?.Value || "未登録"
-    }</td><td>${
-      user.Attributes.find((attr) => attr.Name === "custom:password_set_date")
-        ?.Value || "未登録"
-    }</td><td>${
-      user.Attributes.find((attr) => attr.Name === "custom:usage_start_date")
-        ?.Value || "未登録"
-    }</td><td>${
-      user.Attributes.find((attr) => attr.Name === "custom:usage_end_date")
-        ?.Value || "未登録"
-    }</td></tr>`;
+    return `<tr>
+      <td>${user.Username}</td>
+      <td>${
+        user.Attributes.find((attr) => attr.Name === "email")?.Value || "未登録"
+      }</td>
+      <td>${
+        user.Attributes.find((attr) => attr.Name === "custom:password_set_date")
+          ?.Value || "未登録"
+      }</td>
+      <td>${
+        user.Attributes.find((attr) => attr.Name === "custom:usage_start_date")
+          ?.Value || "未登録"
+      }</td>
+      <td>${
+        user.Attributes.find((attr) => attr.Name === "custom:usage_end_date")
+          ?.Value || "未登録"
+      }</td>
+    </tr>`;
   });
-  sendPage += `
-      </tbody>
-    </table>
+  sendPage += `</tbody></table>
     <h2>仮パスワード再発行</h2>
     <form action="/resend_temporary_password" method="post">
       <input type="email" name="email" placeholder="email@domain" required><br/>
@@ -142,8 +148,8 @@ app.post("/create_user", async (req, res) => {
   const result = await cognitoClient.adminCreateUser({
     userPoolId: USER_POOL_ID,
     username: body.email,
-    //usageStartDate: new Date(Date.now() + 1 * 24 * 60 * 60 * 1000), // 1日後を指定
-    //usageEndDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30日後を指定
+    usageStartDate: body.usageStartDate,
+    usageEndDate: body.usageEndDate,
     userAttributes: userAttributes,
   });
   console.log(JSON.stringify(result, null, 2));
