@@ -31,7 +31,7 @@ resource "aws_s3_bucket" "bucket_cognito_backup" {
   }
 }
 
-# バックアップを許可するバケットポリシーの設定
+# バックアップを許可するバケットポリシーの設定(AWS Backupからのアクセスを許可)
 resource "aws_s3_bucket_policy" "backup_policy" {
   # 割り当て先のバケット
   bucket = aws_s3_bucket.bucket_cognito_backup.id
@@ -52,4 +52,35 @@ resource "aws_s3_bucket_policy" "backup_policy" {
       ]
     }]
   })
+}
+
+# オブジェクトのバージョン管理の設定(AWS Backupの為に必須)
+resource "aws_s3_bucket_versioning" "bucket_cognito_backup" {
+  # バージョン管理を設定するバケットのID
+  bucket = aws_s3_bucket.bucket_cognito_backup.id
+  # バージョン管理の設定
+  versioning_configuration {
+    status = "Enabled"
+  }
+}
+
+# S3バケットオブジェクトのライフサイクルルール(オブジェクトが永遠にバージョニングされない為に必須)
+resource "aws_s3_bucket_lifecycle_configuration" "bucket_cognito_backup" {
+  # 対象となるバケットのID
+  bucket = aws_s3_bucket.bucket_cognito_backup.id
+  # ライフサイクルルールの設定
+  rule {
+    # ルール名
+    id = "${var.project_name}-bucket-cognito-backup-${local.lower_random_hex}"
+    # ルールのステータス
+    status = "Enabled"
+    # ルール適用対象のオブジェクトをprefixで指定
+    filter {
+      prefix = "" # すべてのオブジェクトに適用
+    }
+    # 有効期限
+    expiration {
+      days = var.s3_bucket_lifecycle_expiration_days # 180日経過したファイルを自動的に削除する
+    }
+  }
 }

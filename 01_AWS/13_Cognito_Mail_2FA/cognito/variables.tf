@@ -126,21 +126,6 @@ variable "cognito_reminder_days_before_password_expiry" {
   default     = 7
 }
 #============================================================
-# AWS Backup
-#============================================================
-# Vaultの中にバックアップデータが入っていてもTerraformに削除を許可するかどうか(true:許可)
-variable "backup_force_destroy" {
-  type        = bool
-  description = "Vaultの中にバックアップデータが入っていてもTerraformに削除を許可するかどうか(true:許可)"
-  default     = false
-}
-# 何日後にバックアップデータを削除するか(日)
-variable "backup_delete_after" {
-  type        = number
-  description = "何日後にバックアップデータを削除するか"
-  default     = 365
-}
-#============================================================
 # Lambda
 #============================================================
 # 実行ランタイム（ex: nodejs, python, go, etc.）
@@ -159,5 +144,29 @@ variable "lambda_timeout" {
 variable "lambda_cloudwatch_log_retention_in_days" {
   type        = number
   description = "CloudWatchにログを残す期間（日）"
+  default     = 90
+}
+#============================================================
+# AWS Backup
+#============================================================
+# Vaultの中にバックアップデータが入っていてもTerraformに削除を許可するかどうか(true:許可)
+variable "backup_force_destroy" {
+  type        = bool
+  description = "Vaultの中にバックアップデータが入っていてもTerraformに削除を許可するかどうか(true:許可)"
+  default     = false
+}
+# 何日後にバックアップデータを削除するか(日)
+variable "backup_delete_after" {
+  type        = number
+  description = "何日後にバックアップデータを削除するか"
+  default     = 365
+}
+#============================================================
+# S3
+#============================================================
+# バケットのオブジェクトのバージョニングの有効期限(日)
+variable "s3_bucket_lifecycle_expiration_days" {
+  type        = number
+  description = "バケットのオブジェクトのバージョニングの有効期限(日)"
   default     = 90
 }
