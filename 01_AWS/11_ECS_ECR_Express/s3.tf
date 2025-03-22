@@ -58,12 +58,26 @@ data "aws_iam_policy_document" "alb_log" {
 
 # S3バケットファイルのライフサイクルルール
 resource "aws_s3_bucket_lifecycle_configuration" "alb_log" {
+  # 対象となるバケットのID
   bucket = aws_s3_bucket.alb_log.id
+  # ライフサイクルルールの設定
   rule {
+    # ルール名
+    id = "s3-alb-log-lifecycle"
+    # ルールのステータス(Enabled:有効)
     status = "Enabled"
-    id     = "s3-alb-log-lifecycle"
+    # 最新バージョンの有効期限(日)
     expiration {
+      # バージョニングが無効の場合：指定日数が経過したファイルを自動的に削除する
+      # バージョニングが有効の場合：指定日数が経過した最新バージョンのオブジェクトに削除マーカーが付与され、旧バージョンとなる(通常のGETリクエストではオブジェクトが取得できなくなる)
       days = 180 # 180日経過したファイルを自動的に削除する
+    }
+    # オブジェクトの非最新バージョンの削除設定
+    noncurrent_version_expiration {
+      # 非最新バージョンの保持日数(日)：指定日数が経過したら非最新バージョンを削除する
+      noncurrent_days = 180
+      # 保持するバージョン数(個)
+      newer_noncurrent_versions = 10
     }
   }
 }

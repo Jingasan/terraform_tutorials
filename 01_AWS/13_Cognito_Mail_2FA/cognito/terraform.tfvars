@@ -68,5 +68,7 @@ backup_delete_after = 365
 #============================================================
 # S3
 #============================================================
-# バケットのオブジェクトのバージョニングの有効期限(日)
-s3_bucket_lifecycle_expiration_days = 90
+# 非最新バージョンの保持日数(日)：指定日数が経過したら非最新バージョンを削除する
+s3_bucket_lifecycle_noncurrent_version_expiration_days = 90
+# 保持するバージョン数(個)：1~100
+s3_bucket_lifecycle_newer_noncurrent_versions = 10

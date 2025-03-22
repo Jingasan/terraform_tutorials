@@ -155,18 +155,38 @@ variable "backup_force_destroy" {
   description = "Vaultの中にバックアップデータが入っていてもTerraformに削除を許可するかどうか(true:許可)"
   default     = false
 }
-# 何日後にバックアップデータを削除するか(日)
+# 何日後にバックアップデータを削除するか(日)（90日以上である必要がある）
 variable "backup_delete_after" {
   type        = number
-  description = "何日後にバックアップデータを削除するか"
+  description = "何日後にバックアップデータを削除するか（90日以上である必要がある）"
   default     = 365
+}
+# コールドストレージ保存（低コストの長期保存）の有効化（true:有効）
+variable "backup_opt_in_to_archive_for_supported_resources" {
+  type        = bool
+  description = "コールドストレージ（低コストの長期保存）の有効化（true:有効）"
+  default     = true
+}
+# 何日後に安価で低速なコールドストレージ（S3 Glacier）に移行するか
+# opt_in_to_archive_for_supported_resourcesがtrue、かつdelete_afterよりも小さい値である必要がある
+variable "backup_cold_storage_after" {
+  type        = number
+  description = "何日後に安価で低速なコールドストレージ（S3 Glacier）に移行するか"
+  default     = 30
 }
 #============================================================
 # S3
 #============================================================
-# バケットのオブジェクトのバージョニングの有効期限(日)
-variable "s3_bucket_lifecycle_expiration_days" {
+# 非最新バージョンの保持日数(日)：指定日数が経過したら非最新バージョンを削除する
+variable "s3_bucket_lifecycle_noncurrent_version_expiration_days" {
   type        = number
-  description = "バケットのオブジェクトのバージョニングの有効期限(日)"
+  description = "非最新バージョンの保持日数(日)：指定日数が経過したら非最新バージョンを削除する"
   default     = 90
+}
+
+# 保持するバージョン数(個)：1~100
+variable "s3_bucket_lifecycle_newer_noncurrent_versions" {
+  type        = number
+  description = "保持するバージョン数(個)：1~100"
+  default     = 10
 }

@@ -79,10 +79,12 @@ resource "aws_s3_bucket_lifecycle_configuration" "bucket_cognito_backup" {
     filter {
       prefix = "" # すべてのオブジェクトに適用
     }
-    # 有効期限
-    expiration {
-      # 指定日数が経過したファイルを自動的に削除する
-      days = var.s3_bucket_lifecycle_expiration_days
+    # オブジェクトの非最新バージョンの削除設定
+    noncurrent_version_expiration {
+      # 非最新バージョンの保持日数(日)：指定日数が経過したら非最新バージョンを削除する
+      noncurrent_days = var.s3_bucket_lifecycle_noncurrent_version_expiration_days
+      # 保持するバージョン数(個)
+      newer_noncurrent_versions = var.s3_bucket_lifecycle_newer_noncurrent_versions
     }
   }
 }

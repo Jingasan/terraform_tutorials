@@ -30,7 +30,26 @@ resource "aws_backup_plan" "backup_plan" {
     lifecycle {
       # 何日後にバックアップデータを削除するか(日)
       delete_after = var.backup_delete_after
+      # コールドストレージ保存（低コストの長期保存）の有効化（true:有効）
+      opt_in_to_archive_for_supported_resources = true
+      # 何日後に安価で低速なコールドストレージ（S3 Glacier）に移行するか
+      # opt_in_to_archive_for_supported_resourcesがtrue、かつdelete_afterよりも小さい値である必要がある
+      cold_storage_after = 0
     }
+    # バックアップを別リージョンに複製する場合
+    # copy_action {
+    #   # 複製先のVaultのARN
+    #   destination_vault_arn = "arn:aws:backup::アカウントID:backup-vault:大阪リージョンに作成したボールト名"
+    #   # バックアップデータのライフサイクル
+    #   lifecycle {
+    #     # 何日後にバックアップデータを削除するか(日)
+    #     delete_after = var.backup_delete_after
+    #     # 何日後に安価で低速なコールドストレージ（S3 Glacier）に移行するか
+    #     cold_storage_after = 0
+    #     # アーカイブ（低コストの長期保存）の有効化（true:有効化）
+    #     opt_in_to_archive_for_supported_resources = true
+    #   }
+    # }
   }
   # タグ
   tags = {

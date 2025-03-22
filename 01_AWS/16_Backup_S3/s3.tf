@@ -88,6 +88,30 @@ resource "aws_s3_bucket_versioning" "frontend" {
   }
 }
 
+# S3バケットオブジェクトのライフサイクルルール(オブジェクトが永遠にバージョニングされない為に必須)
+resource "aws_s3_bucket_lifecycle_configuration" "frontend" {
+  # 対象となるバケットのID
+  bucket = aws_s3_bucket.frontend.id
+  # ライフサイクルルールの設定
+  rule {
+    # ルール名
+    id = "${var.project_name}-bucket-frontend-${local.lower_random_hex}"
+    # ルールのステータス(Enabled:有効)
+    status = "Enabled"
+    # ルール適用対象のオブジェクトをprefixで指定
+    filter {
+      prefix = "" # すべてのオブジェクトに適用
+    }
+    # オブジェクトの非最新バージョンの削除設定
+    noncurrent_version_expiration {
+      # 非最新バージョンの保持日数(日)：指定日数が経過したら非最新バージョンを削除する
+      noncurrent_days = var.s3_bucket_lifecycle_noncurrent_version_expiration_days
+      # 保持するバージョン数(個)
+      newer_noncurrent_versions = var.s3_bucket_lifecycle_newer_noncurrent_versions
+    }
+  }
+}
+
 # Webページのアップロード
 locals {
   src_dir = "./webpage"                             # アップロード対象のディレクトリ
