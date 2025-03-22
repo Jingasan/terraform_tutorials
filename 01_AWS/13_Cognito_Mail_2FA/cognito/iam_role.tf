@@ -100,28 +100,34 @@ resource "aws_iam_role" "backup_role" {
   }
 }
 
-# AWSマネージドのバックアップポリシー
-data "aws_iam_policy" "aws_backup_service_role_policy_for_backup" {
-  arn = "arn:aws:iam::aws:policy/service-role/AWSBackupServiceRolePolicyForBackup"
-}
-
-# IAMロールにポリシーを割り当て
-resource "aws_iam_role_policy_attachment" "backup_policy" {
+# IAMロールにAWSマネージドのDynamoDB/RDS/EC2などのバックアップポリシーを割り当て
+resource "aws_iam_role_policy_attachment" "backup_policy_attachment" {
   # IAMロール
   role = aws_iam_role.backup_role.name
   # 割り当てるポリシーのARN
-  policy_arn = data.aws_iam_policy.aws_backup_service_role_policy_for_backup.arn
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSBackupServiceRolePolicyForBackup"
 }
 
-# AWSマネージドのリストアポリシー
-data "aws_iam_policy" "aws_backup_service_role_policy_for_restore" {
-  arn = "arn:aws:iam::aws:policy/service-role/AWSBackupServiceRolePolicyForRestores"
-}
-
-# IAMロールにポリシーを割り当て
-resource "aws_iam_role_policy_attachment" "backup_restore" {
+# IAMロールにAWSマネージドのS3バックアップポリシーを割り当て
+resource "aws_iam_role_policy_attachment" "backup_s3_policy_attachment" {
   # IAMロール
   role = aws_iam_role.backup_role.name
   # 割り当てるポリシーのARN
-  policy_arn = data.aws_iam_policy.aws_backup_service_role_policy_for_restore.arn
+  policy_arn = "arn:aws:iam::aws:policy/AWSBackupServiceRolePolicyForS3Backup"
+}
+
+# IAMロールにAWSマネージドのDynamoDB/RDS/EC2などのリストアポリシーを割り当て
+resource "aws_iam_role_policy_attachment" "restore_policy_attachment" {
+  # IAMロール
+  role = aws_iam_role.backup_role.name
+  # 割り当てるポリシーのARN
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSBackupServiceRolePolicyForRestores"
+}
+
+# IAMロールにAWSマネージドのS3リストアポリシーを割り当て
+resource "aws_iam_role_policy_attachment" "restore_s3_policy_attachment" {
+  # IAMロール
+  role = aws_iam_role.backup_role.name
+  # 割り当てるポリシーのARN
+  policy_arn = "arn:aws:iam::aws:policy/AWSBackupServiceRolePolicyForS3Restore"
 }

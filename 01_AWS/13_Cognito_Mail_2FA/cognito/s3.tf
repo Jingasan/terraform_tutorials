@@ -60,6 +60,7 @@ resource "aws_s3_bucket_versioning" "bucket_cognito_backup" {
   bucket = aws_s3_bucket.bucket_cognito_backup.id
   # バージョン管理の設定
   versioning_configuration {
+    # バージョン管理のステータス(Enabled:有効)
     status = "Enabled"
   }
 }
@@ -72,7 +73,7 @@ resource "aws_s3_bucket_lifecycle_configuration" "bucket_cognito_backup" {
   rule {
     # ルール名
     id = "${var.project_name}-bucket-cognito-backup-${local.lower_random_hex}"
-    # ルールのステータス
+    # ルールのステータス(Enabled:有効)
     status = "Enabled"
     # ルール適用対象のオブジェクトをprefixで指定
     filter {
@@ -80,7 +81,8 @@ resource "aws_s3_bucket_lifecycle_configuration" "bucket_cognito_backup" {
     }
     # 有効期限
     expiration {
-      days = var.s3_bucket_lifecycle_expiration_days # 180日経過したファイルを自動的に削除する
+      # 指定日数が経過したファイルを自動的に削除する
+      days = var.s3_bucket_lifecycle_expiration_days
     }
   }
 }

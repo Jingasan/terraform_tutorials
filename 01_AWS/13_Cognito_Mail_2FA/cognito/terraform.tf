@@ -9,7 +9,7 @@ terraform {
 
   # AWSのバージョン指定
   required_providers {
-    aws = ">=5.90.0"
+    aws = ">=5.91.0"
   }
 
   # .tfstateをS3で管理する設定
