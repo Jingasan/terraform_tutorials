@@ -39,7 +39,6 @@ const getSecrets = async (): Promise<
   | {
       cognitoUserPoolId: string;
       passwordExpirationDays: number;
-      reminderDaysBeforePasswordExpiry: number;
     }
   | undefined
 > => {
@@ -59,18 +58,14 @@ const getSecrets = async (): Promise<
     const secret = JSON.parse(res.SecretString);
     if (
       secret.cognitoUserPoolId === undefined ||
-      secret.passwordExpirationDays === undefined ||
-      secret.reminderDaysBeforePasswordExpiry === undefined
+      secret.passwordExpirationDays === undefined
     ) {
-      logger.error(
-        "cognitoUserPoolId, passwordExpirationDays or reminderDaysBeforeExpiry is not found"
-      );
+      logger.error("cognitoUserPoolId or passwordExpirationDays is not found");
       return undefined;
     }
     return {
       cognitoUserPoolId: secret.cognitoUserPoolId,
       passwordExpirationDays: secret.passwordExpirationDays,
-      reminderDaysBeforePasswordExpiry: secret.reminderDaysBeforePasswordExpiry,
     };
   } catch (error) {
     logger.error("SecretString is not JSON format");
@@ -107,6 +102,39 @@ const listAllUsers = async (
     }
   } while (paginationToken);
   return users;
+};
+
+/**
+ * メールの送信
+ * @param fromEmail 送信元メールアドレス
+ * @param toEmails 送信先メールアドレス
+ * @param mailSub メールタイトル
+ * @param mailBody メールボディ
+ */
+const sendMail = async (
+  fromEmail: string,
+  toEmails: string[],
+  mailSub: string,
+  mailBody: string
+): Promise<boolean> => {
+  try {
+    await sesClient.send(
+      new SES.SendEmailCommand({
+        FromEmailAddress: fromEmail,
+        Destination: { ToAddresses: toEmails },
+        Content: {
+          Simple: {
+            Subject: { Data: mailSub },
+            Body: { Html: { Data: mailBody } },
+          },
+        },
+      })
+    );
+    return true;
+  } catch (err) {
+    logger.error(`Failed to send email to ${toEmails}`, err);
+    return false;
+  }
 };
 
 /**
@@ -156,22 +184,23 @@ export const handler: ScheduledHandler = async (event: ScheduledEvent) => {
         secrets.passwordExpirationDays * 24 * 60 * 60 * 1000;
       /** パスワード有効期限切れ通知日(ミリ秒換算) */
       const expiredNotificationDateMS = expiryDateMS + 1 * 24 * 60 * 60 * 1000;
-      /** パスワード更新依頼通知開始日(ミリ秒換算) */
-      const reminderStartDateMS =
-        expiredNotificationDateMS -
-        secrets.reminderDaysBeforePasswordExpiry * 24 * 60 * 60 * 1000;
+      /** パスワード有効期限切れ7日前(ミリ秒換算) */
+      const reminder7daysAgoDateMS =
+        expiredNotificationDateMS - 7 * 24 * 60 * 60 * 1000;
 
-      logger.info(`Email: ${email}`);
+      logger.info(`email: ${email}`);
       logger.info(`passwordSetDateMS: ${passwordSetDateMS}`);
       logger.info(`expiryDateMS: ${expiryDateMS}`);
       logger.info(`expiredNotificationDateMS: ${expiredNotificationDateMS}`);
-      logger.info(`reminderStartDateMS: ${reminderStartDateMS}`);
+      logger.info(`reminder7daysAgoDateMS: ${reminder7daysAgoDateMS}`);
       logger.info(`todayDateMS: ${todayDateMS}`);
 
-      // 期限7日前〜当日までパスワード更新依頼メールを送信
-      if (reminderStartDateMS <= todayDateMS && todayDateMS <= expiryDateMS) {
+      if (
+        // パスワード有効期限切れ7日前にパスワード更新依頼メールを送信
+        todayDateMS === reminder7daysAgoDateMS
+      ) {
         // パスワード有効期限日(日本時刻yyyy/MM/dd)
-        const ExpiryDate = format(
+        const expiryDate = format(
           addDays(new Date(passwordSetDate), secrets.passwordExpirationDays),
           "yyyy/MM/dd"
         );
@@ -179,46 +208,42 @@ export const handler: ScheduledHandler = async (event: ScheduledEvent) => {
         const mailSub = `${SERVICE_NAME} パスワード更新のお願い`;
         const mailBody = `${email} 様<br/><br/>
 いつもご利用いただき、ありがとうございます。<br/>
-現在のパスワードの有効期限は ${ExpiryDate} までです。<br/>
+現在のパスワードの有効期限は ${expiryDate} までです。<br/>
 有効期限が切れると、現在のパスワードでサービスにログインできなくなります。<br/>
 サービスにログインし、パスワードを更新してください。`;
         // メール送信
-        await sesClient.send(
-          new SES.SendEmailCommand({
-            FromEmailAddress: FROM_EMAIL_ADDRESS,
-            Destination: { ToAddresses: [email] },
-            Content: {
-              Simple: {
-                Subject: { Data: mailSub },
-                Body: { Html: { Data: mailBody } },
-              },
-            },
-          })
+        await sendMail(FROM_EMAIL_ADDRESS, [email], mailSub, mailBody);
+        logger.info(
+          `7 days ago password update request email sent to: ${email}`
         );
-        logger.info(`Password update request email sent to: ${email}`);
-      }
-
-      // パスワード有効期限日翌日に有効期限切れの通知メールを送信
-      if (todayDateMS === expiredNotificationDateMS) {
+      } else if (
+        // パスワード有効期限日にパスワード更新依頼メールを送信
+        todayDateMS === expiryDateMS
+      ) {
+        // メール内容
+        const mailSub = `${SERVICE_NAME} パスワード更新のお願い`;
+        const mailBody = `${email} 様<br/><br/>
+いつもご利用いただき、ありがとうございます。<br/>
+現在のパスワードの有効期限が本日で切れます。<br/>
+有効期限が切れると、現在のパスワードでサービスにログインできなくなります。<br/>
+サービスにログインし、パスワードを更新してください。`;
+        // メール送信
+        await sendMail(FROM_EMAIL_ADDRESS, [email], mailSub, mailBody);
+        logger.info(
+          `1 day ago Password update request email sent to: ${email}`
+        );
+      } else if (
+        // パスワード有効期限日翌日に有効期限切れの通知メールを送信
+        todayDateMS === expiredNotificationDateMS
+      ) {
         // メール内容
         const mailSub = `${SERVICE_NAME} パスワードの有効期限が切れました`;
         const mailBody = `${email} 様<br/><br/>
 いつもご利用いただき、ありがとうございます。<br/>
 パスワードの有効期限が切れました。<br/>
-パスワードリセットしてください。`;
+サービスのトップページからパスワードをリセットしてください。`;
         // メール送信
-        await sesClient.send(
-          new SES.SendEmailCommand({
-            FromEmailAddress: FROM_EMAIL_ADDRESS,
-            Destination: { ToAddresses: [email] },
-            Content: {
-              Simple: {
-                Subject: { Data: mailSub },
-                Body: { Html: { Data: mailBody } },
-              },
-            },
-          })
-        );
+        await sendMail(FROM_EMAIL_ADDRESS, [email], mailSub, mailBody);
         logger.info(`Password expiration notification email sent to: ${email}`);
       }
     })

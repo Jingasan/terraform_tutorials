@@ -119,12 +119,6 @@ variable "cognito_password_expiration_days" {
   description = "パスワード有効期間(日)"
   default     = 90
 }
-# パスワード有効期限日の何日前から通知を行うか(日)
-variable "cognito_reminder_days_before_password_expiry" {
-  type        = number
-  description = "パスワード有効期限日の何日前から通知を行うか(日)"
-  default     = 7
-}
 #============================================================
 # Lambda
 #============================================================
