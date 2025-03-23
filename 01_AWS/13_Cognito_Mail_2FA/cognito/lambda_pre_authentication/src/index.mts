@@ -1,3 +1,6 @@
+/**
+ * ログイン直前にパスワード有効期限切れ、利用開始日、利用終了日をチェックするLambda
+ */
 import { format } from "date-fns";
 import { TZDate } from "@date-fns/tz";
 import { PreAuthenticationTriggerEvent } from "aws-lambda";

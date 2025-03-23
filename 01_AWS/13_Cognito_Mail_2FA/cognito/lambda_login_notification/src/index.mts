@@ -1,3 +1,6 @@
+/**
+ * ユーザーに対し、ログイン通知を送信するLambda
+ */
 import { SESv2Client, SendEmailCommand } from "@aws-sdk/client-sesv2";
 import { PostAuthenticationTriggerEvent } from "aws-lambda";
 const REGION = process.env.REGION || "ap-northeast-1";

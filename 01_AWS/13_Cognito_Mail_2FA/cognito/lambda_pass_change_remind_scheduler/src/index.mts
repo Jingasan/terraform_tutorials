@@ -1,3 +1,6 @@
+/**
+ * パスワード期限切れが近いユーザーに対し、パスワード変更依頼メールを送信するLambda
+ */
 import { addDays, format } from "date-fns";
 import { ScheduledHandler, ScheduledEvent } from "aws-lambda";
 import * as SES from "@aws-sdk/client-sesv2";

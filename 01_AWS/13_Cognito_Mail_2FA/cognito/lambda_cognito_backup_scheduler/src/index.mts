@@ -1,3 +1,6 @@
+/**
+ * Cognitoのユーザー情報一覧をS3バケットに一時バックアップする定期実行Lambda
+ */
 import { parseISO, format } from "date-fns";
 import { TZDate } from "@date-fns/tz";
 import { ScheduledHandler, ScheduledEvent } from "aws-lambda";

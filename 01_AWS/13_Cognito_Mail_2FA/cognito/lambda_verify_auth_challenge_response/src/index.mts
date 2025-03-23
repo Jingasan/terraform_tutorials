@@ -1,3 +1,6 @@
+/**
+ * ログイン時に二段階認証の認証チェックを行うLambda
+ */
 import { VerifyAuthChallengeResponseTriggerEvent } from "aws-lambda";
 
 /**

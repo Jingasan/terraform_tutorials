@@ -46,6 +46,8 @@ resource "aws_iam_policy" "lambda_policy" {
           "ses:SendEmail",
           "cognito-idp:*",
           "secretsmanager:GetSecretValue",
+          "backup:ListRecoveryPointsByBackupVault",
+          "backup:DeleteRecoveryPoint"
         ]
         # 対象となるAWSリソースのARNの指定
         Resource = [

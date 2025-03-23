@@ -1,3 +1,6 @@
+/**
+ * ログイン時にワンタイムパスワードを送信するLambda
+ */
 import { SESv2Client, SendEmailCommand } from "@aws-sdk/client-sesv2";
 import { CreateAuthChallengeTriggerEvent } from "aws-lambda";
 const REGION = process.env.REGION || "ap-northeast-1";
