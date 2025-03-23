@@ -11,8 +11,8 @@ import { TZDate } from "@date-fns/tz";
 const REGION = process.env.REGION || "ap-northeast-1";
 const FROM_EMAIL_ADDRESS = process.env.SES_EMAIL_FROM || undefined;
 const SECRET_NAME = process.env.SECRET_NAME;
-const SERVICE_NAME = `[${process.env.SERVICE_NAME}] ` || "";
-const logger = new Logger();
+const SERVICE_NAME = process.env.SERVICE_NAME;
+const logger = new Logger({ serviceName: SERVICE_NAME });
 const cognitoClient = new Cognito.CognitoIdentityProviderClient({
   region: REGION,
 });
@@ -161,7 +161,7 @@ export const handler: ScheduledHandler = async (event: ScheduledEvent) => {
         expiredNotificationDateMS -
         secrets.reminderDaysBeforePasswordExpiry * 24 * 60 * 60 * 1000;
 
-      logger.info("Email: ", email);
+      logger.info(`Email: ${email}`);
       logger.info(`passwordSetDateMS: ${passwordSetDateMS}`);
       logger.info(`expiryDateMS: ${expiryDateMS}`);
       logger.info(`expiredNotificationDateMS: ${expiredNotificationDateMS}`);
@@ -195,7 +195,7 @@ export const handler: ScheduledHandler = async (event: ScheduledEvent) => {
             },
           })
         );
-        logger.info("Password update request email sent to: ", email);
+        logger.info(`Password update request email sent to: ${email}`);
       }
 
       // パスワード有効期限日翌日に有効期限切れの通知メールを送信
@@ -219,7 +219,7 @@ export const handler: ScheduledHandler = async (event: ScheduledEvent) => {
             },
           })
         );
-        logger.info("Password expiration notification email sent to: ", email);
+        logger.info(`Password expiration notification email sent to: ${email}`);
       }
     })
   );

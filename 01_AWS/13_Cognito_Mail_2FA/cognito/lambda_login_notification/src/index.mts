@@ -6,8 +6,8 @@ import { PostAuthenticationTriggerEvent } from "aws-lambda";
 import { Logger } from "@aws-lambda-powertools/logger";
 const REGION = process.env.REGION || "ap-northeast-1";
 const FROM_EMAIL_ADDRESS = process.env.SES_EMAIL_FROM || undefined;
-const SERVICE_NAME = `[${process.env.SERVICE_NAME}] ` || "";
-const logger = new Logger();
+const SERVICE_NAME = process.env.SERVICE_NAME;
+const logger = new Logger({ serviceName: SERVICE_NAME });
 const ses = new SESv2Client({ region: REGION });
 
 /**
@@ -18,7 +18,7 @@ const ses = new SESv2Client({ region: REGION });
 export const handler = async (
   event: PostAuthenticationTriggerEvent
 ): Promise<PostAuthenticationTriggerEvent> => {
-  logger.info("Event: ", JSON.stringify(event, null, 2));
+  logger.info(`Event: ${JSON.stringify(event, null, 2)}`);
 
   // ユーザー名、メールアドレスを取得
   const { userName, request } = event;
@@ -51,9 +51,9 @@ export const handler = async (
   // ログイン通知メールを送信
   try {
     await ses.send(params);
-    logger.info("メール送信成功");
+    logger.info("Succeeded to send login notification mail.");
   } catch (error) {
-    logger.error("メール送信失敗", error);
+    logger.error("Failed to send login notification mail.", error);
   }
   return event;
 };

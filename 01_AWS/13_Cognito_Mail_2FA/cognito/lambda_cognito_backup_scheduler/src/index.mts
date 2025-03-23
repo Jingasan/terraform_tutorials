@@ -10,7 +10,8 @@ import * as Cognito from "@aws-sdk/client-cognito-identity-provider";
 import { Logger } from "@aws-lambda-powertools/logger";
 const REGION = process.env.REGION || "ap-northeast-1";
 const SECRET_NAME = process.env.SECRET_NAME;
-const logger = new Logger();
+const SERVICE_NAME = process.env.SERVICE_NAME;
+const logger = new Logger({ serviceName: SERVICE_NAME });
 const s3client = new S3.S3Client({ region: REGION });
 const cognitoClient = new Cognito.CognitoIdentityProviderClient({
   region: REGION,

@@ -3,7 +3,8 @@
  */
 import { VerifyAuthChallengeResponseTriggerEvent } from "aws-lambda";
 import { Logger } from "@aws-lambda-powertools/logger";
-const logger = new Logger();
+const SERVICE_NAME = process.env.SERVICE_NAME;
+const logger = new Logger({ serviceName: SERVICE_NAME });
 
 /**
  * VerifyAuthChallengeResponseトリガーのハンドラ
@@ -14,8 +15,7 @@ export const handler = async (
   event: VerifyAuthChallengeResponseTriggerEvent
 ) => {
   logger.info(
-    "VerifyAuthChallengeResponse event:",
-    JSON.stringify(event, null, 2)
+    `VerifyAuthChallengeResponse event: ${JSON.stringify(event, null, 2)}`
   );
   event.response.answerCorrect =
     event.request.privateChallengeParameters.answer ===

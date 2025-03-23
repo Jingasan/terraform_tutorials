@@ -6,7 +6,8 @@ import { ScheduledHandler, ScheduledEvent } from "aws-lambda";
 import { Logger } from "@aws-lambda-powertools/logger";
 const REGION = process.env.REGION || "ap-northeast-1";
 const VAULT_NAME = process.env.VAULT_NAME;
-const logger = new Logger();
+const SERVICE_NAME = process.env.SERVICE_NAME;
+const logger = new Logger({ serviceName: SERVICE_NAME });
 const client = new Backup.BackupClient({ region: REGION });
 
 /**

@@ -3,7 +3,8 @@
  */
 import { DefineAuthChallengeTriggerEvent } from "aws-lambda";
 import { Logger } from "@aws-lambda-powertools/logger";
-const logger = new Logger();
+const SERVICE_NAME = process.env.SERVICE_NAME;
+const logger = new Logger({ serviceName: SERVICE_NAME });
 
 /**
  * DefineAuthChallengeトリガーのハンドラ
@@ -12,8 +13,7 @@ const logger = new Logger();
  */
 export const handler = async (event: DefineAuthChallengeTriggerEvent) => {
   logger.info(
-    "DefineAuthChallenge event request:",
-    JSON.stringify(event, null, 2)
+    `DefineAuthChallenge event request: ${JSON.stringify(event, null, 2)}`
   );
   if (event.request.session.length === 0) {
     // 初回アクセス時 → 二段階認証に移行
@@ -37,8 +37,7 @@ export const handler = async (event: DefineAuthChallengeTriggerEvent) => {
     logger.info("Failed to challenge 2FA");
   }
   logger.info(
-    "DefineAuthChallenge event response:",
-    JSON.stringify(event, null, 2)
+    `DefineAuthChallenge event response: ${JSON.stringify(event, null, 2)}`
   );
   return event;
 };

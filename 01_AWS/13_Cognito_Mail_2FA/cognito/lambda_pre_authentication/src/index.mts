@@ -8,7 +8,8 @@ import * as SecretsManager from "@aws-sdk/client-secrets-manager";
 import { Logger } from "@aws-lambda-powertools/logger";
 const REGION = process.env.REGION || "ap-northeast-1";
 const SECRET_NAME = process.env.SECRET_NAME;
-const logger = new Logger();
+const SERVICE_NAME = process.env.SERVICE_NAME;
+const logger = new Logger({ serviceName: SERVICE_NAME });
 const secretsManagerClient = new SecretsManager.SecretsManagerClient({
   region: REGION,
 });
@@ -66,7 +67,7 @@ const checkPasswordNotExpired = async (
   passwordSetDate?: string
 ): Promise<boolean> => {
   try {
-    logger.info("Password set date:", passwordSetDate);
+    logger.info(`Password set date: ${passwordSetDate}`);
     if (!passwordSetDate) return true;
     // パスワード有効期間を取得
     const passwordExpirationDays = await getPasswordExpirationDays();
@@ -147,7 +148,7 @@ const checkBeforeUsageEndDate = (
  * @returns イベント
  */
 export const handler = async (event: PreAuthenticationTriggerEvent) => {
-  logger.info("PreAuthentication event:", JSON.stringify(event, null, 2));
+  logger.info(`PreAuthentication event: ${JSON.stringify(event, null, 2)}`);
 
   // ユーザーが存在しない場合：認証エラー
   if (event.request.userNotFound) {
