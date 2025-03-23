@@ -5,12 +5,13 @@
 # Lambda関数のzipファイルをデプロイするS3バケットの設定
 resource "aws_s3_bucket" "bucket_lambda" {
   # S3バケット名
-  bucket = "${var.project_name}-lambda-${local.lower_random_hex}"
+  bucket = "${var.project_name}-lambda-${local.project_stage}"
   # バケットの中にオブジェクトが入っていてもTerraformに削除を許可するかどうか(true:許可)
   force_destroy = true
   # タグ
   tags = {
-    Name = var.project_name
+    ProjectName  = var.project_name
+    ProjectStage = local.project_stage
   }
 }
 
@@ -22,12 +23,13 @@ resource "aws_s3_bucket" "bucket_lambda" {
 # Cognitoのユーザー情報をバックアップするS3バケットの設定
 resource "aws_s3_bucket" "bucket_cognito_backup" {
   # S3バケット名
-  bucket = "${var.project_name}-cognito-backup-${local.lower_random_hex}"
+  bucket = "${var.project_name}-cognito-backup-${local.project_stage}"
   # バケットの中にオブジェクトが入っていてもTerraformに削除を許可するかどうか(true:許可)
   force_destroy = true
   # タグ
   tags = {
-    Name = var.project_name
+    ProjectName  = var.project_name
+    ProjectStage = local.project_stage
   }
 }
 
@@ -72,7 +74,7 @@ resource "aws_s3_bucket_lifecycle_configuration" "bucket_cognito_backup" {
   # ライフサイクルルールの設定
   rule {
     # ルール名
-    id = "${var.project_name}-bucket-cognito-backup-${local.lower_random_hex}"
+    id = "${var.project_name}-bucket-cognito-backup-${local.project_stage}"
     # ルールのステータス(Enabled:有効)
     status = "Enabled"
     # ルール適用対象のオブジェクトをprefixで指定

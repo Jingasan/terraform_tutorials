@@ -31,8 +31,10 @@ provider "aws" {
 resource "random_id" "main" {
   byte_length = 2 # 値の範囲
 }
+# プロジェクトのステージ名（例：dev/prod/test/個人名）
 locals {
-  lower_random_hex = random_id.main.dec
+  # var.project_nameでステージ名が指定されてなければ、ランダムな整数値を指定
+  project_stage = var.project_stage != null ? var.project_stage : random_id.main.dec
 }
 
 # 現在のAWSアカウント情報

@@ -12,7 +12,8 @@ resource "aws_secretsmanager_secret" "secretsmanager" {
   description = var.project_name
   # タグ
   tags = {
-    Name = var.project_name
+    ProjectName  = var.project_name
+    ProjectStage = local.project_stage
   }
 }
 

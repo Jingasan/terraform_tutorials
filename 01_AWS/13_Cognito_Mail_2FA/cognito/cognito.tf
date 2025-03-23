@@ -5,7 +5,7 @@
 # ユーザープールの作成
 resource "aws_cognito_user_pool" "user_pool" {
   # ユーザープール名
-  name = "${var.project_name}-${local.lower_random_hex}"
+  name = "${var.project_name}-${local.project_stage}"
   # ユーザー名の代わりに認証に利用できる属性(email/phone_number/preferred_username)
   # aliasに指定した属性には一意制約がかかる（＝同じ属性値を登録できない）
   # username_attributesと同時利用不可
@@ -150,7 +150,8 @@ resource "aws_cognito_user_pool" "user_pool" {
   }
   # タグ
   tags = {
-    "name" = var.project_name
+    ProjectName  = var.project_name
+    ProjectStage = local.project_stage
   }
 }
 

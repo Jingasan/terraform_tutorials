@@ -7,6 +7,12 @@ variable "project_name" {
   description = "プロジェクト名（リソースの名前、タグ、説明文に利用される）"
   default     = "terraform-tutorials"
 }
+# プロジェクトのステージ名（例：dev/prod/test/個人名）
+variable "project_stage" {
+  type        = string
+  description = "プロジェクトのステージ名（例：dev/prod/test/個人名）"
+  default     = null
+}
 #============================================================
 # AWS Account
 #============================================================

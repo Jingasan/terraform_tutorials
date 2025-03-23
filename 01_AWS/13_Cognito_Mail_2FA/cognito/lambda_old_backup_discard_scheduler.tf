@@ -7,7 +7,7 @@ resource "aws_lambda_function" "lambda_old_backup_discard_scheduler" {
   # 関数のZIPファイルをS3にアップロードした後に実行
   depends_on = [null_resource.build_upload_lambda_old_backup_discard_scheduler]
   # 関数名
-  function_name = "${var.project_name}-old-backup-discard-scheduler-${local.lower_random_hex}"
+  function_name = "${var.project_name}-old-backup-discard-scheduler-${local.project_stage}"
   # 実行環境の指定(ex: nodejs, python, go, etc.)
   runtime = var.lambda_runtime
   # ハンドラの指定
@@ -32,7 +32,8 @@ resource "aws_lambda_function" "lambda_old_backup_discard_scheduler" {
   description = var.project_name
   # タグ
   tags = {
-    Name = var.project_name
+    ProjectName  = var.project_name
+    ProjectStage = local.project_stage
   }
 }
 
@@ -105,7 +106,8 @@ resource "aws_cloudwatch_log_group" "lambda_old_backup_discard_scheduler" {
   retention_in_days = var.lambda_cloudwatch_log_retention_in_days
   # タグ
   tags = {
-    Name = var.project_name
+    ProjectName  = var.project_name
+    ProjectStage = local.project_stage
   }
 }
 
@@ -119,7 +121,8 @@ resource "aws_cloudwatch_event_rule" "lambda_old_backup_discard_scheduler" {
   description = var.project_name
   # タグ
   tags = {
-    Name = var.project_name
+    ProjectName  = var.project_name
+    ProjectStage = local.project_stage
   }
 }
 

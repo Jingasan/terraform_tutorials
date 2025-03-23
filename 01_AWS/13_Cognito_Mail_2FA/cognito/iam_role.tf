@@ -24,7 +24,8 @@ resource "aws_iam_role" "lambda_role" {
   description = var.project_name
   # タグ
   tags = {
-    Name = var.project_name
+    ProjectName  = var.project_name
+    ProjectStage = local.project_stage
   }
 }
 
@@ -60,7 +61,8 @@ resource "aws_iam_policy" "lambda_policy" {
   description = var.project_name
   # タグ
   tags = {
-    Name = var.project_name
+    ProjectName  = var.project_name
+    ProjectStage = local.project_stage
   }
 }
 
@@ -80,7 +82,7 @@ resource "aws_iam_role_policy_attachment" "lambda_basic_execution" {
 # IAMロールの設定
 resource "aws_iam_role" "backup_role" {
   # IAMロール名
-  name = "${var.project_name}-backup-${local.lower_random_hex}"
+  name = "${var.project_name}-backup-${local.project_stage}"
   # AWS Backupに割り当てるIAMポリシー
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
@@ -98,7 +100,8 @@ resource "aws_iam_role" "backup_role" {
   description = var.project_name
   # タグ
   tags = {
-    Name = var.project_name
+    ProjectName  = var.project_name
+    ProjectStage = local.project_stage
   }
 }
 
