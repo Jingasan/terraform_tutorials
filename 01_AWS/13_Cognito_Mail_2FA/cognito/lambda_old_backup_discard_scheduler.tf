@@ -114,7 +114,7 @@ resource "aws_cloudwatch_event_rule" "lambda_old_backup_discard_scheduler" {
   # イベントルール名
   name = "${var.project_name}-old-backup-discard-scheduler"
   # イベントルールのスケジュール式(CRON)
-  schedule_expression = "cron(0 17 * * ? *)" # 毎日深夜2時に実行(AWS Backupが毎日深夜1時に実行される為)
+  schedule_expression = "cron(0 21 * * ? *)" # 毎日朝6時に実行(AWS Backupが毎日深夜1時に実行される為)
   # 説明
   description = var.project_name
   # タグ

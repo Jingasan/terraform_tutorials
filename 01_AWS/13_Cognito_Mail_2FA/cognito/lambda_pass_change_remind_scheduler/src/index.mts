@@ -6,11 +6,13 @@ import { ScheduledHandler, ScheduledEvent } from "aws-lambda";
 import * as SES from "@aws-sdk/client-sesv2";
 import * as SecretsManager from "@aws-sdk/client-secrets-manager";
 import * as Cognito from "@aws-sdk/client-cognito-identity-provider";
+import { Logger } from "@aws-lambda-powertools/logger";
 import { TZDate } from "@date-fns/tz";
 const REGION = process.env.REGION || "ap-northeast-1";
 const FROM_EMAIL_ADDRESS = process.env.SES_EMAIL_FROM || undefined;
 const SECRET_NAME = process.env.SECRET_NAME;
 const SERVICE_NAME = `[${process.env.SERVICE_NAME}] ` || "";
+const logger = new Logger();
 const cognitoClient = new Cognito.CognitoIdentityProviderClient({
   region: REGION,
 });
@@ -42,7 +44,7 @@ const getSecrets = async (): Promise<
   | undefined
 > => {
   if (!SECRET_NAME) {
-    console.error("SECRET_NAME is not set");
+    logger.error("SECRET_NAME is not set");
     return undefined;
   }
   const command = new SecretsManager.GetSecretValueCommand({
@@ -50,7 +52,7 @@ const getSecrets = async (): Promise<
   });
   const res = await secretsManagerClient.send(command);
   if (!res.SecretString) {
-    console.error("SecretString is not found");
+    logger.error("SecretString is not found");
     return undefined;
   }
   try {
@@ -60,7 +62,7 @@ const getSecrets = async (): Promise<
       secret.passwordExpirationDays === undefined ||
       secret.reminderDaysBeforePasswordExpiry === undefined
     ) {
-      console.error(
+      logger.error(
         "cognitoUserPoolId, passwordExpirationDays or reminderDaysBeforeExpiry is not found"
       );
       return undefined;
@@ -71,7 +73,7 @@ const getSecrets = async (): Promise<
       reminderDaysBeforePasswordExpiry: secret.reminderDaysBeforePasswordExpiry,
     };
   } catch (error) {
-    console.error("SecretString is not JSON format");
+    logger.error("SecretString is not JSON format");
     return undefined;
   }
 };
@@ -99,8 +101,8 @@ const listAllUsers = async (
       if (res.Users) users.push(...res.Users);
       paginationToken = res.PaginationToken;
     } catch (err) {
-      console.error((err as Cognito.InternalErrorException).name);
-      console.error((err as Cognito.InternalErrorException).message);
+      logger.error((err as Cognito.InternalErrorException).name);
+      logger.error((err as Cognito.InternalErrorException).message);
       return [];
     }
   } while (paginationToken);
@@ -119,12 +121,12 @@ export const handler: ScheduledHandler = async (event: ScheduledEvent) => {
 
   // ユーザー情報一覧の取得
   const userList = await listAllUsers(secrets.cognitoUserPoolId);
-  console.log(userList);
+  logger.info(JSON.stringify(userList, null, 2));
 
   // 本日の日付を取得
   const eventTime = new Date(event.time);
   const todayDate = getJSTDate(eventTime);
-  console.log("TodayDate: ", todayDate);
+  logger.info(`TodayDate: ${todayDate}`);
 
   // パスワード有効期限が迫ったユーザーに対し、更新依頼メールを送信
   await Promise.all(
@@ -136,11 +138,11 @@ export const handler: ScheduledHandler = async (event: ScheduledEvent) => {
         (attr) => attr.Name === "custom:password_set_date"
       )?.Value;
       if (!email) {
-        console.error(`Email not found for user: ${user.Username}`);
+        logger.error(`Email not found for user: ${user.Username}`);
         return;
       }
       if (!passwordSetDate) {
-        console.log(`Password set date not found for user: ${user.Username}`);
+        logger.info(`Password set date not found for user: ${user.Username}`);
         return;
       }
 
@@ -159,12 +161,12 @@ export const handler: ScheduledHandler = async (event: ScheduledEvent) => {
         expiredNotificationDateMS -
         secrets.reminderDaysBeforePasswordExpiry * 24 * 60 * 60 * 1000;
 
-      console.log("Email: ", email);
-      console.log("passwordSetDateMS: ", passwordSetDateMS);
-      console.log("expiryDateMS: ", expiryDateMS);
-      console.log("expiredNotificationDateMS: ", expiredNotificationDateMS);
-      console.log("reminderStartDateMS: ", reminderStartDateMS);
-      console.log("todayDateMS: ", todayDateMS);
+      logger.info("Email: ", email);
+      logger.info(`passwordSetDateMS: ${passwordSetDateMS}`);
+      logger.info(`expiryDateMS: ${expiryDateMS}`);
+      logger.info(`expiredNotificationDateMS: ${expiredNotificationDateMS}`);
+      logger.info(`reminderStartDateMS: ${reminderStartDateMS}`);
+      logger.info(`todayDateMS: ${todayDateMS}`);
 
       // 期限7日前〜当日までパスワード更新依頼メールを送信
       if (reminderStartDateMS <= todayDateMS && todayDateMS <= expiryDateMS) {
@@ -193,7 +195,7 @@ export const handler: ScheduledHandler = async (event: ScheduledEvent) => {
             },
           })
         );
-        console.log("Password update request email sent to: ", email);
+        logger.info("Password update request email sent to: ", email);
       }
 
       // パスワード有効期限日翌日に有効期限切れの通知メールを送信
@@ -217,7 +219,7 @@ export const handler: ScheduledHandler = async (event: ScheduledEvent) => {
             },
           })
         );
-        console.log("Password expiration notification email sent to: ", email);
+        logger.info("Password expiration notification email sent to: ", email);
       }
     })
   );

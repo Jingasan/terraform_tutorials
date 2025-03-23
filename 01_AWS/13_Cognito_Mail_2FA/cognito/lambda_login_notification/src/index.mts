@@ -3,9 +3,11 @@
  */
 import { SESv2Client, SendEmailCommand } from "@aws-sdk/client-sesv2";
 import { PostAuthenticationTriggerEvent } from "aws-lambda";
+import { Logger } from "@aws-lambda-powertools/logger";
 const REGION = process.env.REGION || "ap-northeast-1";
 const FROM_EMAIL_ADDRESS = process.env.SES_EMAIL_FROM || undefined;
 const SERVICE_NAME = `[${process.env.SERVICE_NAME}] ` || "";
+const logger = new Logger();
 const ses = new SESv2Client({ region: REGION });
 
 /**
@@ -16,17 +18,17 @@ const ses = new SESv2Client({ region: REGION });
 export const handler = async (
   event: PostAuthenticationTriggerEvent
 ): Promise<PostAuthenticationTriggerEvent> => {
-  console.log("Event: ", JSON.stringify(event, null, 2));
+  logger.info("Event: ", JSON.stringify(event, null, 2));
 
   // ユーザー名、メールアドレスを取得
   const { userName, request } = event;
   const email = request.userAttributes.email;
   if (!FROM_EMAIL_ADDRESS) {
-    console.error("FROM_EMAIL_ADDRESS is not set");
+    logger.error("FROM_EMAIL_ADDRESS is not set");
     return event;
   }
   if (!email) {
-    console.error("Email not found for user:", userName);
+    logger.error("Email not found for user:", userName);
     return event;
   }
 
@@ -49,9 +51,9 @@ export const handler = async (
   // ログイン通知メールを送信
   try {
     await ses.send(params);
-    console.log("メール送信成功");
+    logger.info("メール送信成功");
   } catch (error) {
-    console.error("メール送信失敗", error);
+    logger.error("メール送信失敗", error);
   }
   return event;
 };

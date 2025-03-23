@@ -5,8 +5,10 @@ import { format } from "date-fns";
 import { TZDate } from "@date-fns/tz";
 import { PreAuthenticationTriggerEvent } from "aws-lambda";
 import * as SecretsManager from "@aws-sdk/client-secrets-manager";
+import { Logger } from "@aws-lambda-powertools/logger";
 const REGION = process.env.REGION || "ap-northeast-1";
 const SECRET_NAME = process.env.SECRET_NAME;
+const logger = new Logger();
 const secretsManagerClient = new SecretsManager.SecretsManagerClient({
   region: REGION,
 });
@@ -29,7 +31,7 @@ const getJSTDate = (date: Date): string => {
  */
 const getPasswordExpirationDays = async (): Promise<number> => {
   if (!SECRET_NAME) {
-    console.error("SECRET_NAME is not set");
+    logger.error("SECRET_NAME is not set");
     return DEFAULT_EXPIRATION_DAYS;
   }
   const command = new SecretsManager.GetSecretValueCommand({
@@ -37,7 +39,7 @@ const getPasswordExpirationDays = async (): Promise<number> => {
   });
   const res = await secretsManagerClient.send(command);
   if (!res.SecretString) {
-    console.error("SecretString is not found");
+    logger.error("SecretString is not found");
     return DEFAULT_EXPIRATION_DAYS;
   }
   try {
@@ -48,7 +50,7 @@ const getPasswordExpirationDays = async (): Promise<number> => {
     }
     return secret.passwordExpirationDays as number;
   } catch (error) {
-    console.error("SecretString is not JSON format");
+    logger.error("SecretString is not JSON format");
     return DEFAULT_EXPIRATION_DAYS;
   }
 };
@@ -64,25 +66,25 @@ const checkPasswordNotExpired = async (
   passwordSetDate?: string
 ): Promise<boolean> => {
   try {
-    console.log("Password set date:", passwordSetDate);
+    logger.info("Password set date:", passwordSetDate);
     if (!passwordSetDate) return true;
     // パスワード有効期間を取得
     const passwordExpirationDays = await getPasswordExpirationDays();
-    console.log("Password expiration days:", passwordExpirationDays);
+    logger.info(`Password expiration days: ${passwordExpirationDays}`);
     // パスワード設定日(ミリ秒換算)を取得
     const passwordSetDateMS = new Date(passwordSetDate).getTime();
-    console.log("Password set date [ms]:", passwordSetDateMS);
+    logger.info(`Password set date [ms]: ${passwordSetDateMS}`);
     // パスワード有効期限日(ミリ秒換算)を計算
     const expiryDateMS =
       passwordSetDateMS + passwordExpirationDays * 24 * 60 * 60 * 1000;
-    console.log("Expiry date [ms]:", expiryDateMS);
+    logger.info(`Expiry date [ms]: ${expiryDateMS}`);
     // 現在ログイン日(ミリ秒換算)を取得
     const currentLoginDateMS = new Date(currentLoginDate).getTime();
-    console.log("Current login date [ms]:", currentLoginDateMS);
+    logger.info(`Current login date [ms]: ${currentLoginDateMS}`);
     // true: 有効期限内, false: 有効期限切れ
     return currentLoginDateMS <= expiryDateMS;
   } catch (error) {
-    console.error("checkPasswordNotExpired Exception:", error);
+    logger.error("checkPasswordNotExpired Exception:", error);
     return false;
   }
 };
@@ -98,17 +100,17 @@ const checkAfterUsageStartDate = (
   usageStartDate?: string
 ) => {
   try {
-    console.log("Usage start date:", usageStartDate);
+    logger.info(`Usage start date: ${usageStartDate}`);
     if (!usageStartDate) return true;
     // 利用開始日(ミリ秒換算)を取得
     const usageStartDateMS = new Date(usageStartDate).getTime();
-    console.log("Usage start date [ms]:", usageStartDateMS);
+    logger.info(`Usage start date [ms]: ${usageStartDateMS}`);
     // 現在ログイン日(ミリ秒換算)を取得
     const currentLoginDateMS = new Date(currentLoginDate).getTime();
-    console.log("Current login date [ms]:", currentLoginDateMS);
+    logger.info(`Current login date [ms]: ${currentLoginDateMS}`);
     return usageStartDateMS <= currentLoginDateMS;
   } catch (error) {
-    console.error("checkAfterUsageStartDate Exception:", error);
+    logger.error("checkAfterUsageStartDate Exception:", error);
     return false;
   }
 };
@@ -124,17 +126,17 @@ const checkBeforeUsageEndDate = (
   usageEndDate: string
 ) => {
   try {
-    console.log("Usage end date:", usageEndDate);
+    logger.info(`Usage end date: ${usageEndDate}`);
     if (!usageEndDate) return true;
     // 利用終了日(ミリ秒換算)を取得
     const usageEndDateMS = new Date(usageEndDate).getTime();
-    console.log("Usage end date [ms]:", usageEndDateMS);
+    logger.info(`Usage end date [ms]: ${usageEndDateMS}`);
     // 現在ログイン日(ミリ秒換算)を取得
     const currentLoginDateMS = new Date(currentLoginDate).getTime();
-    console.log("Current login date [ms]:", currentLoginDateMS);
+    logger.info(`Current login date [ms]: ${currentLoginDateMS}`);
     return currentLoginDateMS <= usageEndDateMS;
   } catch (error) {
-    console.error("checkBeforeUsageEndDate Exception:", error);
+    logger.error("checkBeforeUsageEndDate Exception:", error);
     return false;
   }
 };
@@ -145,11 +147,11 @@ const checkBeforeUsageEndDate = (
  * @returns イベント
  */
 export const handler = async (event: PreAuthenticationTriggerEvent) => {
-  console.log("PreAuthentication event:", JSON.stringify(event, null, 2));
+  logger.info("PreAuthentication event:", JSON.stringify(event, null, 2));
 
   // ユーザーが存在しない場合：認証エラー
   if (event.request.userNotFound) {
-    console.log("User not found");
+    logger.info("User not found");
     throw new Error("USER_NOT_FOUND");
   }
 
@@ -161,7 +163,7 @@ export const handler = async (event: PreAuthenticationTriggerEvent) => {
 
   // パスワード有効期限日、利用開始日、利用終了日が存在しない場合は認証を許可
   if (!passwordSetDate && !usageStartDate && !usageEndDate) {
-    console.log(
+    logger.info(
       "NO_PASSWORD_SET_DATE & NO_USAGE_START_DATE & NO_USAGE_END_DATE"
     );
     return event;
@@ -169,27 +171,27 @@ export const handler = async (event: PreAuthenticationTriggerEvent) => {
 
   // ログイン日(日本時刻)を取得
   const currentLoginDate = getJSTDate(new Date());
-  console.log("Current login date:", currentLoginDate);
+  logger.info(`Current login date: ${currentLoginDate}`);
 
   // パスワードが有効期限切れの場合：認証エラー
   if (!(await checkPasswordNotExpired(currentLoginDate, passwordSetDate))) {
-    console.log("Your password has expired. Please reset your password.");
+    logger.info("Your password has expired. Please reset your password.");
     throw new Error("PASSWORD_HAS_EXPIRED");
   }
 
   // 利用開始日に至ってない場合：認証エラー
   if (!checkAfterUsageStartDate(currentLoginDate, usageStartDate)) {
-    console.log("Your usage period has not started yet.");
+    logger.info("Your usage period has not started yet.");
     throw new Error("USAGE_PERIOD_HAS_NOT_STARTED");
   }
 
   // 利用終了日を過ぎている場合：認証エラー
   if (!checkBeforeUsageEndDate(currentLoginDate, usageEndDate)) {
-    console.log("Your usage period has passed.");
+    logger.info("Your usage period has passed.");
     throw new Error("USAGE_PERIOD_HAS_PASSED");
   }
 
   // パスワードが有効期間内、利用期間内の場合
-  console.log("Password and usage period is valid.");
+  logger.info("Password and usage period is valid.");
   return event;
 };

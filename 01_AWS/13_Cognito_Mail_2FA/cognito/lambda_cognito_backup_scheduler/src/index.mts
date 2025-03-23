@@ -7,8 +7,10 @@ import { ScheduledHandler, ScheduledEvent } from "aws-lambda";
 import * as S3 from "@aws-sdk/client-s3";
 import * as SecretsManager from "@aws-sdk/client-secrets-manager";
 import * as Cognito from "@aws-sdk/client-cognito-identity-provider";
+import { Logger } from "@aws-lambda-powertools/logger";
 const REGION = process.env.REGION || "ap-northeast-1";
 const SECRET_NAME = process.env.SECRET_NAME;
+const logger = new Logger();
 const s3client = new S3.S3Client({ region: REGION });
 const cognitoClient = new Cognito.CognitoIdentityProviderClient({
   region: REGION,
@@ -29,7 +31,7 @@ const getSecrets = async (): Promise<
   | undefined
 > => {
   if (!SECRET_NAME) {
-    console.error("SECRET_NAME is not set");
+    logger.error("SECRET_NAME is not set");
     return undefined;
   }
   const command = new SecretsManager.GetSecretValueCommand({
@@ -37,7 +39,7 @@ const getSecrets = async (): Promise<
   });
   const res = await secretsManagerClient.send(command);
   if (!res.SecretString) {
-    console.error("SecretString is not found");
+    logger.error("SecretString is not found");
     return undefined;
   }
   try {
@@ -46,9 +48,7 @@ const getSecrets = async (): Promise<
       secret.cognitoUserPoolId === undefined ||
       secret.cognitoBackupBucketName === undefined
     ) {
-      console.error(
-        "cognitoUserPoolId or cognitoBackupBucketName is not found"
-      );
+      logger.error("cognitoUserPoolId or cognitoBackupBucketName is not found");
       return undefined;
     }
     return {
@@ -56,7 +56,7 @@ const getSecrets = async (): Promise<
       cognitoBackupBucketName: secret.cognitoBackupBucketName,
     };
   } catch (error) {
-    console.error("SecretString is not JSON format");
+    logger.error("SecretString is not JSON format");
     return undefined;
   }
 };
@@ -85,7 +85,7 @@ const putObject = async (
     await s3client.send(new S3.PutObjectCommand(putObjectParam));
     return true;
   } catch (err) {
-    console.error(err, `Failed to put object s3://${bucket}/${key}`);
+    logger.error(err, `Failed to put object s3://${bucket}/${key}`);
     return false;
   }
 };
@@ -187,8 +187,8 @@ const listAllUsers = async (
       if (res.Users) users.push(...res.Users);
       paginationToken = res.PaginationToken;
     } catch (err) {
-      console.error((err as Cognito.InternalErrorException).name);
-      console.error((err as Cognito.InternalErrorException).message);
+      logger.error((err as Cognito.InternalErrorException).name);
+      logger.error((err as Cognito.InternalErrorException).message);
       return [];
     }
   } while (paginationToken);
@@ -207,17 +207,17 @@ export const handler: ScheduledHandler = async (event: ScheduledEvent) => {
 
   // ユーザー情報一覧の取得
   const userList = await listAllUsers(secrets.cognitoUserPoolId);
-  console.log(userList);
+  logger.info(JSON.stringify(userList, null, 2));
   if (!userList.length) {
-    console.log("No cognito user data");
+    logger.info("No cognito user data");
     return;
   }
 
   // ユーザー情報一覧をS3バケットに保存
   const res = await putUsersData(secrets.cognitoBackupBucketName, userList);
   if (res) {
-    console.log("Succeeded to backup cognito users");
+    logger.info("Succeeded to backup cognito users");
   } else {
-    console.log("Failed to backup cognito users");
+    logger.info("Failed to backup cognito users");
   }
 };

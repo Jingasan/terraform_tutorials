@@ -1,7 +1,7 @@
 {
-  "name": "node",
+  "name": "lambda_pre_authentication",
   "version": "1.0.0",
-  "description": "",
+  "description": "ログイン直前にパスワード有効期限切れ、利用開始日、利用終了日をチェックするLambda",
   "type": "module",
   "main": "dist/index.mjs",
   "scripts": {
@@ -11,6 +11,7 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
+  "private": true,
   "devDependencies": {
     "@types/aws-lambda": "^8.10.147",
     "@types/node": "^22.13.9",
@@ -18,6 +19,7 @@
     "typescript": "^5.8.2"
   },
   "dependencies": {
+    "@aws-lambda-powertools/logger": "^2.16.0",
     "@aws-sdk/client-secrets-manager": "^3.758.0",
     "@date-fns/tz": "^1.2.0",
     "date-fns": "^4.1.0",

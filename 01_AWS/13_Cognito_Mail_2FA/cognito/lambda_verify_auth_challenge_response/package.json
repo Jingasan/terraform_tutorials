@@ -1,7 +1,7 @@
 {
-  "name": "node",
+  "name": "lambda_verify_auth_challenge_response",
   "version": "1.0.0",
-  "description": "",
+  "description": "ログイン時に二段階認証の認証チェックを行うLambda",
   "type": "module",
   "main": "dist/index.mjs",
   "scripts": {
@@ -11,6 +11,7 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
+  "private": true,
   "devDependencies": {
     "@types/aws-lambda": "^8.10.147",
     "@types/node": "^22.13.9",
@@ -18,6 +19,7 @@
     "typescript": "^5.8.2"
   },
   "dependencies": {
+    "@aws-lambda-powertools/logger": "^2.16.0",
     "source-map-support": "^0.5.21"
   }
 }

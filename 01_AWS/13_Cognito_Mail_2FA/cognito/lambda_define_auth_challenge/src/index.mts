@@ -2,6 +2,8 @@
  * ログイン時に二段階認証を管理するLambda
  */
 import { DefineAuthChallengeTriggerEvent } from "aws-lambda";
+import { Logger } from "@aws-lambda-powertools/logger";
+const logger = new Logger();
 
 /**
  * DefineAuthChallengeトリガーのハンドラ
@@ -9,14 +11,14 @@ import { DefineAuthChallengeTriggerEvent } from "aws-lambda";
  * @returns イベント
  */
 export const handler = async (event: DefineAuthChallengeTriggerEvent) => {
-  console.log(
+  logger.info(
     "DefineAuthChallenge event request:",
     JSON.stringify(event, null, 2)
   );
   if (event.request.session.length === 0) {
     // 初回アクセス時 → 二段階認証に移行
     event.response.challengeName = "CUSTOM_CHALLENGE";
-    console.log("To challenge 2FA");
+    logger.info("To challenge 2FA");
   } else if (
     event.request.session.find(
       (challenge) =>
@@ -27,14 +29,14 @@ export const handler = async (event: DefineAuthChallengeTriggerEvent) => {
     // 二段階認証成功時
     event.response.issueTokens = true;
     event.response.failAuthentication = false;
-    console.log("Succeeded to challenge 2FA");
+    logger.info("Succeeded to challenge 2FA");
   } else {
     // 二段階認証失敗時
     event.response.issueTokens = false;
     event.response.failAuthentication = true;
-    console.log("Failed to challenge 2FA");
+    logger.info("Failed to challenge 2FA");
   }
-  console.log(
+  logger.info(
     "DefineAuthChallenge event response:",
     JSON.stringify(event, null, 2)
   );

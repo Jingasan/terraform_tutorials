@@ -3,8 +3,10 @@
  */
 import * as Backup from "@aws-sdk/client-backup";
 import { ScheduledHandler, ScheduledEvent } from "aws-lambda";
+import { Logger } from "@aws-lambda-powertools/logger";
 const REGION = process.env.REGION || "ap-northeast-1";
 const VAULT_NAME = process.env.VAULT_NAME;
+const logger = new Logger();
 const client = new Backup.BackupClient({ region: REGION });
 
 /**
@@ -31,7 +33,7 @@ const getRecoveryPointList = async (
     } while (nextToken); // nextTokenがある限りループ
     return recoveryPoints;
   } catch (e) {
-    console.error(e);
+    logger.error(e);
     return [];
   }
 };
@@ -50,7 +52,7 @@ const deleteRecoveryPoint = async (deleteTargetRecoveryPointARN: string) => {
     await client.send(command);
     return true;
   } catch (e) {
-    console.error(e);
+    logger.error(e);
     return false;
   }
 };
@@ -64,7 +66,7 @@ export const handler: ScheduledHandler = async (event: ScheduledEvent) => {
   // リカバリーポイントの一覧取得
   const recoveryPointList = await getRecoveryPointList(VAULT_NAME);
   if (!recoveryPointList.length) {
-    console.log("No recovery points found.");
+    logger.info("No recovery points found.");
     return;
   }
 
@@ -86,7 +88,7 @@ export const handler: ScheduledHandler = async (event: ScheduledEvent) => {
   }
 
   // ステータスがCOMPLETEDである最新のリカバリーポイント情報
-  console.log(
+  logger.info(
     `[Newest recovery point info]
 idx: ${latestCompletedIdx}
 RecoveryPointARN: ${sortedRecoveryPoints[latestCompletedIdx].RecoveryPointArn}
@@ -102,23 +104,23 @@ ResourceName: ${sortedRecoveryPoints[latestCompletedIdx].ResourceName}
   // 残るリカバリーポイントの数
   const toKeep = sortedRecoveryPoints.slice(0, latestCompletedIdx + 1);
   if (toKeep.length >= 3) {
-    console.log("Maybe some NotCompleted recovery points are existed.");
+    logger.info("Maybe some NotCompleted recovery points are existed.");
   }
 
   // ステータスがCOMPLETEDである最新のリカバリーポイントまでを残し、それ以前の古いリカバリーポイントは削除
   const toDelete = sortedRecoveryPoints.slice(latestCompletedIdx + 1);
-  console.log("Deleting old recovery points...");
+  logger.info("Deleting old recovery points...");
   if (toDelete.length > 0) {
     await Promise.allSettled(
       toDelete.map(async (recoveryPoint) => {
         if (recoveryPoint.RecoveryPointArn) {
           const res = await deleteRecoveryPoint(recoveryPoint.RecoveryPointArn);
           if (res) {
-            console.log(
+            logger.info(
               `Succeeded to delete old recovery point: ${recoveryPoint.RecoveryPointArn}`
             );
           } else {
-            console.error(
+            logger.error(
               `Failed to delete old recovery point: ${recoveryPoint.RecoveryPointArn}`
             );
           }
@@ -126,7 +128,7 @@ ResourceName: ${sortedRecoveryPoints[latestCompletedIdx].ResourceName}
       })
     );
   } else {
-    console.log("No recovery points to delete.");
+    logger.info("No recovery points to delete.");
   }
-  console.log("Finished to delete old recovery points.");
+  logger.info("Finished to delete old recovery points.");
 };
