@@ -10,8 +10,10 @@ resource "aws_s3_bucket" "bucket_lambda" {
   force_destroy = true
   # タグ
   tags = {
-    ProjectName  = var.project_name
-    ProjectStage = local.project_stage
+    ProjectName        = var.project_name
+    ProjectStage       = local.project_stage
+    ProjectDescription = var.project_description_tag
+    ResourceCreatedBy  = "terraform"
   }
 }
 
@@ -28,8 +30,10 @@ resource "aws_s3_bucket" "bucket_cognito_backup" {
   force_destroy = true
   # タグ
   tags = {
-    ProjectName  = var.project_name
-    ProjectStage = local.project_stage
+    ProjectName        = var.project_name
+    ProjectStage       = local.project_stage
+    ProjectDescription = var.project_description_tag
+    ResourceCreatedBy  = "terraform"
   }
 }
 

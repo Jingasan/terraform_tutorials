@@ -55,7 +55,7 @@ resource "null_resource" "main" {
   }
   # ECRログイン
   provisioner "local-exec" {
-    command = "aws ecr get-login-password --region ap-northeast-1 | docker login --username AWS --password-stdin ${aws_ecr_repository.main.repository_url}"
+    command = "aws ecr --profile ${var.profile} get-login-password --region ap-northeast-1 | docker login --username AWS --password-stdin ${aws_ecr_repository.main.repository_url}"
   }
   # コンテナのビルド
   provisioner "local-exec" {

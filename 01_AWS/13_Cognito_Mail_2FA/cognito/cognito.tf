@@ -150,8 +150,10 @@ resource "aws_cognito_user_pool" "user_pool" {
   }
   # タグ
   tags = {
-    ProjectName  = var.project_name
-    ProjectStage = local.project_stage
+    ProjectName        = var.project_name
+    ProjectStage       = local.project_stage
+    ProjectDescription = var.project_description_tag
+    ResourceCreatedBy  = "terraform"
   }
 }
 
@@ -212,6 +214,7 @@ resource "local_file" "env" {
   file_permission = "0644"
   # 出力ファイルの内容
   content = <<DOC
+AWS_PROFILE=${var.profile}
 REGION=${data.aws_region.current.name}
 USER_POOL_ID=${aws_cognito_user_pool.user_pool.id}
 APPLICATION_CLIENT_ID=${aws_cognito_user_pool_client.user_pool.id}

@@ -85,7 +85,7 @@ resource "null_resource" "lambda_build_upload" {
   }
   # S3アップロード
   provisioner "local-exec" {
-    command     = "aws s3 cp ./dist/lambda.zip s3://${aws_s3_bucket.lambda_bucket.bucket}/lambda.zip"
+    command     = "aws s3 cp --profile ${var.profile} ./dist/lambda.zip s3://${aws_s3_bucket.lambda_bucket.bucket}/lambda.zip"
     working_dir = "node"
   }
 }
@@ -107,7 +107,7 @@ resource "null_resource" "lambda_update" {
   }
   # Lambda関数を更新
   provisioner "local-exec" {
-    command     = "aws lambda update-function-code --function-name ${aws_lambda_function.lambda.function_name} --s3-bucket ${aws_s3_bucket.lambda_bucket.bucket} --s3-key lambda.zip --publish --no-cli-pager"
+    command     = "aws lambda update-function-code --profile ${var.profile} --function-name ${aws_lambda_function.lambda.function_name} --s3-bucket ${aws_s3_bucket.lambda_bucket.bucket} --s3-key lambda.zip --publish --no-cli-pager"
     working_dir = "node"
   }
 }

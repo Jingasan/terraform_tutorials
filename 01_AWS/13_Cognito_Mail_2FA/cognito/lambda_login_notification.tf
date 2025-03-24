@@ -32,8 +32,10 @@ resource "aws_lambda_function" "lambda_login_notification" {
   description = var.project_name
   # タグ
   tags = {
-    ProjectName  = var.project_name
-    ProjectStage = local.project_stage
+    ProjectName        = var.project_name
+    ProjectStage       = local.project_stage
+    ProjectDescription = var.project_description_tag
+    ResourceCreatedBy  = "terraform"
   }
 }
 
@@ -71,7 +73,7 @@ resource "null_resource" "build_upload_lambda_login_notification" {
   }
   # S3アップロード
   provisioner "local-exec" {
-    command     = "aws s3 cp lambda.zip s3://${aws_s3_bucket.bucket_lambda.bucket}/login-notify/lambda.zip"
+    command     = "aws s3 cp --profile ${var.profile} lambda.zip s3://${aws_s3_bucket.bucket_lambda.bucket}/login-notify/lambda.zip"
     working_dir = "lambda_login_notification"
   }
 }
@@ -93,7 +95,7 @@ resource "null_resource" "update_lambda_login_notification" {
   }
   # Lambda関数を更新
   provisioner "local-exec" {
-    command     = "aws lambda update-function-code --function-name ${aws_lambda_function.lambda_login_notification.function_name} --s3-bucket ${aws_s3_bucket.bucket_lambda.bucket} --s3-key login-notify/lambda.zip --publish --no-cli-pager"
+    command     = "aws lambda update-function-code --profile ${var.profile} --function-name ${aws_lambda_function.lambda_login_notification.function_name} --s3-bucket ${aws_s3_bucket.bucket_lambda.bucket} --s3-key login-notify/lambda.zip --publish --no-cli-pager"
     working_dir = "lambda_login_notification"
   }
 }
@@ -106,8 +108,10 @@ resource "aws_cloudwatch_log_group" "lambda_login_notification" {
   retention_in_days = var.lambda_cloudwatch_log_retention_in_days
   # タグ
   tags = {
-    ProjectName  = var.project_name
-    ProjectStage = local.project_stage
+    ProjectName        = var.project_name
+    ProjectStage       = local.project_stage
+    ProjectDescription = var.project_description_tag
+    ResourceCreatedBy  = "terraform"
   }
 }
 

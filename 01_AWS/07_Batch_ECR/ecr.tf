@@ -55,7 +55,7 @@ resource "null_resource" "batch" {
   }
   # 実行コマンド：コンテナイメージのビルドとプッシュを行う
   provisioner "local-exec" {
-    command = "aws ecr get-login-password --region ${var.region} | docker login --username AWS --password-stdin ${aws_ecr_repository.batch.repository_url}"
+    command = "aws ecr --profile ${var.profile} get-login-password --region ${var.region} | docker login --username AWS --password-stdin ${aws_ecr_repository.batch.repository_url}"
   }
   provisioner "local-exec" {
     command = "docker build -t ${var.docker_image_name}:latest docker"

@@ -12,8 +12,10 @@ resource "aws_secretsmanager_secret" "secretsmanager" {
   description = var.project_name
   # タグ
   tags = {
-    ProjectName  = var.project_name
-    ProjectStage = local.project_stage
+    ProjectName        = var.project_name
+    ProjectStage       = local.project_stage
+    ProjectDescription = var.project_description_tag
+    ResourceCreatedBy  = "terraform"
   }
 }
 

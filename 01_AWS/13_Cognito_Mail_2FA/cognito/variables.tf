@@ -13,6 +13,12 @@ variable "project_stage" {
   description = "プロジェクトのステージ名（例：dev/prod/test/個人名）"
   default     = null
 }
+# プロジェクトの説明文（AWSリソースのtagに適用）
+variable "project_description_tag" {
+  type        = string
+  description = "プロジェクトの説明文(AWSリソースのtagに適用)"
+  default     = null
+}
 #============================================================
 # AWS Account
 #============================================================

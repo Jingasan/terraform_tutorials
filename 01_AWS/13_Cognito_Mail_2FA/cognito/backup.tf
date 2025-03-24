@@ -10,8 +10,10 @@ resource "aws_backup_vault" "backup_vault" {
   force_destroy = var.backup_force_destroy
   # タグ
   tags = {
-    ProjectName  = var.project_name
-    ProjectStage = local.project_stage
+    ProjectName        = var.project_name
+    ProjectStage       = local.project_stage
+    ProjectDescription = var.project_description_tag
+    ResourceCreatedBy  = "terraform"
   }
 }
 
@@ -30,8 +32,10 @@ resource "aws_backup_plan" "backup_plan" {
   }
   # タグ
   tags = {
-    ProjectName  = var.project_name
-    ProjectStage = local.project_stage
+    ProjectName        = var.project_name
+    ProjectStage       = local.project_stage
+    ProjectDescription = var.project_description_tag
+    ResourceCreatedBy  = "terraform"
   }
 }
 

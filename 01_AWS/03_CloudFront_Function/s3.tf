@@ -92,6 +92,6 @@ resource "null_resource" "fileupload" {
   }
   # ローカルディレクトリにあるWebページをS3バケットにアップロード
   provisioner "local-exec" {
-    command = "aws s3 cp ${local.src_dir} ${local.dst_dir} --recursive"
+    command = "aws s3 cp --profile ${var.profile} ${local.src_dir} ${local.dst_dir} --recursive"
   }
 }
