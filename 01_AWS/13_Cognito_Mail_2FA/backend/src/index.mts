@@ -90,6 +90,7 @@ app.get("/admin", async (_req, res) => {
           <th>パスワード設定日</th>
           <th>利用開始日</th>
           <th>利用終了日</th>
+          <th>ユーザーステータス</th>
         </tr>
       </thead>
       <tbody>`;
@@ -111,6 +112,7 @@ app.get("/admin", async (_req, res) => {
         user.Attributes.find((attr) => attr.Name === "custom:usage_end_date")
           ?.Value || "未登録"
       }</td>
+      <td>${user.UserStatus}</td>
     </tr>`;
   });
   sendPage += `</tbody></table>
@@ -174,7 +176,7 @@ app.post("/resend_temporary_password", async (req, res) => {
   // 仮パスワード再発行
   const result = await cognitoClient.resendTemporaryPassword({
     userPoolId: USER_POOL_ID,
-    username: body.username,
+    username: body.email,
   });
   console.log(JSON.stringify(result, null, 2));
   if (!result.res)
