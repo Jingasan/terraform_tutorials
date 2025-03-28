@@ -45,12 +45,12 @@ resource "null_resource" "build_upload_lambda_old_backup_discard_scheduler" {
   # ソースコードに差分があった場合に実行
   triggers = {
     code_diff = join("", [
-      for file in fileset("lambda_old_backup_discard_scheduler/src", "{*.mts}")
-      : filebase64("lambda_old_backup_discard_scheduler/src/${file}")
+      for file in fileset("lambda/old_backup_discard_scheduler/src", "{*.mts}")
+      : filebase64("lambda/old_backup_discard_scheduler/src/${file}")
     ])
     package_diff = join("", [
-      for file in fileset("lambda_old_backup_discard_scheduler", "{package*.json}")
-      : filebase64("lambda_old_backup_discard_scheduler/${file}")
+      for file in fileset("lambda/old_backup_discard_scheduler", "{package*.json}")
+      : filebase64("lambda/old_backup_discard_scheduler/${file}")
     ])
   }
   # Lambda関数依存パッケージのインストール
@@ -58,22 +58,22 @@ resource "null_resource" "build_upload_lambda_old_backup_discard_scheduler" {
     # 実行するコマンド
     command = "npm install"
     # コマンドを実行するディレクトリ
-    working_dir = "lambda_old_backup_discard_scheduler"
+    working_dir = "lambda/old_backup_discard_scheduler"
   }
   # Lambda関数のビルド
   provisioner "local-exec" {
     command     = "npm run build"
-    working_dir = "lambda_old_backup_discard_scheduler"
+    working_dir = "lambda/old_backup_discard_scheduler"
   }
   # Lambda関数のZIP圧縮
   provisioner "local-exec" {
     command     = "zip -r lambda.zip dist node_modules"
-    working_dir = "lambda_old_backup_discard_scheduler"
+    working_dir = "lambda/old_backup_discard_scheduler"
   }
   # S3アップロード
   provisioner "local-exec" {
     command     = "aws s3 cp --profile ${var.profile} lambda.zip s3://${aws_s3_bucket.bucket_lambda.bucket}/old-backup-discard-scheduler/lambda.zip"
-    working_dir = "lambda_old_backup_discard_scheduler"
+    working_dir = "lambda/old_backup_discard_scheduler"
   }
 }
 
@@ -84,18 +84,18 @@ resource "null_resource" "update_lambda_old_backup_discard_scheduler" {
   # ソースコードに差分があった場合にのみ実行
   triggers = {
     code_diff = join("", [
-      for file in fileset("lambda_old_backup_discard_scheduler/src", "{*.mts}")
-      : filebase64("lambda_old_backup_discard_scheduler/src/${file}")
+      for file in fileset("lambda/old_backup_discard_scheduler/src", "{*.mts}")
+      : filebase64("lambda/old_backup_discard_scheduler/src/${file}")
     ])
     package_diff = join("", [
-      for file in fileset("lambda_old_backup_discard_scheduler", "{package*.json}")
-      : filebase64("lambda_old_backup_discard_scheduler/${file}")
+      for file in fileset("lambda/old_backup_discard_scheduler", "{package*.json}")
+      : filebase64("lambda/old_backup_discard_scheduler/${file}")
     ])
   }
   # Lambda関数を更新
   provisioner "local-exec" {
     command     = "aws lambda update-function-code --profile ${var.profile} --function-name ${aws_lambda_function.lambda_old_backup_discard_scheduler.function_name} --s3-bucket ${aws_s3_bucket.bucket_lambda.bucket} --s3-key old-backup-discard-scheduler/lambda.zip --publish --no-cli-pager"
-    working_dir = "lambda_old_backup_discard_scheduler"
+    working_dir = "lambda/old_backup_discard_scheduler"
   }
 }
 

@@ -46,12 +46,12 @@ resource "null_resource" "build_upload_lambda_login_notification" {
   # ソースコードに差分があった場合に実行
   triggers = {
     code_diff = join("", [
-      for file in fileset("lambda_login_notification/src", "{*.mts}")
-      : filebase64("lambda_login_notification/src/${file}")
+      for file in fileset("lambda/login_notification/src", "{*.mts}")
+      : filebase64("lambda/login_notification/src/${file}")
     ])
     package_diff = join("", [
-      for file in fileset("lambda_login_notification", "{package*.json}")
-      : filebase64("lambda_login_notification/${file}")
+      for file in fileset("lambda/login_notification", "{package*.json}")
+      : filebase64("lambda/login_notification/${file}")
     ])
   }
   # Lambda関数依存パッケージのインストール
@@ -59,22 +59,22 @@ resource "null_resource" "build_upload_lambda_login_notification" {
     # 実行するコマンド
     command = "npm install"
     # コマンドを実行するディレクトリ
-    working_dir = "lambda_login_notification"
+    working_dir = "lambda/login_notification"
   }
   # Lambda関数のビルド
   provisioner "local-exec" {
     command     = "npm run build"
-    working_dir = "lambda_login_notification"
+    working_dir = "lambda/login_notification"
   }
   # Lambda関数のZIP圧縮
   provisioner "local-exec" {
     command     = "zip -r lambda.zip dist node_modules"
-    working_dir = "lambda_login_notification"
+    working_dir = "lambda/login_notification"
   }
   # S3アップロード
   provisioner "local-exec" {
     command     = "aws s3 cp --profile ${var.profile} lambda.zip s3://${aws_s3_bucket.bucket_lambda.bucket}/login-notify/lambda.zip"
-    working_dir = "lambda_login_notification"
+    working_dir = "lambda/login_notification"
   }
 }
 
@@ -85,18 +85,18 @@ resource "null_resource" "update_lambda_login_notification" {
   # ソースコードに差分があった場合にのみ実行
   triggers = {
     code_diff = join("", [
-      for file in fileset("lambda_login_notification/src", "{*.mts}")
-      : filebase64("lambda_login_notification/src/${file}")
+      for file in fileset("lambda/login_notification/src", "{*.mts}")
+      : filebase64("lambda/login_notification/src/${file}")
     ])
     package_diff = join("", [
-      for file in fileset("lambda_login_notification", "{package*.json}")
-      : filebase64("lambda_login_notification/${file}")
+      for file in fileset("lambda/login_notification", "{package*.json}")
+      : filebase64("lambda/login_notification/${file}")
     ])
   }
   # Lambda関数を更新
   provisioner "local-exec" {
     command     = "aws lambda update-function-code --profile ${var.profile} --function-name ${aws_lambda_function.lambda_login_notification.function_name} --s3-bucket ${aws_s3_bucket.bucket_lambda.bucket} --s3-key login-notify/lambda.zip --publish --no-cli-pager"
-    working_dir = "lambda_login_notification"
+    working_dir = "lambda/login_notification"
   }
 }
 

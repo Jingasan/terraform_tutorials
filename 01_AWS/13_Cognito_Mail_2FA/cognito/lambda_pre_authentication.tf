@@ -46,12 +46,12 @@ resource "null_resource" "build_upload_lambda_pre_authentication" {
   # ソースコードに差分があった場合に実行
   triggers = {
     code_diff = join("", [
-      for file in fileset("lambda_pre_authentication/src", "{*.mts}")
-      : filebase64("lambda_pre_authentication/src/${file}")
+      for file in fileset("lambda/pre_authentication/src", "{*.mts}")
+      : filebase64("lambda/pre_authentication/src/${file}")
     ])
     package_diff = join("", [
-      for file in fileset("lambda_pre_authentication", "{package*.json}")
-      : filebase64("lambda_pre_authentication/${file}")
+      for file in fileset("lambda/pre_authentication", "{package*.json}")
+      : filebase64("lambda/pre_authentication/${file}")
     ])
   }
   # Lambda関数依存パッケージのインストール
@@ -59,22 +59,22 @@ resource "null_resource" "build_upload_lambda_pre_authentication" {
     # 実行するコマンド
     command = "npm install"
     # コマンドを実行するディレクトリ
-    working_dir = "lambda_pre_authentication"
+    working_dir = "lambda/pre_authentication"
   }
   # Lambda関数のビルド
   provisioner "local-exec" {
     command     = "npm run build"
-    working_dir = "lambda_pre_authentication"
+    working_dir = "lambda/pre_authentication"
   }
   # Lambda関数のZIP圧縮
   provisioner "local-exec" {
     command     = "zip -r lambda.zip dist node_modules"
-    working_dir = "lambda_pre_authentication"
+    working_dir = "lambda/pre_authentication"
   }
   # S3アップロード
   provisioner "local-exec" {
     command     = "aws s3 cp --profile ${var.profile} lambda.zip s3://${aws_s3_bucket.bucket_lambda.bucket}/pre-authentication/lambda.zip"
-    working_dir = "lambda_pre_authentication"
+    working_dir = "lambda/pre_authentication"
   }
 }
 
@@ -85,18 +85,18 @@ resource "null_resource" "update_lambda_pre_authentication" {
   # ソースコードに差分があった場合にのみ実行
   triggers = {
     code_diff = join("", [
-      for file in fileset("lambda_pre_authentication/src", "{*.mts}")
-      : filebase64("lambda_pre_authentication/src/${file}")
+      for file in fileset("lambda/pre_authentication/src", "{*.mts}")
+      : filebase64("lambda/pre_authentication/src/${file}")
     ])
     package_diff = join("", [
-      for file in fileset("lambda_pre_authentication", "{package*.json}")
-      : filebase64("lambda_pre_authentication/${file}")
+      for file in fileset("lambda/pre_authentication", "{package*.json}")
+      : filebase64("lambda/pre_authentication/${file}")
     ])
   }
   # Lambda関数を更新
   provisioner "local-exec" {
     command     = "aws lambda update-function-code --profile ${var.profile} --function-name ${aws_lambda_function.lambda_pre_authentication.function_name} --s3-bucket ${aws_s3_bucket.bucket_lambda.bucket} --s3-key pre-authentication/lambda.zip --publish --no-cli-pager"
-    working_dir = "lambda_pre_authentication"
+    working_dir = "lambda/pre_authentication"
   }
 }
 

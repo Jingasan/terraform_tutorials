@@ -46,12 +46,12 @@ resource "null_resource" "build_upload_lambda_create_auth_challenge" {
   # ソースコードに差分があった場合に実行
   triggers = {
     code_diff = join("", [
-      for file in fileset("lambda_create_auth_challenge/src", "{*.mts}")
-      : filebase64("lambda_create_auth_challenge/src/${file}")
+      for file in fileset("lambda/create_auth_challenge/src", "{*.mts}")
+      : filebase64("lambda/create_auth_challenge/src/${file}")
     ])
     package_diff = join("", [
-      for file in fileset("lambda_create_auth_challenge", "{package*.json}")
-      : filebase64("lambda_create_auth_challenge/${file}")
+      for file in fileset("lambda/create_auth_challenge", "{package*.json}")
+      : filebase64("lambda/create_auth_challenge/${file}")
     ])
   }
   # Lambda関数依存パッケージのインストール
@@ -59,22 +59,22 @@ resource "null_resource" "build_upload_lambda_create_auth_challenge" {
     # 実行するコマンド
     command = "npm install"
     # コマンドを実行するディレクトリ
-    working_dir = "lambda_create_auth_challenge"
+    working_dir = "lambda/create_auth_challenge"
   }
   # Lambda関数のビルド
   provisioner "local-exec" {
     command     = "npm run build"
-    working_dir = "lambda_create_auth_challenge"
+    working_dir = "lambda/create_auth_challenge"
   }
   # Lambda関数のZIP圧縮
   provisioner "local-exec" {
     command     = "zip -r lambda.zip dist node_modules"
-    working_dir = "lambda_create_auth_challenge"
+    working_dir = "lambda/create_auth_challenge"
   }
   # S3アップロード
   provisioner "local-exec" {
     command     = "aws s3 cp --profile ${var.profile} lambda.zip s3://${aws_s3_bucket.bucket_lambda.bucket}/create-auth-challenge/lambda.zip"
-    working_dir = "lambda_create_auth_challenge"
+    working_dir = "lambda/create_auth_challenge"
   }
 }
 
@@ -85,18 +85,18 @@ resource "null_resource" "update_lambda_create_auth_challenge" {
   # ソースコードに差分があった場合にのみ実行
   triggers = {
     code_diff = join("", [
-      for file in fileset("lambda_create_auth_challenge/src", "{*.mts}")
-      : filebase64("lambda_create_auth_challenge/src/${file}")
+      for file in fileset("lambda/create_auth_challenge/src", "{*.mts}")
+      : filebase64("lambda/create_auth_challenge/src/${file}")
     ])
     package_diff = join("", [
-      for file in fileset("lambda_create_auth_challenge", "{package*.json}")
-      : filebase64("lambda_create_auth_challenge/${file}")
+      for file in fileset("lambda/create_auth_challenge", "{package*.json}")
+      : filebase64("lambda/create_auth_challenge/${file}")
     ])
   }
   # Lambda関数を更新
   provisioner "local-exec" {
     command     = "aws lambda update-function-code --profile ${var.profile} --function-name ${aws_lambda_function.lambda_create_auth_challenge.function_name} --s3-bucket ${aws_s3_bucket.bucket_lambda.bucket} --s3-key create-auth-challenge/lambda.zip --publish --no-cli-pager"
-    working_dir = "lambda_create_auth_challenge"
+    working_dir = "lambda/create_auth_challenge"
   }
 }
 
