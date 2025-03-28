@@ -160,7 +160,7 @@ resource "aws_cognito_user_pool" "user_pool" {
 # アプリケーションクライアントの作成
 resource "aws_cognito_user_pool_client" "user_pool" {
   # ユーザープールクライアント名
-  name = var.project_name
+  name = "${var.project_name}-${local.project_stage}"
   # ユーザープールクライアントを作成する対象のユーザープールID
   user_pool_id = aws_cognito_user_pool.user_pool.id
   # シークレットを作成するか false(default):作成しない

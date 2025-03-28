@@ -34,7 +34,7 @@ cognito_refresh_token_validity = 2592000
 # 認証フローセッションの持続期間(分)(3-15分の範囲で指定)
 cognito_auth_session_validity = 3
 # メールの送信元アドレス(SESで事前に確認済みのメールアドレス)
-cognito_from_email_address = "user@domain"
+cognito_from_email_address = "email@domain"
 # パスワードの最低文字数
 cognito_password_minimum_length = 8
 # パスワードに大文字を必須とするか
@@ -65,6 +65,10 @@ lambda_cloudwatch_log_retention_in_days = 90
 #============================================================
 # Vaultの中にバックアップデータが入っていてもTerraformに削除を許可するかどうか(true:許可)
 backup_force_destroy = true
+# 保持する世代数:1~100（指定した世代よりも古い世代のバックアップはすべて削除する）
+backup_keep_generations = 5
+# バックアップの複製先リージョン（バックアップの複製元とは別リージョンを指定すること）
+backup_clone_region = "ap-northeast-3"
 #============================================================
 # S3
 #============================================================
@@ -72,3 +76,8 @@ backup_force_destroy = true
 s3_bucket_lifecycle_noncurrent_version_expiration_days = 90
 # 保持するバージョン数(個)：1~100
 s3_bucket_lifecycle_newer_noncurrent_versions = 10
+#============================================================
+# SNS
+#============================================================
+# SNS通知先のメールアドレス
+sns_to_email_address = "email@domain"

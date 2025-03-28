@@ -5,7 +5,7 @@
 # RDS用のSecretの作成
 resource "aws_secretsmanager_secret" "secretsmanager" {
   # Secret名
-  name = var.project_name
+  name = "${var.project_name}-${local.project_stage}"
   # 削除後のシークレット保存期間（日）
   recovery_window_in_days = var.secret_manager_recovery_window_in_days
   # 説明
@@ -33,5 +33,9 @@ resource "aws_secretsmanager_secret_version" "secretsmanager" {
     passwordExpirationDays = "${var.cognito_password_expiration_days}"
     # Cognitoのユーザー情報をバックアップするバケット名
     cognitoBackupBucketName = "${aws_s3_bucket.bucket_cognito_backup.bucket}"
+    # Vault名の一覧
+    vaultNames = ["${aws_backup_vault.main.name}"]
+    # 保持する世代数:1~100（指定した世代よりも古い世代のバックアップはすべて削除する）
+    keepGenerations = "${var.backup_keep_generations}"
   })
 }

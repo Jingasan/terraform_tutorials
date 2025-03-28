@@ -118,7 +118,7 @@ resource "aws_cloudwatch_log_group" "lambda_cognito_backup_scheduler" {
 # CloudWatchイベントルールの設定
 resource "aws_cloudwatch_event_rule" "lambda_cognito_backup_scheduler" {
   # イベントルール名
-  name = "${var.project_name}-cognito-backup-scheduler"
+  name = "${var.project_name}-cognito-backup-scheduler-${local.project_stage}"
   # イベントルールのスケジュール式(CRON)
   schedule_expression = "cron(0 15 * * ? *)" # 毎日深夜0時に実行
   # 説明
@@ -135,7 +135,7 @@ resource "aws_cloudwatch_event_rule" "lambda_cognito_backup_scheduler" {
 # CloudWatchイベントターゲットの設定
 resource "aws_cloudwatch_event_target" "lambda_cognito_backup_scheduler" {
   # ターゲットID
-  target_id = "${var.project_name}-cognito-backup-scheduler"
+  target_id = "${var.project_name}-cognito-backup-scheduler-${local.project_stage}"
   # イベントルール
   rule = aws_cloudwatch_event_rule.lambda_cognito_backup_scheduler.name
   # ターゲットとなるLambda関数のARN

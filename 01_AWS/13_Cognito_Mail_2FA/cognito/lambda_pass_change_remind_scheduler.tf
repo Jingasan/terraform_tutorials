@@ -118,7 +118,7 @@ resource "aws_cloudwatch_log_group" "lambda_pass_change_remind_scheduler" {
 # CloudWatchイベントルールの設定
 resource "aws_cloudwatch_event_rule" "lambda_pass_change_remind_scheduler" {
   # イベントルール名
-  name = "${var.project_name}-pass-change-remind-scheduler"
+  name = "${var.project_name}-pass-change-remind-scheduler-${local.project_stage}"
   # イベントルールのスケジュール式(CRON)
   schedule_expression = "cron(0 15 * * ? *)" # 毎日深夜0時に実行
   # 説明
@@ -135,7 +135,7 @@ resource "aws_cloudwatch_event_rule" "lambda_pass_change_remind_scheduler" {
 # CloudWatchイベントターゲットの設定
 resource "aws_cloudwatch_event_target" "lambda_pass_change_remind_scheduler" {
   # ターゲットID
-  target_id = "${var.project_name}-pass-change-remind-scheduler"
+  target_id = "${var.project_name}-pass-change-remind-scheduler-${local.project_stage}"
   # イベントルール
   rule = aws_cloudwatch_event_rule.lambda_pass_change_remind_scheduler.name
   # ターゲットとなるLambda関数のARN

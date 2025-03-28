@@ -1,7 +1,7 @@
 {
   "name": "lambda_old_backup_discard_scheduler",
   "version": "1.0.0",
-  "description": "AWS Backupの古いをリカバリーポイントを削除する定期実行Lambda",
+  "description": "AWS Backupの指定世代以降の古いをリカバリーポイントを削除する定期実行Lambda",
   "type": "module",
   "main": "dist/index.mjs",
   "scripts": {
@@ -21,6 +21,7 @@
   "dependencies": {
     "@aws-lambda-powertools/logger": "^2.16.0",
     "@aws-sdk/client-backup": "^3.772.0",
+    "@aws-sdk/client-secrets-manager": "^3.777.0",
     "source-map-support": "^0.5.21"
   }
 }

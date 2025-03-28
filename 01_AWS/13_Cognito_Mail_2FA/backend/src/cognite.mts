@@ -119,6 +119,11 @@ export class CognitoClient {
       const command = new Cognito.AdminCreateUserCommand({
         UserPoolId: args.userPoolId,
         Username: args.username,
+        // 一時パスワードの送信方法(EMAIL/SMS)
+        DesiredDeliveryMediums: ["EMAIL"],
+        // 指定すると固定の一時パスワードを生成
+        TemporaryPassword: undefined,
+        // 一時パスワードの再送信
         MessageAction: "RESEND",
       });
       const res = await this.cognitoClient.send(command);

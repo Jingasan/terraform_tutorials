@@ -25,7 +25,6 @@ resource "aws_lambda_function" "lambda_old_backup_discard_scheduler" {
       SERVICE_NAME = var.project_name
       REGION       = var.region
       SECRET_NAME  = aws_secretsmanager_secret.secretsmanager.name
-      VAULT_NAME   = aws_backup_vault.backup_vault.name
     }
   }
   # 作成するLambdaの説明文
@@ -118,18 +117,18 @@ resource "aws_cloudwatch_log_group" "lambda_old_backup_discard_scheduler" {
 # CloudWatchイベントルールの設定
 resource "aws_cloudwatch_event_rule" "lambda_old_backup_discard_scheduler" {
   # イベントルール名
-  name = "${var.project_name}-old-backup-discard-scheduler"
-  # イベントルールのスケジュール式(CRON)
+  name = "${var.project_name}-old-backup-discard-scheduler-${local.project_stage}"
+  # イベント発火条件：AWS Backupの特定のVaultでバックアップジョブが正常完了した場合
   event_pattern = jsonencode({
     source        = ["aws.backup"],
     "detail-type" = ["Backup Job State Change"],
     detail = {
       state           = ["COMPLETED"],
-      backupVaultName = ["${aws_backup_vault.backup_vault.name}"]
+      backupVaultName = ["${aws_backup_vault.main.name}", "${aws_backup_vault.clone.name}"]
     }
   })
   # 説明
-  description = var.project_name
+  description = "${var.project_name} Trigger on AWS Backup Success"
   # タグ
   tags = {
     ProjectName        = var.project_name
@@ -142,7 +141,7 @@ resource "aws_cloudwatch_event_rule" "lambda_old_backup_discard_scheduler" {
 # CloudWatchイベントターゲットの設定
 resource "aws_cloudwatch_event_target" "lambda_old_backup_discard_scheduler" {
   # ターゲットID
-  target_id = "${var.project_name}-old-backup-discard-scheduler"
+  target_id = "${var.project_name}-old-backup-discard-scheduler-${local.project_stage}"
   # イベントルール
   rule = aws_cloudwatch_event_rule.lambda_old_backup_discard_scheduler.name
   # ターゲットとなるLambda関数のARN

@@ -5,7 +5,7 @@
 # IAMロールの設定
 resource "aws_iam_role" "lambda_role" {
   # IAMロール名
-  name = "${var.project_name}-lambda-iam-role"
+  name = "${var.project_name}-lambda-iam-role-${local.project_stage}"
   # IAMロールの対象となるAWSサービスの指定
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
@@ -34,7 +34,7 @@ resource "aws_iam_role" "lambda_role" {
 # IAMロールに紐付けるポリシーの設定
 resource "aws_iam_policy" "lambda_policy" {
   # ポリシー名
-  name = "${var.project_name}-lambda-iam-policy"
+  name = "${var.project_name}-lambda-iam-policy-${local.project_stage}"
   # ポリシー(どのAWSリソースにどのような操作を許可するか)の定義
   policy = jsonencode({
     Version = "2012-10-17"
