@@ -1,8 +1,10 @@
 /**
  * ログイン時に二段階認証の認証チェックを行うLambda
  */
+import * as sourceMapSupport from "source-map-support";
 import { VerifyAuthChallengeResponseTriggerEvent } from "aws-lambda";
 import { Logger } from "@aws-lambda-powertools/logger";
+sourceMapSupport.install();
 const SERVICE_NAME = process.env.SERVICE_NAME;
 const logger = new Logger({ serviceName: SERVICE_NAME });
 

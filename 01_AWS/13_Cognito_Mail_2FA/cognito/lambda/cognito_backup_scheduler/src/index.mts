@@ -1,6 +1,7 @@
 /**
  * Cognitoのユーザー情報一覧をS3バケットに一時バックアップする定期実行Lambda
  */
+import * as sourceMapSupport from "source-map-support";
 import { parseISO, format } from "date-fns";
 import { TZDate } from "@date-fns/tz";
 import { ScheduledHandler, ScheduledEvent } from "aws-lambda";
@@ -8,6 +9,7 @@ import * as S3 from "@aws-sdk/client-s3";
 import * as SecretsManager from "@aws-sdk/client-secrets-manager";
 import * as Cognito from "@aws-sdk/client-cognito-identity-provider";
 import { Logger } from "@aws-lambda-powertools/logger";
+sourceMapSupport.install();
 const REGION = process.env.REGION || "ap-northeast-1";
 const SECRET_NAME = process.env.SECRET_NAME;
 const SERVICE_NAME = process.env.SERVICE_NAME;

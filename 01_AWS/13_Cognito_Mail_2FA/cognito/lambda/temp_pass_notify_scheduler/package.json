@@ -1,0 +1,29 @@
+{
+  "name": "lambda_temp_pass_notify_scheduler",
+  "version": "1.0.0",
+  "description": "利用開始日になったユーザーに対し、仮パスワードを記載したメールを送信するLambda",
+  "type": "module",
+  "main": "dist/index.mjs",
+  "scripts": {
+    "prebuild": "rm -rf dist",
+    "build": "tsc"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "private": true,
+  "devDependencies": {
+    "@types/aws-lambda": "^8.10.147",
+    "@types/node": "^22.13.9",
+    "@types/source-map-support": "^0.5.10",
+    "typescript": "^5.8.2"
+  },
+  "dependencies": {
+    "@aws-lambda-powertools/logger": "^2.16.0",
+    "@aws-sdk/client-cognito-identity-provider": "^3.760.0",
+    "@aws-sdk/client-secrets-manager": "^3.758.0",
+    "@date-fns/tz": "^1.2.0",
+    "date-fns": "^4.1.0",
+    "source-map-support": "^0.5.21"
+  }
+}

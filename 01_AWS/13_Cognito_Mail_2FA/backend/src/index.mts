@@ -1,3 +1,4 @@
+import * as sourceMapSupport from "source-map-support";
 import * as Cognito from "@aws-sdk/client-cognito-identity-provider";
 import express, { Request, Response, NextFunction } from "express";
 import session from "express-session";
@@ -5,6 +6,7 @@ import cors from "cors";
 import * as dotenv from "dotenv";
 import { randomUUID } from "crypto";
 import { CognitoClient } from "./cognite.mjs";
+sourceMapSupport.install();
 dotenv.config();
 const app = express();
 const PORT = 3000;

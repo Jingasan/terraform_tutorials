@@ -1,5 +1,5 @@
 /**
- * パスワード期限切れが近いユーザーに対し、パスワード変更依頼メールを送信するLambda
+ * 利用終了日になったことをメール通知するLambda
  */
 import * as sourceMapSupport from "source-map-support";
 import { addDays, format } from "date-fns";
@@ -38,11 +38,7 @@ const getJSTDate = (date: Date): string => {
  * @returns シークレットおよび設定値
  */
 const getSecrets = async (): Promise<
-  | {
-      cognitoUserPoolId: string;
-      passwordExpirationDays: number;
-    }
-  | undefined
+  { cognitoUserPoolId: string } | undefined
 > => {
   if (!SECRET_NAME) {
     logger.error("SECRET_NAME is not set");
@@ -58,16 +54,12 @@ const getSecrets = async (): Promise<
   }
   try {
     const secret = JSON.parse(res.SecretString);
-    if (
-      secret.cognitoUserPoolId === undefined ||
-      secret.passwordExpirationDays === undefined
-    ) {
-      logger.error("cognitoUserPoolId or passwordExpirationDays is not found");
+    if (secret.cognitoUserPoolId === undefined) {
+      logger.error("cognitoUserPoolId is not found");
       return undefined;
     }
     return {
       cognitoUserPoolId: secret.cognitoUserPoolId,
-      passwordExpirationDays: secret.passwordExpirationDays,
     };
   } catch (error) {
     logger.error("SecretString is not JSON format");
@@ -140,7 +132,7 @@ const sendMail = async (
 };
 
 /**
- * 定刻にパスワード変更依頼メールまたはパスワード有効期限切れ通知メールを送信するハンドラ
+ * 定刻に利用終了日になったことをメール通知するハンドラ
  * @param event イベント
  * @returns イベント
  */
@@ -161,92 +153,37 @@ export const handler: ScheduledHandler = async (event: ScheduledEvent) => {
   // パスワード有効期限が迫ったユーザーに対し、更新依頼メールを送信
   await Promise.all(
     userList.map(async (user) => {
-      const email = user.Attributes?.find(
-        (attr) => attr.Name === "email"
+      const usageEndDate = user.Attributes?.find(
+        (attr) => attr.Name === "custom:usage_end_date"
       )?.Value;
-      const passwordSetDate = user.Attributes?.find(
-        (attr) => attr.Name === "custom:password_set_date"
-      )?.Value;
-      if (!email) {
-        logger.error(`Email not found for user: ${user.Username}`);
-        return;
-      }
-      if (!passwordSetDate) {
-        logger.info(`Password set date not found for user: ${user.Username}`);
+      if (!usageEndDate) {
+        logger.info(`Usage end date not found for user: ${user.Username}`);
         return;
       }
 
       /** 本日(ミリ秒換算) */
       const todayDateMS = new Date(todayDate).getTime();
-      /** パスワード設定日(ミリ秒換算) */
-      const passwordSetDateMS = new Date(passwordSetDate).getTime();
-      /** パスワード有効期限日(ミリ秒換算) */
-      const expiryDateMS =
-        passwordSetDateMS +
-        secrets.passwordExpirationDays * 24 * 60 * 60 * 1000;
-      /** パスワード有効期限切れ通知日(ミリ秒換算) */
-      const expiredNotificationDateMS = expiryDateMS + 1 * 24 * 60 * 60 * 1000;
-      /** パスワード有効期限切れ7日前(ミリ秒換算) */
-      const reminder7daysAgoDateMS =
-        expiredNotificationDateMS - 7 * 24 * 60 * 60 * 1000;
-
-      logger.info(`email: ${email}`);
-      logger.info(`passwordSetDateMS: ${passwordSetDateMS}`);
-      logger.info(`expiryDateMS: ${expiryDateMS}`);
-      logger.info(`expiredNotificationDateMS: ${expiredNotificationDateMS}`);
-      logger.info(`reminder7daysAgoDateMS: ${reminder7daysAgoDateMS}`);
-      logger.info(`todayDateMS: ${todayDateMS}`);
-
-      if (
-        // パスワード有効期限切れ7日前にパスワード更新依頼メールを送信
-        todayDateMS === reminder7daysAgoDateMS
-      ) {
-        // パスワード有効期限日(日本時刻yyyy/MM/dd)
-        const expiryDate = format(
-          addDays(new Date(passwordSetDate), secrets.passwordExpirationDays),
-          "yyyy/MM/dd"
-        );
+      /** 利用終了日(ミリ秒換算) */
+      const usageEndDateMS = new Date(usageEndDate).getTime();
+      // 利用終了日になったら通知メールを送信
+      if (todayDateMS === usageEndDateMS) {
+        const email = user.Attributes?.find(
+          (attr) => attr.Name === "email"
+        )?.Value;
+        if (!email) {
+          logger.error(`Email not found for user: ${user.Username}`);
+          return;
+        }
         // メール内容
-        const mailSub = `${SERVICE_NAME} パスワード更新のお願い`;
+        const mailSub = `${SERVICE_NAME} サービスご利用可能期間の終了のお知らせ`;
         const mailBody = `${email} 様<br/><br/>
 いつもご利用いただき、ありがとうございます。<br/>
-現在のパスワードの有効期限は ${expiryDate} までです。<br/>
-有効期限が切れると、現在のパスワードでサービスにログインできなくなります。<br/>
-サービスにログインし、パスワードを更新してください。`;
+お客様のサービスご利用可能期間が最終日となりましたので、ご連絡いたします。<br/>
+利用期間の終了に伴い、明日以降お客様のアカウントで本サービスにはログインできなくなります。<br/>
+本サービスをご利用いただき、誠にありがとうございました。`;
         // メール送信
         await sendMail(FROM_EMAIL_ADDRESS, [email], mailSub, mailBody);
-        logger.info(
-          `7 days ago password update request email sent to: ${email}`
-        );
-      } else if (
-        // パスワード有効期限日にパスワード更新依頼メールを送信
-        todayDateMS === expiryDateMS
-      ) {
-        // メール内容
-        const mailSub = `${SERVICE_NAME} パスワード更新のお願い`;
-        const mailBody = `${email} 様<br/><br/>
-いつもご利用いただき、ありがとうございます。<br/>
-現在のパスワードの有効期限が本日で切れます。<br/>
-有効期限が切れると、現在のパスワードでサービスにログインできなくなります。<br/>
-サービスにログインし、パスワードを更新してください。`;
-        // メール送信
-        await sendMail(FROM_EMAIL_ADDRESS, [email], mailSub, mailBody);
-        logger.info(
-          `1 day ago Password update request email sent to: ${email}`
-        );
-      } else if (
-        // パスワード有効期限日翌日に有効期限切れの通知メールを送信
-        todayDateMS === expiredNotificationDateMS
-      ) {
-        // メール内容
-        const mailSub = `${SERVICE_NAME} パスワードの有効期限が切れました`;
-        const mailBody = `${email} 様<br/><br/>
-いつもご利用いただき、ありがとうございます。<br/>
-パスワードの有効期限が切れました。<br/>
-サービスのトップページからパスワードをリセットしてください。`;
-        // メール送信
-        await sendMail(FROM_EMAIL_ADDRESS, [email], mailSub, mailBody);
-        logger.info(`Password expiration notification email sent to: ${email}`);
+        logger.info(`Usage period end reminder email to ${email}`);
       }
     })
   );

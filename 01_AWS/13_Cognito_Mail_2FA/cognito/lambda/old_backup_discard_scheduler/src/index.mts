@@ -1,9 +1,11 @@
 /**
  * AWS Backupの指定世代以降の古いをリカバリーポイントを削除する定期実行Lambda
  */
+import * as sourceMapSupport from "source-map-support";
 import * as Backup from "@aws-sdk/client-backup";
 import * as SecretsManager from "@aws-sdk/client-secrets-manager";
 import { Logger } from "@aws-lambda-powertools/logger";
+sourceMapSupport.install();
 const REGION = process.env.REGION || "ap-northeast-1";
 const VAULT_NAME = process.env.VAULT_NAME;
 const SECRET_NAME = process.env.SECRET_NAME;

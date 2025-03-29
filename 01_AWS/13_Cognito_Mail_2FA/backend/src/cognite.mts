@@ -28,6 +28,29 @@ export class CognitoClient {
   }
 
   /**
+   * 利用開始日に至っているかどうかチェック
+   * @param todayDate 本日(日本時刻yyyy/MM/dd)
+   * @param usageStartDate 利用開始日(日本時刻yyyy/MM/dd)
+   * @returns true: 利用開始日に至っている, false: 利用開始日に至っていない
+   */
+  private checkAfterUsageStartDate = (
+    todayDate: string,
+    usageStartDate?: string
+  ) => {
+    try {
+      if (!usageStartDate) return true;
+      // 利用開始日(ミリ秒換算)を取得
+      const usageStartDateMS = new Date(usageStartDate).getTime();
+      // 現在ログイン日(ミリ秒換算)を取得
+      const currentLoginDateMS = new Date(todayDate).getTime();
+      return usageStartDateMS <= currentLoginDateMS;
+    } catch (error) {
+      console.error("checkAfterUsageStartDate Exception:", error);
+      return false;
+    }
+  };
+
+  /**
    * 管理者によるユーザー作成
    * @param userPoolId ユーザープールID
    * @param username 新規ユーザー名
@@ -87,6 +110,13 @@ export class CognitoClient {
         DesiredDeliveryMediums: ["EMAIL"],
         // 指定すると固定の一時パスワードを生成
         TemporaryPassword: undefined,
+        // undefined:一時パスワードを送信擦る/SUPPRESS:一時パスワードを送信しない
+        MessageAction: this.checkAfterUsageStartDate(
+          getJSTDate(new Date()),
+          args.usageStartDate
+        )
+          ? undefined
+          : "SUPPRESS",
       });
       const res = await this.cognitoClient.send(command);
       console.log(res);

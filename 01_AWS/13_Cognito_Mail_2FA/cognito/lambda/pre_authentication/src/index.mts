@@ -1,11 +1,13 @@
 /**
  * ログイン直前にパスワード有効期限切れ、利用開始日、利用終了日をチェックするLambda
  */
+import * as sourceMapSupport from "source-map-support";
 import { format } from "date-fns";
 import { TZDate } from "@date-fns/tz";
 import { PreAuthenticationTriggerEvent } from "aws-lambda";
 import * as SecretsManager from "@aws-sdk/client-secrets-manager";
 import { Logger } from "@aws-lambda-powertools/logger";
+sourceMapSupport.install();
 const REGION = process.env.REGION || "ap-northeast-1";
 const SECRET_NAME = process.env.SECRET_NAME;
 const SERVICE_NAME = process.env.SERVICE_NAME;

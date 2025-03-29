@@ -1,9 +1,11 @@
 /**
  * ユーザーに対し、ログイン通知を送信するLambda
  */
+import * as sourceMapSupport from "source-map-support";
 import { SESv2Client, SendEmailCommand } from "@aws-sdk/client-sesv2";
 import { PostAuthenticationTriggerEvent } from "aws-lambda";
 import { Logger } from "@aws-lambda-powertools/logger";
+sourceMapSupport.install();
 const REGION = process.env.REGION || "ap-northeast-1";
 const FROM_EMAIL_ADDRESS = process.env.SES_EMAIL_FROM || undefined;
 const SERVICE_NAME = process.env.SERVICE_NAME;
