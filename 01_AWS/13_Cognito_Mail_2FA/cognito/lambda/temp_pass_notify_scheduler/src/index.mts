@@ -175,10 +175,7 @@ export const handler: ScheduledHandler = async (event: ScheduledEvent) => {
           return;
         }
         // 仮パスワードを記載したメールを送信
-        await sendTemporaryPasswordEmail(
-          secrets.cognitoUserPoolId,
-          user.Username
-        );
+        await sendTemporaryPasswordEmail(secrets.cognitoUserPoolId, email);
         logger.info(`Sent temporary password email to ${email}`);
       }
     })
