@@ -112,7 +112,7 @@ resource "aws_appautoscaling_target" "aurora_scaling_target" {
 resource "aws_appautoscaling_policy" "aurora_scaling_policy" {
   # ポリシー名
   name = "${var.project_name}-aurora-scaling-policy"
-  # ポリシータイプ（通常はTargetTrackingScalingを使用）
+  # ポリシータイプ
   policy_type = "TargetTrackingScaling"
   # 対象サービス名（Auroraの場合はrds）
   service_namespace = aws_appautoscaling_target.aurora_scaling_target.service_namespace
@@ -120,7 +120,7 @@ resource "aws_appautoscaling_policy" "aurora_scaling_policy" {
   resource_id = aws_appautoscaling_target.aurora_scaling_target.resource_id
   # オートスケーリング対象の項目
   scalable_dimension = aws_appautoscaling_target.aurora_scaling_target.scalable_dimension
-  # ポリシータイプがTargetTrackingScalingの場合にオートスケーリングルールの設定
+  # ポリシータイプがTargetTrackingScalingの場合のオートスケーリングルールの設定
   target_tracking_scaling_policy_configuration {
     # オートスケーリングのメトリクスの設定（AWSマネージドのメトリクスを利用する場合に使用）
     predefined_metric_specification {
