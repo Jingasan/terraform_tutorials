@@ -77,7 +77,7 @@ resource "aws_rds_cluster_instance" "aurora_instances" {
   # true: 許可。インスタンスにパブリックIPが割り当てられる。インスタンスがパブリックサブネット上にある場合に設定。
   # false: 拒否。VPC内からのみアクセスを許可。インスタンスがプライベートサブネット上にある場合に設定。
   publicly_accessible = false
-  # DBインスタンスの設定値の変更を即時反映するか（true:即時反映する）
+  # DBインスタンスの設定値の変更を即時反映するか（true:反映する/false(default):反映しない）
   # 即時反映しない場合は次回のメンテナンスウィンドウで反映される。
   apply_immediately = var.aurora_apply_immediately
   # タグ
