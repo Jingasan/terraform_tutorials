@@ -229,10 +229,31 @@ resource "aws_vpc_endpoint" "cloudwatch_logs_endpoint" {
   private_dns_enabled = true
   # プライベートサブネットに配置
   subnet_ids = [for value in aws_subnet.private : value.id]
-  # 
+  # セキュリティグループ
+  security_group_ids = [aws_security_group.endpoint_sg.id]
   # タグ
   tags = {
     Name              = "${var.project_name}-cloudwatch-logs-vpc-endpoint"
+    ProjectName       = var.project_name
+    ResourceCreatedBy = "terraform"
+  }
+}
+resource "aws_vpc_endpoint" "secrets_manager_endpoint" {
+  # 対象となるVPCのID
+  vpc_id = aws_vpc.main.id
+  # VPCエンドポイント対象サービスのDNSドメイン名（Secrets Managerの場合はcom.amazonaws.region.secretsmanager）
+  service_name = "com.amazonaws.${var.region}.secretsmanager"
+  # VPCエンドポイントのタイプ（Gateway, Interfaceなど）（Secrets Managerの場合はInterface）
+  vpc_endpoint_type = "Interface"
+  # プライベートDNSを有効化するか（true:有効）（VPCエンドポイントのタイプがInterfaceの場合は有効化が必要）
+  private_dns_enabled = true
+  # プライベートサブネットに配置
+  subnet_ids = [for value in aws_subnet.private : value.id]
+  # セキュリティグループ
+  security_group_ids = [aws_security_group.endpoint_sg.id]
+  # タグ
+  tags = {
+    Name              = "${var.project_name}-secrets-manager-vpc-endpoint"
     ProjectName       = var.project_name
     ResourceCreatedBy = "terraform"
   }
