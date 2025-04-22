@@ -155,7 +155,7 @@ variable "aurora_deletion_protection" {
   description = "削除保護（true:DBクラスターを削除できなくする（defaultはfalse））"
   default     = true
 }
-# DBインスタンスの設定値の変更を即時反映するか（true:即時反映する）
+# DBインスタンスの設定値の変更を即時反映するか（true:反映する/false(default):反映しない）
 # 即時反映しない場合は次回のメンテナンスウィンドウで反映される。
 variable "aurora_apply_immediately" {
   type        = bool
