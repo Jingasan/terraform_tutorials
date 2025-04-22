@@ -159,7 +159,7 @@ variable "aurora_deletion_protection" {
 # 即時反映しない場合は次回のメンテナンスウィンドウで反映される。
 variable "aurora_apply_immediately" {
   type        = bool
-  description = "DBインスタンスの設定値の変更を即時反映するか（true:即時反映する）"
+  description = "DBインスタンスの設定値の変更を即時反映するか（true:反映する/false(default):反映しない）"
   default     = false
 }
 # クラスターパラメータグループの適用先ファミリー
