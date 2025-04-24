@@ -208,6 +208,33 @@ variable "rds_proxy_connection_borrow_timeout" {
   default     = 120
 }
 #============================================================
+# ECS
+#============================================================
+# ECSで起動するコンテナ名
+variable "ecs_container_name" {
+  type        = string
+  description = "ECSで起動するコンテナ名"
+  default     = "BastionContainer"
+}
+# ECSで起動するイメージ名
+variable "ecs_container_image" {
+  type        = string
+  description = "ECSで起動するイメージ名"
+  default     = "ubuntu:22.04"
+}
+# ECSで起動するコンテナのvCPU数
+variable "ecs_container_vcpu" {
+  type        = string
+  description = "ECSで起動するコンテナのvCPU数"
+  default     = "256" # 0.25vCPU
+}
+# ECSで起動するコンテナのメモリサイズ
+variable "ecs_container_memory" {
+  type        = string
+  description = "ECSで起動するコンテナのメモリサイズ"
+  default     = "512" # 0.5GB
+}
+#============================================================
 # Secrets Manager
 #============================================================
 # 削除後のシークレット保存期間（日）

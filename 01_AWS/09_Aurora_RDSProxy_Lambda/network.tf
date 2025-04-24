@@ -403,20 +403,37 @@ resource "aws_security_group" "lambda_sg" {
   name = "${var.project_name}-lambda-sg"
   # 適用先のVPC
   vpc_id = aws_vpc.main.id
-  # インバウントルールの設定（外部からこのセキュリティグループに所属するリソースへのアクセス許可設定）
-  ingress {
-    # 許可する開始ポート番号
-    from_port = 443
-    # 許可する終了ポート番号
-    to_port = 443
-    # 使用するプロトコル（tcpはhttpsの通信プロトコル）
-    protocol = "tcp"
-    # アクセスを許可する送信元IPアドレスの範囲
-    # このVPC内のすべてのIPアドレスを指定することで、このVPC内のLambdaなどのすべてのリソースからアクセスを許可する。
+  # アウトバウンドルールの設定（このセキュリティグループに所属するリソースから外部へのアクセス許可設定）
+  egress {
+    # 許可する開始ポート番号（0はすべてのポート番号を許可）
+    from_port = 0
+    # 許可する終了ポート番号（0はすべてのポート番号を許可）
+    to_port = 0
+    # 使用するプロトコル（-1はすべてのプロトコルを許可）
+    protocol = "-1"
+    # アクセスを許可する送信先のIPアドレスの範囲
+    # 0.0.0.0/0を指定することで、インターネット上のすべてのIPアドレスへのアクセスを許可する。
     cidr_blocks = ["0.0.0.0/0"]
+    #security_groups = [aws_security_group.endpoint_sg]
     # 説明
-    description = "Allow HTTPS from all"
+    description = "Allow all outbound"
   }
+  # セキュリティグループの説明
+  description = "${var.project_name} Lambda Security Group"
+  # タグ
+  tags = {
+    Name              = "${var.project_name}-lambda-sg"
+    ProjectName       = var.project_name
+    ResourceCreatedBy = "terraform"
+  }
+}
+
+# ECS用のセキュリティグループ
+resource "aws_security_group" "ecs_security_group" {
+  # セキュリティグループ名
+  name = "${var.project_name}-ecs-sg"
+  # 適用先のVPC
+  vpc_id = aws_vpc.main.id
   # アウトバウンドルールの設定（このセキュリティグループに所属するリソースから外部へのアクセス許可設定）
   egress {
     # 許可する開始ポート番号（0はすべてのポート番号を許可）
@@ -431,11 +448,11 @@ resource "aws_security_group" "lambda_sg" {
     # 説明
     description = "Allow all outbound"
   }
-  # セキュリティグループの説明
-  description = "${var.project_name} Lambda Security Group"
+  # 説明
+  description = "${var.project_name} ECS Security Group"
   # タグ
   tags = {
-    Name              = "${var.project_name}-lambda-sg"
+    Name              = "${var.project_name}-ecs-sg"
     ProjectName       = var.project_name
     ResourceCreatedBy = "terraform"
   }
