@@ -99,7 +99,7 @@ resource "aws_api_gateway_deployment" "api_gateway" {
 # REST APIのステージ（APIバージョンなど）の設定
 resource "aws_api_gateway_stage" "stage" {
   # REST APIのステージ名（APIバージョン）（例：dev/prod/v1/v2）
-  stage_name = "dev"
+  stage_name = var.api_gateway_stage_name
   # API GatewayのRestAPIの定義ID
   rest_api_id = aws_api_gateway_rest_api.api.id
   # API Gatewayのデプロイ設定ID
