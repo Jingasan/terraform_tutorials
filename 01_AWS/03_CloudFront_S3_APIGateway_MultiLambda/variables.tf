@@ -6,7 +6,7 @@
 variable "project_name" {
   type        = string
   description = "プロジェクト名（リソースの名前、タグ、説明文に利用される）"
-  default     = "default"
+  default     = "terraform-tutorials"
 }
 # プロジェクトのステージ名（例：dev/prod/test/個人名）
 variable "project_stage" {

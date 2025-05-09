@@ -147,3 +147,51 @@ resource "null_resource" "fileupload" {
     command = "aws s3 cp --profile ${var.profile} ${local.src_dir}/dist ${local.dst_dir} --recursive"
   }
 }
+
+
+
+#============================================================
+# S3バケットのWebアプリを更新するスクリプトの作成
+#============================================================
+
+# S3バケットのWebアプリを更新するスクリプトの出力
+resource "local_file" "deploy_s3_app_script" {
+  # 出力先
+  filename = "./script/deploy_s3_app.sh"
+  # 出力ファイルのパーミッション
+  file_permission = "0755"
+  # 出力ファイルの内容
+  content = <<DOC
+#!/bin/bash
+# S3バケットのWebアプリを更新するスクリプト（自動生成）
+
+# コマンドライン引数チェック
+echo "> $0 $*"
+if [ $# != 1 ]; then
+    echo "Please set deploy target awscli profile."
+    echo "Usage: $0 [AWS Profile]"
+    exit 1
+fi
+# AWS Profile名の取得
+profile=$1
+echo "awscli profile: $profile"
+
+# 本スクリプトのあるディレクトリに移動
+THIS_SCRIPT_DIR=$(cd $(dirname $0); pwd)
+pushd $THIS_SCRIPT_DIR > /dev/null 2>&1
+
+# Webアプリがあるディレクトリに移動
+pushd ../${local.src_dir} > /dev/null 2>&1
+
+# Webアプリをビルド
+npm install
+npm run build
+
+# WebアプリをS3にアップロード
+aws s3 cp --profile ${var.profile} dist ${local.dst_dir} --recursive
+
+# 元のディレクトリに戻る
+popd > /dev/null 2>&1
+popd > /dev/null 2>&1
+DOC
+}

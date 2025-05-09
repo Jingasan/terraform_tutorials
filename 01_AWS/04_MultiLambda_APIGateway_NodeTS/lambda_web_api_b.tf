@@ -165,7 +165,6 @@ npm run build
 
 # Lambda関数をZIP圧縮
 zip -r lambda.zip dist node_modules
-# Lambda関数のZIPファイルをS3にアップロード
 
 # Lambda関数のZIPファイルをS3にアップロード
 aws s3 cp --profile ${var.profile} lambda.zip s3://${aws_s3_bucket.bucket_lambda.bucket}/${local.lambda_web_api_b_s3_key}
