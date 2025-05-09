@@ -16,6 +16,9 @@ resource "aws_api_gateway_rest_api" "api" {
     # API GatewayをVPC内からしかアクセスできないようにする場合は、PRIVATEを指定する。
     types = ["REGIONAL"]
   }
+  # API Gatewayのデフォルトエンドポイントを無効化する（false(default):無効化しない）
+  # 証明書をAPI Gatewayに直接設定し、独自ドメインを利用する場合に無効化する。
+  disable_execute_api_endpoint = false
   # タグ
   tags = {
     Name = "${var.project_name}-api-gateway-${local.project_stage}"
