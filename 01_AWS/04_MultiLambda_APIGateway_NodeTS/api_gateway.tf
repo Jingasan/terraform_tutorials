@@ -121,7 +121,8 @@ resource "aws_lambda_permission" "apigw_a" {
 
 # API Gateway URLの表示
 output "web_api_a_url" {
-  value = "${aws_api_gateway_stage.stage.invoke_url}/a/test"
+  value       = "${aws_api_gateway_stage.stage.invoke_url}/a/test"
+  description = "API Gateway URL for Web API A"
 }
 
 
@@ -197,5 +198,6 @@ resource "aws_lambda_permission" "apigw_b" {
 
 # API Gateway URLの表示
 output "web_api_b_url" {
-  value = "${aws_api_gateway_stage.stage.invoke_url}/b/test"
+  value       = "${aws_api_gateway_stage.stage.invoke_url}/b/test"
+  description = "API Gateway URL for Web API B"
 }

@@ -197,11 +197,14 @@ resource "aws_cloudfront_origin_access_control" "s3_bucket" {
 
 # CloudFront URLの表示
 output "cloudfront_web_page_url" {
-  value = "https://${aws_cloudfront_distribution.common.domain_name}/index.html"
+  value       = "https://${aws_cloudfront_distribution.common.domain_name}/index.html"
+  description = "Web Page URL"
 }
 output "cloudfront_web_api_a_url" {
-  value = "https://${aws_cloudfront_distribution.common.domain_name}/api/a/test"
+  value       = "https://${aws_cloudfront_distribution.common.domain_name}/api/a/test"
+  description = "Web API A URL"
 }
 output "cloudfront_web_api_b_url" {
-  value = "https://${aws_cloudfront_distribution.common.domain_name}/api/b/test"
+  value       = "https://${aws_cloudfront_distribution.common.domain_name}/api/b/test"
+  description = "Web API B URL"
 }

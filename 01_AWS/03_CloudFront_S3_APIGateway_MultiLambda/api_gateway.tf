@@ -8,6 +8,14 @@ resource "aws_api_gateway_rest_api" "api" {
   name = "${var.project_name}-api-gateway-${local.project_stage}"
   # 説明文
   description = "${var.project_name} API Gateway ${local.project_stage}"
+  # API Gatewayのエンドポイントの設定
+  endpoint_configuration {
+    # API Gatewayのエンドポイントタイプ（EDGE(default):CloudFront/REGIONAL:リージョン/PRIVATE:VPC）
+    # API Gatewayを自作のCloudFront経由で利用する場合は、REGIONALを指定する。
+    #（EDGEにしておくと、API GatewayデフォルトのCloudFrontが作成される為、CloudFrontが二重になる）
+    # API GatewayをVPC内からしかアクセスできないようにする場合は、PRIVATEを指定する。
+    types = ["REGIONAL"]
+  }
   # タグ
   tags = {
     Name = "${var.project_name}-api-gateway-${local.project_stage}"
@@ -131,7 +139,8 @@ resource "aws_lambda_permission" "apigw_a" {
 
 # API Gateway URLの表示
 output "api_gateway_web_api_a_url" {
-  value = "${aws_api_gateway_stage.stage.invoke_url}/a/test"
+  value       = "${aws_api_gateway_stage.stage.invoke_url}/a/test"
+  description = "API Gateway URL for Web API A"
 }
 
 
@@ -206,5 +215,6 @@ resource "aws_lambda_permission" "apigw_b" {
 
 # API Gateway URLの表示
 output "api_gateway_web_api_b_url" {
-  value = "${aws_api_gateway_stage.stage.invoke_url}/b/test"
+  value       = "${aws_api_gateway_stage.stage.invoke_url}/b/test"
+  description = "API Gateway URL for Web API B"
 }
