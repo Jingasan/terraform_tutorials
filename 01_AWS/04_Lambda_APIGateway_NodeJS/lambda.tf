@@ -94,10 +94,6 @@ resource "aws_cloudwatch_log_group" "lambda" {
 resource "aws_iam_role" "lambda_role" {
   # IAMロール名
   name = "${var.project_name}-lambda-iam-role"
-  # IAMロールにポリシーを紐付け
-  managed_policy_arns = [
-    aws_iam_policy.lambda_policy.arn
-  ]
   # IAMロールの対象となるAWSサービスの指定
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
@@ -147,6 +143,14 @@ resource "aws_iam_policy" "lambda_policy" {
   tags = {
     Name = var.project_name
   }
+}
+
+# IAMロールにポリシーを割り当て
+resource "aws_iam_role_policy_attachment" "lambda" {
+  # IAMロール名
+  role = aws_iam_role.lambda_role.name
+  # 割り当てるポリシーのARN
+  policy_arn = aws_iam_policy.lambda_policy.arn
 }
 
 # Lambda関数名のコンソール出力
@@ -231,8 +235,6 @@ resource "aws_api_gateway_deployment" "api_gateway" {
     aws_api_gateway_integration.lambda,
     aws_api_gateway_integration.lambda_root,
   ]
-  # ステージ名の説明
-  stage_description = var.project_name
   # 既存のAPI Gatewayリソースがあった場合に一旦削除してから作り直す設定
   lifecycle {
     create_before_destroy = true

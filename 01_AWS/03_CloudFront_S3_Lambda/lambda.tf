@@ -128,10 +128,6 @@ resource "aws_cloudwatch_log_group" "lambda" {
 resource "aws_iam_role" "lambda_role" {
   # IAMロール名
   name = "${var.project_name}-lambda-iam-role"
-  # IAMロールにポリシーを紐付け
-  managed_policy_arns = [
-    aws_iam_policy.lambda_policy.arn
-  ]
   # IAMロールの対象となるAWSサービスの指定
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
@@ -185,10 +181,36 @@ resource "aws_iam_policy" "lambda_policy" {
   }
 }
 
-# Lambda関数のURLリソースの設定
+# IAMロールにポリシーを割り当て
+resource "aws_iam_role_policy_attachment" "lambda" {
+  # IAMロール名
+  role = aws_iam_role.lambda_role.name
+  # 割り当てるポリシーのARN
+  policy_arn = aws_iam_policy.lambda_policy.arn
+}
+
+# Lambda関数をWeb APIとして公開
 resource "aws_lambda_function_url" "lambda" {
-  function_name      = aws_lambda_function.lambda.function_name
-  authorization_type = "NONE"
+  # 公開対象のLambda関数名
+  function_name = aws_lambda_function.lambda.function_name
+  # 認証タイプ（NONE/AWS_IAM）
+  authorization_type = "AWS_IAM"
+}
+
+# LambdaにCloudFrontからの実行権限を付与
+resource "aws_lambda_permission" "lambda_from_cloudfront" {
+  # 宣言ID
+  statement_id = "AllowExecutionFromCloudFront"
+  # Lambda関数を実行するリソースのARN
+  source_arn = aws_cloudfront_distribution.main.arn
+  # プリンシパル
+  principal = "cloudfront.amazonaws.com"
+  # 許可アクション
+  action = "lambda:InvokeFunctionUrl"
+  # 実行するLambda関数名
+  function_name = aws_lambda_function.lambda.function_name
+  # Lambda関数実行時の認証タイプ
+  function_url_auth_type = "AWS_IAM"
 }
 
 # Lambda関数URL
