@@ -194,7 +194,7 @@ resource "aws_lambda_function_url" "lambda" {
   # 公開対象のLambda関数名
   function_name = aws_lambda_function.lambda.function_name
   # 認証タイプ（NONE/AWS_IAM）
-  authorization_type = "AWS_IAM"
+  authorization_type = "AWS_IAM" # Web APIの呼び出しをIAM認証必須にしてCloudFrontからの呼び出しに制限
 }
 
 # LambdaにCloudFrontからの実行権限を付与
