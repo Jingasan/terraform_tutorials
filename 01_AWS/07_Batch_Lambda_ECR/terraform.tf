@@ -5,12 +5,7 @@
 # Terraformの設定
 terraform {
   # Terraformのバージョン指定
-  required_version = ">= 1.3.8"
-
-  # AWSのバージョン指定
-  required_providers {
-    aws = ">=5.24.0"
-  }
+  required_version = ">= 1.13.3"
 
   # .tfstateをS3で管理する設定
   # terraform initをする前に以下の保管用バケットをS3に作成しておく必要がある

@@ -136,10 +136,6 @@ resource "aws_cloudwatch_log_group" "lambda" {
 resource "aws_iam_role" "lambda_role" {
   # IAMロール名
   name = "${var.project_name}-lambda-iam-role"
-  # IAMロールにポリシーを紐付け
-  managed_policy_arns = [
-    aws_iam_policy.lambda_policy.arn
-  ]
   # IAMロールの対象となるAWSサービスの指定
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
@@ -196,6 +192,14 @@ resource "aws_iam_policy" "lambda_policy" {
   tags = {
     Name = var.project_name
   }
+}
+
+# IAMロールにポリシーを割り当て
+resource "aws_iam_role_policy_attachment" "lambda" {
+  # IAMロール名
+  role = aws_iam_role.lambda_role.name
+  # 割り当てるポリシーのARN
+  policy_arn = aws_iam_policy.lambda_policy.arn
 }
 
 # CloudFront向けにLambda関数のURLを定義

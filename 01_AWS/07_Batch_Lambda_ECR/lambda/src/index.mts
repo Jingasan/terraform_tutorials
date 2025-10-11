@@ -50,7 +50,7 @@ const cancelJobCommand = async (jobId: string): Promise<boolean> => {
 };
 
 // 連続ジョブの登録
-app.post("/job", async (_req: Request, res: Response, _next: NextFunction) => {
+app.get("/job", async (_req: Request, res: Response, _next: NextFunction) => {
   console.log("JobQueue: " + jobQueue);
   console.log("JobDefinition: " + jobDefinition);
   // ジョブ１の送信

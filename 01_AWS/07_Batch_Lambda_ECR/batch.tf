@@ -9,7 +9,7 @@ resource "aws_batch_compute_environment" "aws-batch-computing-environment" {
     aws_iam_role_policy_attachment.batch-compute-environment
   ]
   # コンピューティング環境名
-  compute_environment_name = var.project_name
+  name = var.project_name
   # サービスロール
   service_role = aws_iam_role.batch-compute-environment.arn
   # タイプ
@@ -107,9 +107,12 @@ resource "aws_batch_job_queue" "job_queue" {
   # ジョブキューの優先度
   priority = 1
   # 接続されたコンピューティング環境（最低１つ最大３つ指定可能）
-  compute_environments = [
-    aws_batch_compute_environment.aws-batch-computing-environment.arn,
-  ]
+  compute_environment_order {
+    # 割り当て優先度
+    order = 1
+    # コンピューティング環境のARN
+    compute_environment = aws_batch_compute_environment.aws-batch-computing-environment.arn
+  }
   # タグ
   tags = {
     Name = var.project_name
