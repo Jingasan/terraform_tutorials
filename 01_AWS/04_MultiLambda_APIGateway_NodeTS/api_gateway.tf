@@ -6,6 +6,17 @@
 resource "aws_api_gateway_rest_api" "api" {
   # API Gateway名
   name = "${var.project_name}-api-gateway-${local.project_stage}"
+  # API Gatewayのエンドポイントの設定
+  endpoint_configuration {
+    # API Gatewayのエンドポイントタイプ（EDGE(default):CloudFront/REGIONAL:リージョン/PRIVATE:VPC）
+    # API Gatewayを自作のCloudFront経由で利用する場合は、REGIONALを指定する。
+    #（EDGEにしておくと、API GatewayデフォルトのCloudFrontが作成される為、CloudFrontが二重になる）
+    # API GatewayをVPC内からしかアクセスできないようにする場合は、PRIVATEを指定する。
+    types = ["EDGE"]
+  }
+  # API Gatewayのデフォルトエンドポイントを無効化する（false(default):無効化しない）
+  # 証明書をAPI Gatewayに直接設定し、独自ドメインを利用する場合に無効化する。
+  disable_execute_api_endpoint = false
   # 説明文
   description = "${var.project_name} API Gateway ${local.project_stage}"
   # タグ
