@@ -103,7 +103,7 @@ resource "aws_cognito_user_pool" "user_pool" {
     # DEVELOPER(default):Amazon SESでEメールを送信(推奨)
     email_sending_account = "DEVELOPER"
     # SESで認証するメールアドレスのARN
-    source_arn = "arn:aws:ses:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:identity/${var.cognito_from_email_address}"
+    source_arn = "arn:aws:ses:${data.aws_region.current.id}:${data.aws_caller_identity.current.account_id}:identity/${var.cognito_from_email_address}"
     # 送信元メールアドレス
     from_email_address = var.cognito_from_email_address
   }
@@ -215,7 +215,7 @@ resource "local_file" "env" {
   # 出力ファイルの内容
   content = <<DOC
 AWS_PROFILE=${var.profile}
-REGION=${data.aws_region.current.name}
+REGION=${data.aws_region.current.region}
 USER_POOL_ID=${aws_cognito_user_pool.user_pool.id}
 APPLICATION_CLIENT_ID=${aws_cognito_user_pool_client.user_pool.id}
 DOC
