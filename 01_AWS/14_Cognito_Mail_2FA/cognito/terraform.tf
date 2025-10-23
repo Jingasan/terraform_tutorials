@@ -27,13 +27,6 @@ provider "aws" {
   profile = var.profile # AWSアクセスキーのプロファイル
 }
 
-# バックアップの複製先リージョンのプロバイダ設定
-provider "aws" {
-  alias   = "backup_clone_region"
-  region  = var.backup_clone_region # バックアップの複製先リージョン（バックアップの複製元とは別リージョンを指定すること）
-  profile = var.profile             # AWSアクセスキーのプロファイル
-}
-
 # ランダムな小文字16進数値の生成
 resource "random_id" "main" {
   byte_length = 2 # 値の範囲

@@ -153,27 +153,6 @@ variable "lambda_cloudwatch_log_retention_in_days" {
   default     = 90
 }
 #============================================================
-# AWS Backup
-#============================================================
-# Vaultの中にバックアップデータが入っていてもTerraformに削除を許可するかどうか(true:許可)
-variable "backup_force_destroy" {
-  type        = bool
-  description = "Vaultの中にバックアップデータが入っていてもTerraformに削除を許可するかどうか(true:許可)"
-  default     = false
-}
-# 保持する世代数:1~100（指定した世代よりも古い世代のバックアップはすべて削除する）
-variable "backup_keep_generations" {
-  type        = number
-  description = "保持する世代数:1~100（指定した世代よりも古い世代のバックアップはすべて削除する）"
-  default     = 5
-}
-# バックアップの複製先リージョン（バックアップの複製元とは別リージョンを指定すること）
-variable "backup_clone_region" {
-  type        = string
-  description = "バックアップの複製先リージョン"
-  default     = "ap-northeast-3"
-}
-#============================================================
 # S3
 #============================================================
 # 非最新バージョンの保持日数(日)：指定日数が経過したら非最新バージョンを削除する
@@ -187,13 +166,4 @@ variable "s3_bucket_lifecycle_newer_noncurrent_versions" {
   type        = number
   description = "保持するバージョン数(個)：1~100"
   default     = 10
-}
-#============================================================
-# SNS
-#============================================================
-# SNS通知先のメールアドレス
-variable "sns_to_email_address" {
-  type        = string
-  description = "SNS通知先のメールアドレス"
-  default     = "email@domain"
 }

@@ -31,11 +31,5 @@ resource "aws_secretsmanager_secret_version" "secretsmanager" {
     cognitoAppClientId = "${aws_cognito_user_pool_client.user_pool.id}"
     # パスワード有効期限日(日)
     passwordExpirationDays = "${var.cognito_password_expiration_days}"
-    # Cognitoのユーザー情報をバックアップするバケット名
-    cognitoBackupBucketName = "${aws_s3_bucket.bucket_cognito_backup.bucket}"
-    # Vault名の一覧
-    vaultNames = ["${aws_backup_vault.main.name}"]
-    # 保持する世代数:1~100（指定した世代よりも古い世代のバックアップはすべて削除する）
-    keepGenerations = "${var.backup_keep_generations}"
   })
 }
