@@ -1,0 +1,12 @@
+*.tfstate
+*.tfstate.*
+*.terraform
+*.terraform.*
+!.terraform.lock.hcl
+*.zip
+node_modules
+dist
+*.js
+*.cjs
+*.mjs
+.env

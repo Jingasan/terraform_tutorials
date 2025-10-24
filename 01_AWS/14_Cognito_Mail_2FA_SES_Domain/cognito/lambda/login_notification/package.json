@@ -1,0 +1,26 @@
+{
+  "name": "lambda_login_notification",
+  "version": "1.0.0",
+  "description": "ユーザーに対し、ログイン通知を送信するLambda",
+  "type": "module",
+  "main": "dist/index.mjs",
+  "scripts": {
+    "prebuild": "rm -rf dist",
+    "build": "tsc"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "private": true,
+  "devDependencies": {
+    "@types/aws-lambda": "^8.10.147",
+    "@types/node": "^22.13.9",
+    "@types/source-map-support": "^0.5.10",
+    "typescript": "^5.8.2"
+  },
+  "dependencies": {
+    "@aws-lambda-powertools/logger": "^2.16.0",
+    "@aws-sdk/client-sesv2": "^3.758.0",
+    "source-map-support": "^0.5.21"
+  }
+}
