@@ -4,6 +4,7 @@
 
 # ユーザープールの作成
 resource "aws_cognito_user_pool" "user_pool" {
+  depends_on = [aws_route53_record.ses_record]
   # ユーザープール名
   name = var.project_name
   # ユーザー名の代わりに認証に利用できる属性(email/phone_number/preferred_username)
