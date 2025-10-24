@@ -1,9 +1,0 @@
-.terraform
-lambda.zip
-*.tfstate
-*.tfstate.backup
-*.js
-*.cjs
-*.mjs
-node_modules
-dist
