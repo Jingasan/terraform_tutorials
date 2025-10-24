@@ -4,7 +4,8 @@
 
 # ユーザープールの作成
 resource "aws_cognito_user_pool" "user_pool" {
-  depends_on = [aws_route53_record.ses_record]
+  # SESドメインIDの検証が完了したら、そのドメインのメールアドレスを用いるCognitoユーザープールを作成する
+  depends_on = [aws_ses_domain_identity_verification.domain]
   # ユーザープール名
   name = "${var.project_name}-${local.project_stage}"
   # ユーザー名の代わりに認証に利用できる属性(email/phone_number/preferred_username)

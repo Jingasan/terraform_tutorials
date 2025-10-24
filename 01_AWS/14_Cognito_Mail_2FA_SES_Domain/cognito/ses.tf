@@ -16,7 +16,7 @@ data "aws_route53_zone" "main" {
 # SES
 #============================================================
 
-# ドメインタイプのID作成
+# ドメインID作成
 # IDとは、SESにおいて、メール送信元となるメールアドレスまたはドメインのことである。
 # SESからメールを送信する場合は、SESにIDを登録する。
 resource "aws_ses_domain_identity" "domain" {
@@ -41,6 +41,12 @@ resource "aws_route53_record" "ses_record" {
   records = [aws_ses_domain_identity.domain.verification_token]
 }
 
+# ドメインIDの検証が成功するまで待機する処理
+resource "aws_ses_domain_identity_verification" "domain" {
+  depends_on = [aws_route53_record.ses_record]
+  # 検証完了待ち対象のドメインID
+  domain = aws_ses_domain_identity.domain.id
+}
 
 
 #============================================================
