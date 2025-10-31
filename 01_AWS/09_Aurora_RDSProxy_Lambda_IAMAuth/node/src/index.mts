@@ -13,7 +13,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 // CORS
 app.use(cors());
 
-// RDS関連の情報
+// RDS関連の情報（※本番環境ではSecretsManagerから取得すべき）
 const rdsProxyHostname = String(process.env.RDS_PROXY_HOSTNAME); // RDS Proxyのホスト名
 const rdsPort = Number(process.env.RDS_PORT); // RDSポート番号
 const rdsDatabase = String(process.env.RDS_DATABASE); // RDSデータベース名
@@ -41,7 +41,7 @@ const getRDSProxyToken = async (): Promise<string | false> => {
 
 // RDS Proxyとの接続初期化
 const initRDSProxyConnection = async (): Promise<PG.Client | false> => {
-  // RDS Proxy接続のためのトークンの取得
+  // RDS Proxy接続のためのIAM認証トークンの取得
   const token = await getRDSProxyToken();
   if (!token) return false;
   try {
@@ -51,7 +51,7 @@ const initRDSProxyConnection = async (): Promise<PG.Client | false> => {
       port: rdsPort, // RDSポート番号
       database: rdsDatabase, // RDSデータベース名
       user: rdsUsername, // RDSマスターユーザー名
-      password: token, // RDS Proxy接続トークン
+      password: token, // RDS接続のためのIAM認証トークン
       ssl: true, // 暗号化通信を有効化
     });
     // RDS Proxyとの接続

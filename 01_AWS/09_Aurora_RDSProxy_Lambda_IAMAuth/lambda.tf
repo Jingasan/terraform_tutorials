@@ -42,6 +42,7 @@ resource "aws_lambda_function" "lambda" {
   # 環境変数の指定
   environment {
     variables = {
+      # RDS関連の情報（※本番環境ではSecretsManagerから取得すべき）
       RDS_PROXY_HOSTNAME = aws_db_proxy.rds_proxy.endpoint        # RDS Proxyのホスト名
       RDS_PORT           = aws_rds_cluster.aurora_postgresql.port # RDSポート番号
       RDS_DATABASE       = var.aurora_database_name               # RDSデータベース名
