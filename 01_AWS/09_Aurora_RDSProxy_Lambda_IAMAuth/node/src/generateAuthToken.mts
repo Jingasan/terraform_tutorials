@@ -7,7 +7,7 @@ import * as RDSSigner from "@aws-sdk/rds-signer";
  */
 export const generateIAMAuthToken = async (dbConfig: {
   /** RDSのホスト名 */
-  hostname: string;
+  host: string;
   /** RDSのポート番号 */
   port: number;
   /** RDSのマスターユーザー名 */
@@ -16,7 +16,7 @@ export const generateIAMAuthToken = async (dbConfig: {
   region: string;
 }): Promise<string> => {
   const rdsSigner = new RDSSigner.Signer({
-    hostname: dbConfig.hostname,
+    hostname: dbConfig.host,
     port: dbConfig.port,
     username: dbConfig.username,
     region: dbConfig.region,

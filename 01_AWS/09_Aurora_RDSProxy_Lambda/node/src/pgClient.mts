@@ -48,7 +48,7 @@ export class PgClient {
       idleTimeoutMillis: 10_000,
     });
 
-    console.log("New IAM token issued and pg Pool created.");
+    console.log("New pg Pool created.");
 
     return this.pool;
   }

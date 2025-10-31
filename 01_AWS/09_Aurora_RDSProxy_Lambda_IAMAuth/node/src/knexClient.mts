@@ -1,4 +1,4 @@
-import { Pool } from "pg";
+import knex, { Knex } from "knex";
 import { generateIAMAuthToken } from "./generateAuthToken.mjs";
 
 /**
@@ -14,13 +14,13 @@ interface AuroraConfig {
 }
 
 /**
- * PGのシングルトン管理クラス
+ * Knexのシングルトン管理クラス
  * APIコールの度に毎回コネクションを張ると、新しいIAM認証トークンの再発行や接続のコストがかかったり、
  * 接続プールが積み上がっていき、接続上限の問題が発生したりするため、DBとのコネクション管理はシングルトンにしておく。
  */
-export class PgClient {
-  private static pool: Pool | null = null;
-  private static tokenExpiration = 0;
+export class KnexClient {
+  private static instance: Knex | null = null;
+  private static tokenExpiration: number = 0;
   private static config: AuroraConfig;
 
   /**
@@ -32,15 +32,15 @@ export class PgClient {
   }
 
   /**
-   * コネクションプールの取得
-   * @returns コネクションプール
+   * Knexのシングルトンインスタンスの取得
+   * @returns Knexのシングルトンインスタンス
    */
-  static async getPool(): Promise<Pool> {
+  static async getInstance(): Promise<Knex> {
     const now = Date.now();
 
     // IAM認証トークンが有効期限内なら再利用（14分以上使用している場合は再接続）
-    if (this.pool && now < this.tokenExpiration - 60_000) {
-      return this.pool;
+    if (this.instance && now < this.tokenExpiration - 60_000) {
+      return this.instance;
     }
 
     // RDS接続のためのIAM認証トークンを取得
@@ -51,27 +51,33 @@ export class PgClient {
       username: this.config.username,
     });
 
-    // 古いPoolをクローズ
-    if (this.pool) await this.pool.end();
+    // 古いコネクションを削除
+    if (this.instance) {
+      await this.instance.destroy();
+    }
 
-    // 新しいPoolを生成
-    this.pool = new Pool({
-      host: this.config.host,
-      port: this.config.port,
-      user: this.config.username,
-      password: token,
-      database: this.config.database,
-      ssl: this.config.ssl ? { rejectUnauthorized: false } : undefined,
-      max: 1, // 最大同時接続数
-      min: 0, // 最小同時接続数
-      idleTimeoutMillis: 10_000,
+    // 新しいコネクションを生成
+    this.instance = knex({
+      client: "pg",
+      connection: {
+        host: this.config.host,
+        port: this.config.port,
+        user: this.config.username,
+        password: token,
+        database: this.config.database,
+        ssl: this.config.ssl ? { rejectUnauthorized: false } : undefined,
+      },
+      pool: {
+        max: 1, // 最大同時接続数
+        min: 0, // 最小同時接続数
+      },
     });
 
     // トークンの有効期限を15分に設定
     this.tokenExpiration = now + 15 * 60 * 1000;
 
-    console.log("New IAM token issued and pg Pool created.");
+    console.log("New IAM token issued and Knex instance created.");
 
-    return this.pool;
+    return this.instance;
   }
 }
