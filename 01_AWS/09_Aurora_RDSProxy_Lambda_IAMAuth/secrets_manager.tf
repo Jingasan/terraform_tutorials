@@ -33,6 +33,7 @@ resource "aws_secretsmanager_secret_version" "rds" {
   })
 }
 
+# Aurora接続パスワードのローテーション設定
 # resource "aws_secretsmanager_secret" "aurora_secret" {
 #   name = "aurora-cluster-credentials"
 #   description = "Aurora master credentials managed by AWS"

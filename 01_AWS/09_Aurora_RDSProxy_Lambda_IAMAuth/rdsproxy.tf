@@ -20,8 +20,15 @@ resource "aws_db_proxy" "rds_proxy" {
     secret_arn = aws_secretsmanager_secret.rds.arn
     # クライアント認証タイプの指定
     client_password_auth_type = "POSTGRES_SCRAM_SHA_256"
-    # IAM認証するかどうか
+    # IAM認証するかどうか（REQUIRED：する／DISABLED：しない）
+    # IAM認証を有効化すると、RDSProxyへの接続はRDSのパスワードではなく、RDSから発行したIAM認証トークンを使って行うことになる。
+    # IAM認証トークンは15分の有効期限があり、外部に漏れてしまっても有効期限が切れると接続できなくなる為、利用するとセキュリティ性が高くなる。
+    # 有効期限が15分である為、Secrets ManagerでLambdaを利用したDB接続パスワードの定期ローテーションも行う必要がなくなる。
+    # また、IAM認証を利用することで、IAMポリシーの階層でアクセス権限を管理できるようになる。（例：LambdaだけにDB接続を許可するなど）
+    # 一方で、IAM認証を利用する場合は定期的にIAM認証トークンを取得し直し、DBとのコネクションを張り直す必要がある。
     iam_auth = "REQUIRED"
+    # 説明文
+    description = var.project_name
   }
   # TLS接続の有効化
   require_tls = true
