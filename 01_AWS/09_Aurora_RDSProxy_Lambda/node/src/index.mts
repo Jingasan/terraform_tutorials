@@ -17,6 +17,7 @@ const rdsProxyHostname = String(process.env.RDS_PROXY_HOSTNAME); // RDS Proxyの
 const rdsPort = Number(process.env.RDS_PORT); // RDSポート番号
 const rdsDatabase = String(process.env.RDS_DATABASE); // RDSデータベース名
 const rdsUsername = String(process.env.RDS_USERNAME); // RDSマスターユーザー名
+const rdsPassword = String(process.env.RDS_PASSWORD); // RDSマスターパスワード
 const rdsRegion = String(process.env.RDS_REGION); // RDSとRDS Proxyを配置したRegion
 
 /**
@@ -27,6 +28,7 @@ PgClient.initialize({
   port: rdsPort,
   database: rdsDatabase,
   username: rdsUsername,
+  password: rdsPassword,
   region: rdsRegion,
   ssl: true,
 });
