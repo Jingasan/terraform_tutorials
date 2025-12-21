@@ -53,10 +53,10 @@ variable "aurora_engine_version" {
   description = "Auroraのエンジンのバージョン"
   default     = "16.6"
 }
-# Aurora DBのエンジンモード（parallelquery/provisioned/serverless）
+# Aurora DBのエンジンモード（parallelquery/provisioned/serverless）（ここでのserverlessはv1である為、v2を利用する場合はprovisionedを指定する）
 variable "aurora_engine_mode" {
   type        = string
-  description = "Aurora DBのエンジンモード（parallelquery/provisioned/serverless）"
+  description = "Aurora DBのエンジンモード（parallelquery/provisioned/serverless）（ここでのserverlessはv1である為、v2を利用する場合はprovisionedを指定する）"
   default     = "provisioned"
 }
 # Aurora DBのポート番号

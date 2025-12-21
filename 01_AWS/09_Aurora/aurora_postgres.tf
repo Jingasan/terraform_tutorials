@@ -10,7 +10,7 @@ resource "aws_rds_cluster" "aurora_postgresql" {
   engine = var.aurora_engine
   # Aurora DBのエンジンのバージョン
   engine_version = var.aurora_engine_version
-  # Aurora DBのエンジンモード（parallelquery/provisioned/serverless）
+  # Aurora DBのエンジンモード（parallelquery/provisioned/serverless）（ここでのserverlessはv1である為、v2を利用する場合はprovisionedを指定する）
   engine_mode = var.aurora_engine_mode
   # DBポート番号
   port = var.aurora_port

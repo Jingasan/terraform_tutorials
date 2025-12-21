@@ -81,7 +81,7 @@ variable "aurora_master_password" {
 variable "aurora_instance_class" {
   type        = string
   description = "Aurora DBのインスタンスタイプ"
-  default     = "db.t4g.medium"
+  default     = "db.serverless"
 }
 # Aurora DBインスタンスの最小数
 variable "aurora_min_capacity" {
@@ -89,29 +89,17 @@ variable "aurora_min_capacity" {
   description = "Aurora DBインスタンスの最小数"
   default     = 2
 }
-# Aurora DBインスタンスの最大数
-variable "aurora_max_capacity" {
+# 最小ACU（0-256から0.5刻みで指定可能, 2.0GiB/ACU）
+variable "aurora_min_acu" {
   type        = number
-  description = "Aurora DBインスタンスの最大数"
-  default     = 4
+  description = "最小ACU（0-256から0.5刻みで指定可能, 2.0GiB/ACU）"
+  default     = 0.5
 }
-# AuroraのオートスケーリングにおけるCPU平均使用率の閾値（%）（この値を超えたらスケールアウトする）
-variable "aurora_target_value" {
+# 最大ACU（1-256から0.5刻みで指定可能, 2.0GiB/ACU）
+variable "aurora_max_acu" {
   type        = number
-  description = "AuroraのオートスケーリングにおけるCPU平均使用率の閾値（%）（この値を超えたらスケールアウトする）"
-  default     = 75.0
-}
-# スケールイン直後の再スケーリングを防ぐクールダウン時間（秒）（default:5分）
-variable "aurora_scale_in_cooldown" {
-  type        = number
-  description = "スケールイン直後の再スケーリングを防ぐクールダウン時間（秒）（default:5分）"
-  default     = 300
-}
-# スケールアウト直後の再スケーリングを防ぐクールダウン時間（秒）（default:5分）
-variable "aurora_scale_out_cooldown" {
-  type        = number
-  description = "スケールアウト直後の再スケーリングを防ぐクールダウン時間（秒）（default:5分）"
-  default     = 300
+  description = "最大ACU（1-256から0.5刻みで指定可能, 2.0GiB/ACU）"
+  default     = 8
 }
 # CloudWatch Logsに出力するログの種類（指定しない場合は出力しない）
 # Aurora PostgreSQLの場合はpostgresql（PostgreSQLの一般ログを出力する）を指定可能。

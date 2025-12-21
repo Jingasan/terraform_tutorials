@@ -16,6 +16,13 @@ resource "aws_rds_cluster" "aurora_postgresql" {
   port = var.aurora_port
   # Aurora DBの初期DB名
   database_name = var.aurora_database_name
+  # Aurora Serverless v2のスケーリング設定
+  serverlessv2_scaling_configuration {
+    # 最小ACU（0-256から0.5刻みで指定可能, 2.0GiB/ACU）
+    min_capacity = var.aurora_min_acu
+    # 最大ACU（1-256から0.5刻みで指定可能, 2.0GiB/ACU）
+    max_capacity = var.aurora_max_acu
+  }
   # Auroraインスタンスを所属させるサブネットグループ名
   # 高可用性担保の為、Auroraのインスタンス群を所属させるサブネットグループは
   # それぞれAZが異なる複数のプライベートサブネットで構成されること。
@@ -24,9 +31,8 @@ resource "aws_rds_cluster" "aurora_postgresql" {
   vpc_security_group_ids = [aws_security_group.aurora.id]
   # Aurora DBのマスターユーザー名
   master_username = var.aurora_master_username
-  # Aurora DBのマスターパスワードをSecrets Managerで管理するか
+  # Aurora DBのマスターパスワード
   master_password = var.aurora_master_password
-  #manage_master_user_password = true
   # Aurora DBのストレージ暗号化（true:暗号化する）
   storage_encrypted = true
   # CloudWatch Logsに出力するログの種類（指定しない場合は出力しない）
@@ -89,54 +95,6 @@ resource "aws_rds_cluster_instance" "aurora_instances" {
   }
 }
 
-# オートスケーリング対象となるAurora読み取り専用インスタンス（Reader）の設定
-resource "aws_appautoscaling_target" "aurora_scaling_target" {
-  # 対象サービス名（Auroraの場合はrds）
-  service_namespace = "rds"
-  # オートスケーリング対象のクラスターのリソースID（Auroraの場合は、cluster:<cluster-name>）
-  resource_id = "cluster:${aws_rds_cluster.aurora_postgresql.cluster_identifier}"
-  # スケーリング対象（Auroraの場合はrds:cluster:ReadReplicaCount）
-  scalable_dimension = "rds:cluster:ReadReplicaCount"
-  # オートスケーリングの最大インスタンス数
-  max_capacity = var.aurora_max_capacity
-  # オートスケーリングの最小インスタンス数（フェイルオーバーする場合は2台以上を設定しておく）
-  min_capacity = var.aurora_min_capacity
-  # タグ
-  tags = {
-    Name              = "${var.project_name}-aurora-postgresql"
-    ProjectName       = var.project_name
-    ResourceCreatedBy = "terraform"
-  }
-}
-
-# オートスケーリングのルール設定
-resource "aws_appautoscaling_policy" "aurora_scaling_policy" {
-  # ポリシー名
-  name = "${var.project_name}-aurora-scaling-policy"
-  # ポリシータイプ
-  policy_type = "TargetTrackingScaling"
-  # 対象サービス名（Auroraの場合はrds）
-  service_namespace = aws_appautoscaling_target.aurora_scaling_target.service_namespace
-  # オートスケーリングのポリシー設定先のクラスターリソースID
-  resource_id = aws_appautoscaling_target.aurora_scaling_target.resource_id
-  # オートスケーリング対象の項目
-  scalable_dimension = aws_appautoscaling_target.aurora_scaling_target.scalable_dimension
-  # ポリシータイプがTargetTrackingScalingの場合のオートスケーリングルールの設定
-  target_tracking_scaling_policy_configuration {
-    # オートスケーリングのメトリクスの設定（AWSマネージドのメトリクスを利用する場合に使用）
-    predefined_metric_specification {
-      # メトリクスタイプの設定（Aurora ReaderインスタンスのCPUの平均使用率を指定）
-      predefined_metric_type = "RDSReaderAverageCPUUtilization"
-    }
-    # メトリクスの目標値（%）（この値を超えたらスケールアウトする）
-    target_value = var.aurora_target_value
-    # スケールイン直後の再スケーリングを防ぐクールダウン時間（秒）（default:5分）
-    scale_in_cooldown = var.aurora_scale_in_cooldown
-    # スケールアウト直後の再スケーリングを防ぐクールダウン時間（秒）（default:5分）
-    scale_out_cooldown = var.aurora_scale_out_cooldown
-  }
-}
-
 # クラスターパラメータグループ
 resource "aws_rds_cluster_parameter_group" "custom_aurora_postgresql" {
   # パラメータグループ名
@@ -188,6 +146,56 @@ resource "aws_db_subnet_group" "aurora" {
   subnet_ids = [for value in aws_subnet.private : value.id]
   # サブネットグループの説明
   description = "${var.project_name} Aurora Subnet Group for ${var.aurora_engine}"
+  # タグ
+  tags = {
+    Name              = "${var.project_name}-aurora-postgresql-sg"
+    ProjectName       = var.project_name
+    ResourceCreatedBy = "terraform"
+  }
+}
+
+
+
+#============================================================
+# Security Group
+#============================================================
+
+# Aurora用のセキュリティグループ
+resource "aws_security_group" "aurora" {
+  # セキュリティグループ名
+  name = "${var.project_name}-${var.aurora_engine}-sg"
+  # 適用先のVPC
+  vpc_id = aws_vpc.main.id
+  # インバウントルールの設定（外部からこのセキュリティグループに所属するリソースへのアクセス許可設定）
+  ingress {
+    # 許可する開始ポート番号
+    from_port = var.aurora_port
+    # 許可する終了ポート番号
+    to_port = var.aurora_port
+    # 使用するプロトコル（tcpはPostgreSQLの通信プロトコル）
+    protocol = "tcp"
+    # アクセスを許可する送信元IPアドレスの範囲
+    # このVPC内のすべてのIPアドレスを指定することで、このVPC内のLambdaなどのすべてのリソースからアクセスを許可する。
+    cidr_blocks = [var.vpc_cidr]
+    # 説明
+    description = "Allow tcp to port ${var.aurora_port} from VPC"
+  }
+  # アウトバウンドルールの設定（このセキュリティグループに所属するリソースから外部へのアクセス許可設定）
+  egress {
+    # 許可する開始ポート番号（0はすべてのポート番号を許可）
+    from_port = 0
+    # 許可する終了ポート番号（0はすべてのポート番号を許可）
+    to_port = 0
+    # 使用するプロトコル（-1はすべてのプロトコルを許可）
+    protocol = "-1"
+    # アクセスを許可する送信先のIPアドレスの範囲
+    # 0.0.0.0/0を指定することで、インターネット上のすべてのIPアドレスへのアクセスを許可する。
+    cidr_blocks = ["0.0.0.0/0"]
+    # 説明
+    description = "Allow all outbound"
+  }
+  # セキュリティグループの説明
+  description = "${var.project_name} Aurora Security Group for ${var.aurora_engine}"
   # タグ
   tags = {
     Name              = "${var.project_name}-aurora-postgresql-sg"
