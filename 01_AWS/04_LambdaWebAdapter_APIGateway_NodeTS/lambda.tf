@@ -25,9 +25,10 @@ resource "aws_lambda_function" "lambda" {
   # 環境変数の指定
   environment {
     variables = {
-      ENV_VAL  = "Terraform tutorial"
-      NODE_ENV = "production"
-      # Lambda Web AdapterはPORT=8080を自動認識
+      # Lambda関数のアプリケーションのポート番号（Lambda Web AdapterのデフォルトはPORT=8080）
+      PORT = var.lambda_app_port
+      # Node.jsの実行環境（development/production）
+      NODE_ENV = var.lambda_node_env
     }
   }
   # 作成するLambdaの説明文

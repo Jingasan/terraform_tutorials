@@ -28,9 +28,7 @@ app.get("/info", cors(corsOptions), async (req, res) => {
   return res.status(200).json({
     service: "Lambda Express API",
     node_version: process.version,
-    aws_region: process.env.AWS_REGION || "N/A",
-    lambda_function_name: process.env.AWS_LAMBDA_FUNCTION_NAME || "local",
-    environment: process.env.NODE_ENV || "development",
+    process_env: process.env,
   });
 });
 

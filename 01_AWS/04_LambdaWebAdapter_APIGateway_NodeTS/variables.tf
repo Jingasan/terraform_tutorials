@@ -19,6 +19,10 @@ variable "lambda_runtime" {}
 variable "lambda_memory_size" {}
 # Lambda関数の一時ストレージサイズ（MB）（最小512MB、最大10,240MB）
 variable "lambda_ephemeral_storage_size" {}
+# Lambda関数のアプリケーションのポート番号（Lambda Web AdapterのデフォルトはPORT=8080）
+variable "lambda_app_port" {}
+# Node.jsの実行環境（development/production）
+variable "lambda_node_env" {}
 # Lambda関数のタイムアウト時間
 variable "lambda_timeout" {}
 # CloudWatchにログを残す期間（日）

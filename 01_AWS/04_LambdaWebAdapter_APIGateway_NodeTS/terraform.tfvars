@@ -19,6 +19,10 @@ lambda_runtime = "nodejs22.x"
 lambda_memory_size = 2048
 # Lambda関数の一時ストレージサイズ（MB）（最小512MB、最大10,240MB）
 lambda_ephemeral_storage_size = 512
+# Lambda関数のアプリケーションのポート番号（Lambda Web AdapterのデフォルトはPORT=8080）
+lambda_app_port = 3000
+# Node.jsの実行環境（development/production）
+lambda_node_env = "production"
 # Lambda関数のタイムアウト時間
 lambda_timeout = 30
 # CloudWatchにログを残す期間（日）

@@ -6,5 +6,6 @@ services:
       context: ./
       dockerfile: Dockerfile
     ports:
-      - "8080:8080"
+      # 3000番ポートをコンテナ側の8080番ポートにマッピングして公開（Lambda Web Adapterのデフォルトポートは8080）
+      - "3000:8080"
     tty: true
