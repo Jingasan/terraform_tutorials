@@ -34,7 +34,7 @@ resource "aws_s3_bucket" "bucket_lambda_cloudwatch_log" {
 
 # S3バケットオブジェクトのライフサイクルルール（オブジェクトが永遠にバージョニングされない為に必須）
 resource "aws_s3_bucket_lifecycle_configuration" "bucket_lambda_cloudwatch_log" {
-  depends_on = [aws_s3_bucket.bucket_lambda_cloudwatch_log, aws_s3_bucket_versioning.bucket_lambda_cloudwatch_log]
+  depends_on = [aws_s3_bucket.bucket_lambda_cloudwatch_log]
   # 対象となるバケットのID
   bucket = aws_s3_bucket.bucket_lambda_cloudwatch_log.id
   # ライフサイクルルールの設定
