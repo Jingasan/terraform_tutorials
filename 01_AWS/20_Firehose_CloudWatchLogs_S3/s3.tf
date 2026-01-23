@@ -32,17 +32,6 @@ resource "aws_s3_bucket" "bucket_lambda_cloudwatch_log" {
   }
 }
 
-# オブジェクトのバージョン管理の設定
-resource "aws_s3_bucket_versioning" "bucket_lambda_cloudwatch_log" {
-  # バージョン管理を設定するバケットのID
-  bucket = aws_s3_bucket.bucket_lambda_cloudwatch_log.id
-  # バージョン管理の設定
-  versioning_configuration {
-    # バージョン管理のステータス（Enabled:有効）
-    status = "Enabled"
-  }
-}
-
 # S3バケットオブジェクトのライフサイクルルール（オブジェクトが永遠にバージョニングされない為に必須）
 resource "aws_s3_bucket_lifecycle_configuration" "bucket_lambda_cloudwatch_log" {
   depends_on = [aws_s3_bucket.bucket_lambda_cloudwatch_log, aws_s3_bucket_versioning.bucket_lambda_cloudwatch_log]
@@ -63,12 +52,12 @@ resource "aws_s3_bucket_lifecycle_configuration" "bucket_lambda_cloudwatch_log" 
       # 移行先のストレージクラス
       storage_class = "DEEP_ARCHIVE"
       # ストレージクラス移行までの日数（日）：1以上の値を指定。指定日数が経過したらオブジェクトのクラスが移行する。
-      days = var.s3_lambda_cloudwatch_log_lifecycle_transition_days
+      days = var.s3_cloudwatch_log_lifecycle_transition_days
     }
     # オブジェクトの有効期限設定
     expiration {
       # オブジェクトの保持日数（日）：1以上の値を指定。指定日数が経過したらオブジェクトが削除される。
-      days = var.s3_lambda_cloudwatch_log_lifecycle_expiration_days
+      days = var.s3_cloudwatch_log_lifecycle_expiration_days
     }
   }
 }

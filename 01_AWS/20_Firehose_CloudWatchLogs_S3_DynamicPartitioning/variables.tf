@@ -56,13 +56,13 @@ variable "apigateway_stage_name" {
 # S3
 #============================================================
 # Lambda関数のCloudWatchログのストレージクラス移行までの日数（日）：1以上の値を指定。指定日数が経過したらオブジェクトのクラスが移行する。
-variable "s3_lambda_cloudwatch_log_lifecycle_transition_days" {
+variable "s3_cloudwatch_log_lifecycle_transition_days" {
   type        = number
   description = "Lambda関数のCloudWatchログのストレージクラス移行までの日数（日）：1以上の値を指定。指定日数が経過したらオブジェクトのクラスが移行する。"
   default     = 1
 }
 # Lambda関数のCloudWatchログの保持日数（日）：1以上の値を指定。指定日数が経過したらオブジェクトが削除される。
-variable "s3_lambda_cloudwatch_log_lifecycle_expiration_days" {
+variable "s3_cloudwatch_log_lifecycle_expiration_days" {
   type        = number
   description = "Lambda関数のCloudWatchログの保持日数（日）：1以上の値を指定。指定日数が経過したらオブジェクトが削除される。"
   default     = 90
