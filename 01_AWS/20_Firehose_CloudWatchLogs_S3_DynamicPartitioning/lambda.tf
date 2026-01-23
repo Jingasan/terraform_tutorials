@@ -124,7 +124,7 @@ resource "aws_cloudwatch_log_subscription_filter" "lambda_to_s3" {
   # 送信先のARN
   destination_arn = aws_kinesis_firehose_delivery_stream.lambda_cloudwatch_log_to_s3.arn # S3バケットを指定
   # サブスクリプションフィルタの実行に使用するIAMロールのARN
-  role_arn = aws_iam_role.lambda_cloudwatch_logs_role.arn
+  role_arn = aws_iam_role.cloudwatch_logs_role.arn
 }
 
 

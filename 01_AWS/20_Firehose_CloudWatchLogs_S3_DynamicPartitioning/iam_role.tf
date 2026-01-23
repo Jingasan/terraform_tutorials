@@ -90,7 +90,7 @@ resource "aws_iam_role" "firehose_role" {
       Action = "sts:AssumeRole"
     }]
   })
-  # ポリシーの説明文
+  # 説明
   description = var.project_name
   # タグ
   tags = {
@@ -134,9 +134,9 @@ resource "aws_iam_role_policy" "firehose_policy" {
 #============================================================
 
 # IAMロールの設定
-resource "aws_iam_role" "lambda_cloudwatch_logs_role" {
+resource "aws_iam_role" "cloudwatch_logs_role" {
   # IAMロール名
-  name = "${var.project_name}-lambda-cloudwatch-logs-role"
+  name = "${var.project_name}-cloudwatch-logs-role"
   # IAMロールの対象となるAWSサービスの指定
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
@@ -149,12 +149,18 @@ resource "aws_iam_role" "lambda_cloudwatch_logs_role" {
       Action = "sts:AssumeRole"
     }]
   })
+  # 説明
+  description = var.project_name
+  # タグ
+  tags = {
+    Name = var.project_name
+  }
 }
 
 # IAMロールに紐付けるポリシーの設定
-resource "aws_iam_role_policy" "lambda_cloudwatch_logs_policy" {
+resource "aws_iam_role_policy" "cloudwatch_logs_policy" {
   # ポリシー割当先のIAMロール
-  role = aws_iam_role.lambda_cloudwatch_logs_role.id
+  role = aws_iam_role.cloudwatch_logs_role.id
   # ポリシー(どのAWSリソースにどのような操作を許可するか)の定義
   policy = jsonencode({
     Version = "2012-10-17"
